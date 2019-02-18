@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 
-import ExampleComponent from 'react-virtualized-dnd'
+import {ExampleBoard} from 'react-virtualized-dnd';
 
 export default class App extends Component {
   render () {
     return (
       <div>
-        <ExampleComponent text='Modern React component module' />
+        <ExampleBoard text='Modern React component module' />
       </div>
     )
   }

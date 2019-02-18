@@ -1,22 +1,7 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import Draggable from './components/draggable';
+import Droppable from './components/droppable';
+import DragDropContext from './components/drag_drop_context';
+import VirtualizedScrollBar from './components/virtualized-scrollbar';
+import ExampleBoard from './examples/example-board';
 
-import styles from './styles.css'
-
-export default class ExampleComponent extends Component {
-  static propTypes = {
-    text: PropTypes.string
-  }
-
-  render() {
-    const {
-      text
-    } = this.props
-
-    return (
-      <div className={styles.test}>
-        Example Component: {text}
-      </div>
-    )
-  }
-}
+export {Draggable, Droppable, DragDropContext, VirtualizedScrollBar, ExampleBoard}
