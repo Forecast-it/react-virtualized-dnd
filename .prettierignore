@@ -1,0 +1,4 @@
+src/translations/lang/*
+src/translations/whitelists/*
+package-lock.json
+package.json

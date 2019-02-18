@@ -15,12 +15,12 @@ npm install --save react-virtualized-dnd
 ```jsx
 import React, { Component } from 'react'
 
-import MyComponent from 'react-virtualized-dnd'
+import ExampleBoard from 'react-virtualized-dnd'
 
 class Example extends Component {
   render () {
     return (
-      <MyComponent />
+      <ExampleBoard />
     )
   }
 }

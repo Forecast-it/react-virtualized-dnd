@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import {Scrollbars} from 'react-custom-scrollbars';
 
 class VirtualizedScrollBar extends Component {
@@ -15,50 +14,64 @@ class VirtualizedScrollBar extends Component {
 			unrenderedAbove: 0
 		};
 	}
-	getListToRender(list) {
+
+	// If we use static row height, we can optimizie by finding the first element to render, and adding (containersize + overScan / index * height) elems.
+	getListToRenderStaticOptimization(list) {
 		let listToRender = [];
 		let foundAlwaysActiveElem = false;
 		const rowHeight = this.state.rowHeight;
 		const containerHeight = this.props.containerHeight;
 		const overScan = this.state.elemOverScan * this.state.rowHeight;
 		if (!containerHeight || this.state.scrollOffset == null) return true;
-
-		// If static, find start and add containersize + overScan / index * height elems.
-		if (this.props.staticRowHeight) {
-			let firstIndexToRender = null;
-			for (let index = 0; index < list.length && firstIndexToRender == null; index++) {
-				const child = list[index];
-				if (child.props.alwaysRender && (this.props.singleActiveElement && !foundAlwaysActiveElem) && child.props.alwaysRender(child.props.draggableId)) {
-					listToRender.push(child);
-					foundAlwaysActiveElem = true;
-				} else {
-					// Check if we're below the current scroll offset
-					const ySmallerThanList = (index + 1) * rowHeight < this.state.scrollOffset;
-					if (!ySmallerThanList) {
-						// First time this isn't the case, we've got our starting element
-						firstIndexToRender = index;
-					}
+		let firstIndexToRender = null;
+		for (let index = 0; index < list.length && firstIndexToRender == null; index++) {
+			const child = list[index];
+			if (child.props.alwaysRender && (this.props.singleActiveElement && !foundAlwaysActiveElem) && child.props.alwaysRender(child.props.draggableId)) {
+				listToRender.push(child);
+				foundAlwaysActiveElem = true;
+			} else {
+				// Check if we're below the current scroll offset
+				const ySmallerThanList = (index + 1) * rowHeight < this.state.scrollOffset;
+				if (!ySmallerThanList) {
+					// First time this isn't the case, we've got our starting element
+					firstIndexToRender = index;
 				}
 			}
-			// Since we found the starting element, and all rows have the same static height, we know that we must render X rows from the starting element, where X is the amount of rows we can fit in the container + overscan.
-			const end = firstIndexToRender + Math.ceil((containerHeight + overScan) / rowHeight);
-			// +1 because Array.slice isn't inclusive
-			listToRender = listToRender.concat(list.slice(firstIndexToRender, end + 1));
-		} else {
-			list.forEach((child, index) => {
-				if (child.props.alwaysRender && (this.props.singleActiveElement && !foundAlwaysActiveElem) && child.props.alwaysRender(child.props.draggableId)) {
-					listToRender.push(child);
-					foundAlwaysActiveElem = true;
-				} else {
-					// Don't render if we're below the current scroll offset, or if we're above the containerHeight + scrollOffset
-					const ySmallerThanList = (index + 1) * rowHeight + overScan < this.state.scrollOffset;
-					const yLargerThanList = (index + 1) * rowHeight - overScan * this.state.rowHeight > this.state.scrollOffset + containerHeight;
-					if (!ySmallerThanList && !yLargerThanList) {
-						listToRender.push(child);
-					}
-				}
-			});
 		}
+		// Since we found the starting element, and all rows have the same static height, we know that we must render X rows from the starting element, where X is the amount of rows we can fit in the container + overscan.
+		const end = firstIndexToRender + Math.ceil((containerHeight + overScan) / rowHeight);
+		// +1 because Array.slice isn't inclusive
+		listToRender = listToRender.concat(list.slice(firstIndexToRender, end + 1));
+		return listToRender;
+	}
+
+	getListToRender(list) {
+		let listToRender = [];
+		let foundAlwaysActiveElem = false;
+		const rowHeight = this.state.rowHeight;
+		const containerHeight = this.props.containerHeight;
+		const overScan = this.state.elemOverScan * this.state.rowHeight;
+		if (!containerHeight || this.state.scrollOffset == null) {
+			return true;
+		}
+		/* This optimization breaks due to the always rendered element messing up the shown range. Revisit?
+		if (this.props.staticRowHeight) {
+			return this.getListToRenderStaticOptimization(list);
+		}*/
+		list.forEach((child, index) => {
+			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
+			if (child.props.alwaysRender && (this.props.singleActiveElement && !foundAlwaysActiveElem) && child.props.alwaysRender(child.props.draggableId)) {
+				listToRender.push(child);
+				foundAlwaysActiveElem = true;
+			} else {
+				// Don't render if we're below the current scroll offset, or if we're above the containerHeight + scrollOffset
+				const ySmallerThanList = (index + 1) * rowHeight + overScan < this.state.scrollOffset;
+				const yLargerThanList = (index + 1) * rowHeight - overScan * this.state.rowHeight > this.state.scrollOffset + containerHeight;
+				if (!ySmallerThanList && !yLargerThanList) {
+					listToRender.push(child);
+				}
+			}
+		});
 		return listToRender;
 	}
 
