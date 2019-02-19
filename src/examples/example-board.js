@@ -36,7 +36,7 @@ class ExampleBoard extends Component {
 			const list = [];
 			entry.items.forEach(item => {
 				list.push(
-					<Draggable tagName="div" dragAndDropGroup={dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
+					<Draggable dragAndDropGroup={dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
 						<div className={'draggable-test'} style={{border: 'solid 1px black', height: '50px', marginBottom: '1px', backgroundColor: 'white', flexGrow: 1}}>
 							<p style={{marginLeft: '5px'}} className={'item-name'}>
 								{item.name}
@@ -74,7 +74,7 @@ class ExampleBoard extends Component {
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{minWidth: 500, flexGrow: 1}} key={index + elem.droppableId}>
-								<Droppable tagName="div" dragAndDropGroup={dragAndDropGroupName} droppableId={elem.droppableId} key={elem.droppableId}>
+								<Droppable dragAndDropGroup={dragAndDropGroupName} droppableId={elem.droppableId} key={elem.droppableId}>
 									{elem.items}
 								</Droppable>
 							</div>
