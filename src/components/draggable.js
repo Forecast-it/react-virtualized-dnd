@@ -299,7 +299,7 @@ class Draggable extends Component {
 			'aria-dropeffect': 'move'
 		};
 
-		const CustomTag = this.props.tagName;
+		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 
 		return <CustomTag {...propsObject}>{this.props.children}</CustomTag>;
 	}

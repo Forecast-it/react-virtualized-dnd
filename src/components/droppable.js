@@ -158,7 +158,7 @@ class Droppable extends Component {
 		);
 		const listToRender = childrenWithProps;
 
-		const CustomTag = this.props.tagName;
+		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 
 		return (
 			<CustomTag {...propsObject} style={{height: 500, minHeight: 500, maxHeight: 500}}>

@@ -50,7 +50,6 @@ class ExampleBoard extends Component {
 		return dataToRender;
 	}
 
-
 	onDragEnd(source, destinationId, placeholderId) {
 		const listToRemoveFrom = this.state.testData.find(list => list.name.includes(source.droppableId));
 		const listToAddTo = this.state.testData.find(list => list.name.includes(destinationId));
@@ -70,7 +69,7 @@ class ExampleBoard extends Component {
 		const elemsToRender = this.getElemsToRender(this.state.testData);
 		return (
 			<div>
-				<h1>DND TEST</h1>
+				<h1>Example Board</h1>
 				<DragDropContext dragAndDropGroup={dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
@@ -87,4 +86,4 @@ class ExampleBoard extends Component {
 	}
 }
 ExampleBoard.propTypes = {};
-export default ExampleBoard; 
+export default ExampleBoard;
