@@ -63,10 +63,18 @@ class ExampleBoard extends Component {
 	}
 
 	handleInputChange(e) {
+		if (Number(e.target.value) > 5000) {
+			alert('Please, calm down.');
+			return;
+		}
 		this.setState({numItems: Number(e.target.value)});
 	}
 
 	handleColumnInputChange(e) {
+		if (Number(e.target.value) > 100) {
+			alert('Please, calm down.');
+			return;
+		}
 		this.setState({numColumns: Number(e.target.value)});
 	}
 
