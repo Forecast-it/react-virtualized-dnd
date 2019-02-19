@@ -60,6 +60,9 @@ class DragDropContext extends Component {
 		if (!this.state.dragActive) {
 			this.setState({dragActive: true, draggedElem: draggable});
 		}
+		if (this.props.onDragStart) {
+			this.props.onDragStart(draggable, x, y);
+		}
 	}
 
 	onDragEnd() {
