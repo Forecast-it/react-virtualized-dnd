@@ -16,37 +16,37 @@ npm install --save react-virtualized-dnd
 
 #### API
 
-| _Prop_      | _Type_   | _Required_ | _Description_                                                                                                               |     |
-| ----------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- | --- |
-| onDragEnd   | function | no         | Fired on drag end. Returns the source object, the droppableId of the destination, and the id of the placeholder dropped on. |     |
-| onDragStart | function | no         | Function fired on drag start. Returns the draggableId of the dragged element.                                               |     |
+| **Prop**    | **Type** | **Required** | **Description**                                                                                                             |     |
+| ----------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- | --- |
+| onDragEnd   | function | no           | Fired on drag end. Returns the source object, the droppableId of the destination, and the id of the placeholder dropped on. |     |
+| onDragStart | function | no           | Function fired on drag start. Returns the draggableId of the dragged element.                                               |     |
 
 #### Props
 
-| _Prop_           | _Type_   | _Required_ | _Description_                                                  |     |
-| ---------------- | -------- | ---------- | -------------------------------------------------------------- | --- |
-| dragAndDropGroup | string   | yes        | Unique identifier for the drag and drop group the context uses |     |
-| horizontalScroll | boolean  | no         | Enables or disables horizontal scrolling of the context        |     |
-| onDragEnd        | function | no         | Function fired on drag end.                                    |     |
-| onDragStart      | function | no         | Function fired on drag start.                                  |     |
+| **Prop**         | **Type** | **Required** | **Description**                                                |     |
+| ---------------- | -------- | ------------ | -------------------------------------------------------------- | --- |
+| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |     |
+| horizontalScroll | boolean  | no           | Enables or disables horizontal scrolling of the context        |     |
+| onDragEnd        | function | no           | Function fired on drag end.                                    |     |
+| onDragStart      | function | no           | Function fired on drag start.                                  |     |
 
 ### Draggable
 
 #### Props
 
-| _Prop_           | _Type_ | _Required_ | _Description_                                                  |     |
-| ---------------- | ------ | ---------- | -------------------------------------------------------------- | --- |
-| dragAndDropGroup | string | yes        | Unique identifier for the drag and drop group the context uses |     |
-| draggableId      | string | yes        | Unique identifier for the draggable                            |     |
+| **Prop**         | **Type** | **Required** | **Description**                                                |     |
+| ---------------- | -------- | ------------ | -------------------------------------------------------------- | --- |
+| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |     |
+| draggableId      | string   | yes          | Unique identifier for the draggable                            |     |
 
 ### Droppable
 
 #### Props
 
-| _Prop_           | _Type_ | _Required_ | _Description_                                                  |     |
-| ---------------- | ------ | ---------- | -------------------------------------------------------------- | --- |
-| dragAndDropGroup | string | yes        | Unique identifier for the drag and drop group the context uses |     |
-| droppableId      | string | yes        | Unique identifier for the droppable                            |     |
+| **Prop**         | **Type** | **Required** | **Description**                                                |     |
+| ---------------- | -------- | ------------ | -------------------------------------------------------------- | --- |
+| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |     |
+| droppableId      | string   | yes          | Unique identifier for the droppable                            |     |
 
 ## Usage
 
