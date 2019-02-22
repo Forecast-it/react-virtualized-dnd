@@ -161,8 +161,8 @@ class Droppable extends Component {
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 
 		return (
-			<CustomTag {...propsObject} style={{height: 500, minHeight: 500, maxHeight: 500}}>
-				<VirtualizedScrollBar singleActiveElement={true} staticRowHeight={50} ref={scrollDiv => (this.scrollBars = scrollDiv)} containerHeight={500}>
+			<CustomTag {...propsObject} style={{height: this.props.containerHeight, minHeight: this.props.containerHeight, maxHeight: this.props.containerHeight}}>
+				<VirtualizedScrollBar singleActiveElement={true} staticRowHeight={50} ref={scrollDiv => (this.scrollBars = scrollDiv)} containerHeight={this.props.containerHeight}>
 					{this.state.droppableActive && this.state.droppableActive === this.props.droppableId ? this.pushPlaceholder(listToRender) : listToRender}
 				</VirtualizedScrollBar>
 			</CustomTag>

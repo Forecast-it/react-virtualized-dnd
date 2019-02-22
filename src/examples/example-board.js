@@ -109,7 +109,7 @@ class ExampleBoard extends Component {
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{minWidth: 500, flexGrow: 1}} key={index + elem.droppableId}>
-								<Droppable dragAndDropGroup={this.dragAndDropGroupName} droppableId={elem.droppableId} key={elem.droppableId}>
+								<Droppable containerHeight={500} dragAndDropGroup={this.dragAndDropGroupName} droppableId={elem.droppableId} key={elem.droppableId}>
 									{elem.items}
 								</Droppable>
 							</div>

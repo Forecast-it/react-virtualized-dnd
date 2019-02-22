@@ -57,6 +57,7 @@ npm install --save react-virtualized-dnd
 | ---------------- | -------- | ------------ | -------------------------------------------------------------- |
 | dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |
 | droppableId      | string   | yes          | Unique identifier for the droppable                            |
+| containerHeight  | number   | yes          | Height for the virtualizing container                          |
 
 ## Usage
 
