@@ -1,6 +1,7 @@
 # react-virtualized-dnd
 
-> A React-based, virtualized drag-and-drop framework.
+A React-based, fully virtualized drag-and-drop framework, enabling the the cross over of great user interaction and great performance.
+This project was made in response to the large amount of issues created by trying to use other virtualization libraries with other drag and drop libraries - react-virtualized-dnd does it all for you!
 
 [![NPM](https://img.shields.io/npm/v/react-virtualized-dnd.svg)](https://www.npmjs.com/package/react-virtualized-dnd) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
