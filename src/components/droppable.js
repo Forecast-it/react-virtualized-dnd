@@ -82,13 +82,11 @@ class Droppable extends Component {
 		if (this.props.children.length !== nextProps.children.length) {
 			return true;
 		}
-		const isTargetingMe = nextState.droppableActive === this.props.droppableId;
+		const isTargetingMe = nextState.droppableActive && nextState.droppableActive === this.props.droppableId;
 		if (isTargetingMe) {
 			if (this.state.droppableActive === nextState.droppableActive && this.state.placeholder === nextState.placeholder) {
 				return false;
 			}
-		} else if (this.state.placeholder == null && this.state.droppableActive == null) {
-			return false;
 		}
 		return true;
 	}
