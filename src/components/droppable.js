@@ -171,6 +171,8 @@ class Droppable extends Component {
 }
 
 Droppable.propTypes = {
-	droppableId: PropTypes.string.isRequired
+	droppableId: PropTypes.string.isRequired,
+	dragAndDropGroup: PropTypes.string.isRequired,
+	containerHeight: PropTypes.number.isRequired
 };
 export default Droppable;
