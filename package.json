@@ -1,10 +1,14 @@
 {
 	"name": "react-virtualized-dnd",
-	"version": "1.1.8",
+	"version": "1.2.2",
 	"description": "A React-based, virtualized drag-and-drop framework.",
 	"author": "MagerlinC",
 	"license": "MIT",
-	"repository": "MagerlinC/react-virtualized-dnd",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Forecast-it/react-virtualized-dnd",
+		"directory": "packages/react-dom"
+	},
 	"main": "dist/index.js",
 	"module": "dist/index.es.js",
 	"jsnext:main": "dist/index.es.js",

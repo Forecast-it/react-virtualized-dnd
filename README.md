@@ -25,10 +25,11 @@ npm install --save react-virtualized-dnd
 
 #### API
 
-| **Prop**    | **Type** | **Required** | **Description**                                                                                                             |
-| ----------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| onDragEnd   | function | no           | Fired on drag end. Returns the source object, the droppableId of the destination, and the id of the placeholder dropped on. |
-| onDragStart | function | no           | Function fired on drag start. Returns the draggableId of the dragged element.                                               |
+| **Prop**         | **Type** | **Required** | **Description**                                                                                                             |
+| ---------------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| onDragEnd        | function | no           | Fired on drag end. Returns the source object, the droppableId of the destination, and the id of the placeholder dropped on. |
+| onDragStart      | function | no           | Function fired on drag start. Returns the draggableId of the dragged element.                                               |
+| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses                                                              |
 
 #### Props
 
@@ -107,6 +108,10 @@ class Example extends Component {
 }
 ```
 
+## Author
+
+Made by Full Stack Developer Mikkel Agerlin [MagerlinC](https://github.com/MagerlinC).
+
 ## License
 
-MIT © [MagerlinC](https://github.com/MagerlinC)
+MIT ©
