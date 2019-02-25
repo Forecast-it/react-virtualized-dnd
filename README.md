@@ -103,15 +103,17 @@ class Example extends Component {
 
 #### Props
 
-| **Prop**         | **Type** | **Required** | **Description**                                                |
-| ---------------- | -------- | ------------ | -------------------------------------------------------------- |
-| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |
-| droppableId      | string   | yes          | Unique identifier for the droppable                            |
-| containerHeight  | number   | yes          | Height for the virtualizing container                          |
+| **Prop**         | **Type** | **Required** | **Description**                                                  |
+| ---------------- | -------- | ------------ | ---------------------------------------------------------------- |
+| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses   |
+| droppableId      | string   | yes          | Unique identifier for the droppable                              |
+| containerHeight  | number   | yes          | Height for the virtualizing scroll container                     |
+| rowHeight        | number   | no           | Height of each row _with_ borders. Default is 50px.              |
+| disableScroll    | booleans | no           | Flag to disable scrollbars. This disables virtualization as well |
 
 ## Author
 
-Made by Full Stack Developer Mikkel Agerlin [MagerlinC](https://github.com/MagerlinC).
+Made by Mikkel Agerlin [MagerlinC](https://github.com/MagerlinC), Full Stack Developer at Forecast.
 
 ## License
 

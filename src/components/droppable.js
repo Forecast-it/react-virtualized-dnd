@@ -8,8 +8,6 @@ class Droppable extends Component {
 		super(props);
 		this.state = {
 			placeholder: null,
-			rowCount: 0,
-			rowHeight: 50,
 			scrollOffset: 0,
 			topSpacerHeight: 0,
 			unrenderedBelow: 0,
@@ -159,15 +157,29 @@ class Droppable extends Component {
 			);
 			listToRender = childrenWithProps;
 		}
+		const rowsTotalHeight = listToRender.length * (this.props.rowHeight ? this.props.rowHeight : 50);
+		const shouldScroll = this.props.containerHeight < rowsTotalHeight;
+		const containerHeight = shouldScroll ? this.props.containerHeight : rowsTotalHeight;
 
 		const draggedElemId = this.state.currentlyActiveDraggable ? this.state.currentlyActiveDraggable.draggableId : null;
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 
 		return (
-			<CustomTag {...propsObject} style={{height: this.props.containerHeight, minHeight: this.props.containerHeight, maxHeight: this.props.containerHeight}}>
-				<VirtualizedScrollBar stickyElems={[draggedElemId]} staticRowHeight={50} ref={scrollDiv => (this.scrollBars = scrollDiv)} containerHeight={this.props.containerHeight}>
-					{this.state.droppableActive && this.state.droppableActive === this.props.droppableId ? this.pushPlaceholder(listToRender) : listToRender}
-				</VirtualizedScrollBar>
+			<CustomTag {...propsObject} style={{height: containerHeight, minHeight: containerHeight, maxHeight: containerHeight}}>
+				{shouldScroll && !this.props.disableScroll ? (
+					<VirtualizedScrollBar
+						stickyElems={[draggedElemId]}
+						staticRowHeight={this.props.rowHeight ? this.props.rowHeight : 50}
+						ref={scrollDiv => (this.scrollBars = scrollDiv)}
+						containerHeight={this.props.containerHeight}
+					>
+						{this.state.droppableActive && this.state.droppableActive === this.props.droppableId ? this.pushPlaceholder(listToRender) : listToRender}
+					</VirtualizedScrollBar>
+				) : (
+					<div className={'no-scroll-container'}>
+						{this.state.droppableActive && this.state.droppableActive === this.props.droppableId ? this.pushPlaceholder(listToRender) : listToRender}
+					</div>
+				)}
 			</CustomTag>
 		);
 	}
@@ -176,6 +188,8 @@ class Droppable extends Component {
 Droppable.propTypes = {
 	droppableId: PropTypes.string.isRequired,
 	dragAndDropGroup: PropTypes.string.isRequired,
-	containerHeight: PropTypes.number.isRequired
+	containerHeight: PropTypes.number.isRequired,
+	rowHeight: PropTypes.number,
+	disableScroll: PropTypes.bool
 };
 export default Droppable;

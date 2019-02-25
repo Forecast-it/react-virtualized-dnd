@@ -43,7 +43,7 @@ class ExampleBoard extends Component {
 			entry.items.forEach(item => {
 				list.push(
 					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
-						<div className={'draggable-test'} style={{border: 'solid 1px black', height: '50px', marginBottom: '1px', backgroundColor: 'white', flexGrow: 1}}>
+						<div className={'draggable-test'} style={{border: 'solid 1px black', height: '48px', marginBottom: '1px', backgroundColor: 'white', flexGrow: 1}}>
 							<p style={{marginLeft: '5px'}} className={'item-name'}>
 								{item.name}
 							</p>
@@ -108,7 +108,7 @@ class ExampleBoard extends Component {
 				<DragDropContext dragAndDropGroup={this.dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
-							<div className={'sizer'} style={{minWidth: 500, flexGrow: 1}} key={index + elem.droppableId}>
+							<div className={'sizer'} style={{flexGrow: 1}} key={index + elem.droppableId}>
 								<Droppable containerHeight={500} dragAndDropGroup={this.dragAndDropGroupName} droppableId={elem.droppableId} key={elem.droppableId}>
 									{elem.items}
 								</Droppable>
