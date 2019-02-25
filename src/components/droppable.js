@@ -66,10 +66,9 @@ class Droppable extends Component {
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		// If we're not mid-drag, always update
-		if (this.state.currentlyActiveDraggable == null && this.state.droppableActive == null) {
-			// IF WE DO THIS, EVERYTHING BREAKS. If we don't, we're blocking updates to children
-			//return true;
+		// If we're not in a drag, and one is not coming up, always update
+		if (this.state.currentlyActiveDraggable == null && this.state.droppableActive == null && nextState.droppableActive == null && nextState.currentlyActiveDraggable == null) {
+			return true;
 		}
 		if (this.state.mounted !== nextState.mounted) {
 			return true;
