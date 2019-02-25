@@ -102,7 +102,7 @@ class Droppable extends Component {
 							key={'placeholder'}
 							draggableid={'placeholder'}
 							className={'draggable-test'}
-							style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: '50px', marginBottom: '1px', backgroundColor: 'grey'}}
+							style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: '50px', backgroundColor: 'grey'}}
 						>
 							<p className={'placeholder-text'} />
 						</div>
@@ -112,7 +112,7 @@ class Droppable extends Component {
 			});
 		} else if (!pushedPlaceholder) {
 			listToRender.push(
-				<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={{border: 'solid 1px black', height: '50px', marginBottom: '1px', backgroundColor: 'grey'}}>
+				<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={{border: 'solid 1px black', height: '50px', backgroundColor: 'grey'}}>
 					<p className={'placeholder-text'} />
 				</div>
 			);
@@ -129,13 +129,6 @@ class Droppable extends Component {
 			this.scrollBars.scrollTop(this.scrollBars.getScrollTop() + scrollOffset);
 		}
 	}
-
-	/*getShouldAlwaysRender(draggableId) {
-		// Don't unmount currently dragged element on scroll.
-		if (this.state.currentlyActiveDraggable && this.props.droppableId == this.state.currentlyActiveDraggable.droppableId) {
-			return this.state.currentlyActiveDraggable.draggableId === draggableId;
-		} else return false;
-	}*/
 
 	render() {
 		const {children} = this.props;
