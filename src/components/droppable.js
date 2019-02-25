@@ -8,12 +8,9 @@ class Droppable extends Component {
 		super(props);
 		this.state = {
 			placeholder: null,
-			dragActive: false,
-			elemList: [],
 			rowCount: 0,
 			rowHeight: 50,
 			scrollOffset: 0,
-			elemOverScan: 1,
 			topSpacerHeight: 0,
 			unrenderedBelow: 0,
 			unrenderedAbove: 0,
@@ -32,7 +29,7 @@ class Droppable extends Component {
 		this.onScrollChange = this.onScrollChange.bind(this);
 		this.onDragEnd = this.onDragEnd.bind(this);
 		this.onDragStart = this.onDragStart.bind(this);
-		this.getShouldAlwaysRender = this.getShouldAlwaysRender.bind(this);
+		//this.getShouldAlwaysRender = this.getShouldAlwaysRender.bind(this);
 	}
 
 	componentDidMount() {
@@ -63,30 +60,34 @@ class Droppable extends Component {
 		const isTargetingMe = droppableActive === this.props.droppableId;
 		if (isTargetingMe) {
 			this.setState({placeholder: placeholder, droppableActive: droppableActive});
-		} else if (this.state.placeholder != null || this.state.droppableActive != null) {
+		} else if (this.state.placeholder != null || this.state.droppableActive !== null) {
 			this.setState({placeholder: null, droppableActive: null});
 		}
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
+		// If we're not mid-drag, always update
+		if (this.state.currentlyActiveDraggable == null && this.state.droppableActive == null) {
+			// IF WE DO THIS, EVERYTHING BREAKS. If we don't, we're blocking updates to children
+			//return true;
+		}
 		if (this.state.mounted !== nextState.mounted) {
 			return true;
 		}
 		if (this.state.scrollOffset !== nextState.scrollOffset) {
 			return true;
 		}
-		// TODO: THIS IS A SIMPLE FIX!!! CHECK ELEMS
-		if (this.state.elemList.length !== nextState.elemList.length) {
+		if (this.props.children && nextProps.children && this.props.children.length !== nextProps.children.length) {
 			return true;
 		}
-		if (this.props.children.length !== nextProps.children.length) {
-			return true;
-		}
-		const isTargetingMe = nextState.droppableActive && nextState.droppableActive === this.props.droppableId;
+		const isTargetingMe = nextState.droppableActive === this.props.droppableId;
 		if (isTargetingMe) {
 			if (this.state.droppableActive === nextState.droppableActive && this.state.placeholder === nextState.placeholder) {
 				return false;
 			}
+		} else if (this.state.placeholder == null && this.state.droppableActive == null) {
+			//If we're not being targeted, we dont' want a placeholder update.
+			return false;
 		}
 		return true;
 	}
@@ -104,7 +105,7 @@ class Droppable extends Component {
 							key={'placeholder'}
 							draggableid={'placeholder'}
 							className={'draggable-test'}
-							style={{border: 'solid 1px black', height: '50px', marginBottom: '1px', backgroundColor: 'grey'}}
+							style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: '50px', marginBottom: '1px', backgroundColor: 'grey'}}
 						>
 							<p className={'placeholder-text'} />
 						</div>
@@ -132,35 +133,40 @@ class Droppable extends Component {
 		}
 	}
 
-	getShouldAlwaysRender(draggableId) {
-		if (this.state.currentlyActiveDraggable) {
+	/*getShouldAlwaysRender(draggableId) {
+		// Don't unmount currently dragged element on scroll.
+		if (this.state.currentlyActiveDraggable && this.props.droppableId == this.state.currentlyActiveDraggable.droppableId) {
 			return this.state.currentlyActiveDraggable.draggableId === draggableId;
 		} else return false;
-	}
+	}*/
 
 	render() {
-		//console.log('Rendered droppable with id ', this.props.droppableId);
 		const {children} = this.props;
+		// Objects we want to render
+		let listToRender = [];
 		const propsObject = {
 			key: this.props.droppableId,
 			droppableid: this.props.droppableId,
 			droppablegroup: this.props.dragAndDropGroup
 		};
 
-		// Pass my droppableId to all children to give a source for DnD
-		let childrenWithProps = React.Children.map(children, child =>
-			React.cloneElement(child, {
-				droppableId: this.props.droppableId,
-				alwaysRender: this.getShouldAlwaysRender
-			})
-		);
-		const listToRender = childrenWithProps;
+		if (children && children.length > 0) {
+			// Pass my droppableId to all children to give a source for DnD
+			let childrenWithProps = React.Children.map(children, child =>
+				React.cloneElement(child, {
+					droppableId: this.props.droppableId
+					//alwaysRender: this.getShouldAlwaysRender
+				})
+			);
+			listToRender = childrenWithProps;
+		}
 
+		const draggedElemId = this.state.currentlyActiveDraggable ? this.state.currentlyActiveDraggable.draggableId : null;
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 
 		return (
 			<CustomTag {...propsObject} style={{height: this.props.containerHeight, minHeight: this.props.containerHeight, maxHeight: this.props.containerHeight}}>
-				<VirtualizedScrollBar singleActiveElement={true} staticRowHeight={50} ref={scrollDiv => (this.scrollBars = scrollDiv)} containerHeight={this.props.containerHeight}>
+				<VirtualizedScrollBar stickyElems={[draggedElemId]} staticRowHeight={50} ref={scrollDiv => (this.scrollBars = scrollDiv)} containerHeight={this.props.containerHeight}>
 					{this.state.droppableActive && this.state.droppableActive === this.props.droppableId ? this.pushPlaceholder(listToRender) : listToRender}
 				</VirtualizedScrollBar>
 			</CustomTag>

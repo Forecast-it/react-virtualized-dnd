@@ -44,14 +44,14 @@ class Draggable extends Component {
 		}
 
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
+			e.preventDefault();
+			e.stopPropagation();
 			if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
 				const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
 				dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 				this.droppableDraggedOver = null;
 				this.draggableHoveringOver = null;
 			}
-			e.preventDefault();
-			e.stopPropagation();
 			let x = e.clientX;
 			let y = e.clientY;
 			let cardWidth = this.draggable.offsetWidth;
@@ -79,6 +79,7 @@ class Draggable extends Component {
 	onPointerUp(e) {
 		e.preventDefault();
 		e.stopPropagation();
+
 		if (this.props.disableDrag) {
 			return;
 		}
@@ -219,11 +220,10 @@ class Draggable extends Component {
 			// Reset dragged element's pointers
 			cardUnder = this.getDraggableParentElement(elementUnder);
 			if (!cardUnder) {
-				//console.log('Retry above');
 				// Try again just above, to avoid weird flickers in the spaces between cards
 				/*elementUnder = document.elementFromPoint(x, y + 5);
 				cardUnder = this.getDraggableParentElement(elementUnder);
-				console.log('found', cardUnder);*/
+				*/
 			}
 			draggingElement.style.pointerEvents = 'all';
 		}
@@ -268,7 +268,7 @@ class Draggable extends Component {
 
 	render() {
 		const active = this.state.isDragging && this.state.wasClicked;
-		const styles = {
+		const draggingStyle = {
 			cursor: 'move',
 			position: this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved ? 'fixed' : '',
 			width: this.state.width,
@@ -282,7 +282,7 @@ class Draggable extends Component {
 		const propsObject = {
 			'data-cy': 'draggable-' + this.props.draggableId,
 			className: 'draggable',
-			style: active ? {...styles} : {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.state.wasClicked ? 'move' : 'grab'},
+			style: active ? {...draggingStyle} : {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.state.wasClicked ? 'move' : 'grab'},
 			key: this.props.draggableId,
 			draggableid: this.props.draggableId,
 			index: this.props.innerIndex,

@@ -8,12 +8,12 @@ class VirtualizedScrollBar extends Component {
 			// Update this when dynamic row height becomes a thing
 			rowHeight: this.props.staticRowHeight ? this.props.staticRowHeight : 50,
 			scrollOffset: 0,
-			elemOverScan: this.props.overScan ? this.props.overScan : 5,
+			elemOverScan: this.props.overScan ? this.props.overScan : 3,
 			topSpacerHeight: 0,
 			unrenderedBelow: 0,
 			unrenderedAbove: 0
 		};
-		this.alwaysRenderElem = null;
+		this.stickyElems = null;
 	}
 
 	// If we use static row height, we can optimizie by finding the first element to render, and adding (containersize + overScan / index * height) elems.
@@ -27,7 +27,7 @@ class VirtualizedScrollBar extends Component {
 		let firstIndexToRender = null;
 		for (let index = 0; index < list.length && firstIndexToRender == null; index++) {
 			const child = list[index];
-			if (child.props.alwaysRender && (this.props.singleActiveElement && !foundAlwaysActiveElem) && child.props.alwaysRender(child.props.draggableId)) {
+			if (child.props.alwaysRender && !foundAlwaysActiveElem && child.props.alwaysRender(child.props.draggableId)) {
 				listToRender.push(child);
 				foundAlwaysActiveElem = true;
 			} else {
@@ -48,12 +48,10 @@ class VirtualizedScrollBar extends Component {
 
 	getListToRender(list) {
 		let listToRender = [];
-		this.alwaysRenderElem = null;
+		this.stickyElems = [];
 		const rowHeight = this.state.rowHeight;
 		const containerHeight = this.props.containerHeight;
 		const overScan = this.state.elemOverScan * this.state.rowHeight;
-		let firstSmallerElem = null;
-		let firstLargerElem = null;
 		if (!containerHeight || this.state.scrollOffset == null) {
 			return true;
 		}
@@ -63,19 +61,15 @@ class VirtualizedScrollBar extends Component {
 		}*/
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
-			if (child.props.alwaysRender && !this.alwaysRenderElem && child.props.alwaysRender(child.props.draggableId)) {
+			if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
 				//listToRender.push(child);
-				this.alwaysRenderElem = child;
+				this.stickyElems.push(child);
+				console.log('ADDED STICKY ELEM: ', child);
 			} else {
 				// Don't render if we're below the current scroll offset, or if we're above the containerHeight + scrollOffset
 				const ySmallerThanList = (index + 1) * rowHeight + overScan < this.state.scrollOffset;
 				const yLargerThanList = (index + 1) * rowHeight - overScan > this.state.scrollOffset + containerHeight;
-				if (ySmallerThanList) {
-					firstSmallerElem = child;
-				}
-				if (yLargerThanList && !firstLargerElem) {
-					firstLargerElem = child;
-				}
+
 				if (!ySmallerThanList && !yLargerThanList) {
 					listToRender.push(child);
 				}
@@ -112,13 +106,15 @@ class VirtualizedScrollBar extends Component {
 
 		const listToRender = this.getListToRender(childrenWithProps);
 
-		const unrenderedBelow = (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.alwaysRenderElem ? 1 : 0);
+		const unrenderedBelow = (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.stickyElems ? 1 : 0);
 		const unrenderedAbove = listToRender && listToRender.length > 0 ? childrenWithProps.length - (listToRender[listToRender.length - 1].props.originalindex + 1) : 0;
 		const belowSpacerStyle = {width: '100%', height: unrenderedBelow ? unrenderedBelow * this.state.rowHeight : 0};
 		const aboveSpacerStyle = {width: '100%', height: unrenderedAbove ? unrenderedAbove * this.state.rowHeight : 0};
-		if (this.alwaysRenderElem) {
-			listToRender.push(this.alwaysRenderElem);
+		if (this.stickyElems && this.stickyElems.length > 0) {
+			console.log(this.stickyElems[0]);
+			listToRender.push(this.stickyElems[0]);
 		}
+		console.log(listToRender);
 		return (
 			<Scrollbars onScroll={this.handleScroll.bind(this)} ref={div => (this.scrollBars = div)} autoHeight={false} autoHeightMax={500} autoHeightMin={500}>
 				<div
