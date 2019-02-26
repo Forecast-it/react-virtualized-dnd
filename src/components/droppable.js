@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {subscribe, unsubscribe} from '../util/event_manager';
 import VirtualizedScrollBar from './virtualized-scrollbar';
+import Util from './../util/util';
 
 class Droppable extends Component {
 	constructor(props) {
@@ -12,15 +13,7 @@ class Droppable extends Component {
 			topSpacerHeight: 0,
 			unrenderedBelow: 0,
 			unrenderedAbove: 0,
-			dragAndDropGroup: {
-				id: this.props.dragAndDropGroup,
-				moveEvent: this.props.dragAndDropGroup + '-MOVE',
-				resetEvent: this.props.dragAndDropGroup + '-RESET',
-				startEvent: this.props.dragAndDropGroup + '-START',
-				endEvent: this.props.dragAndDropGroup + '-END',
-				scrollEvent: this.props.dragAndDropGroup + '-SCROLL',
-				placeholderEvent: this.props.dragAndDropGroup + '-PLACEHOLDER'
-			},
+			dragAndDropGroup: Util.getDragEvents(this.props.dragAndDropGroup),
 			currentlyActiveDraggable: null
 		};
 		this.onPlaceholderChange = this.onPlaceholderChange.bind(this);

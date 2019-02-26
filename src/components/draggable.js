@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {dispatch} from '../util/event_manager';
+import Util from './../util/util';
 
 class Draggable extends Component {
 	constructor(props) {
@@ -18,13 +19,7 @@ class Draggable extends Component {
 		};
 		this.pointerSupport = !!window.PointerEvent;
 		this.onPointerMove = this.onPointerMove.bind(this);
-		this.dragAndDropGroup = {
-			id: this.props.dragAndDropGroup,
-			moveEvent: this.props.dragAndDropGroup + '-MOVE',
-			resetEvent: this.props.dragAndDropGroup + '-RESET',
-			startEvent: this.props.dragAndDropGroup + '-START',
-			endEvent: this.props.dragAndDropGroup + '-END'
-		};
+		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
 	}
 
 	componentWillUnmount() {

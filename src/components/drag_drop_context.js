@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {dispatch, subscribe, unsubscribe} from '../util/event_manager';
 import {Scrollbars} from 'react-custom-scrollbars';
+import Util from './../util/util';
 
 class DragDropContext extends Component {
 	constructor(props) {
@@ -11,14 +12,7 @@ class DragDropContext extends Component {
 			dragActive: false,
 			draggedElem: null,
 			droppableActive: null,
-			dragAndDropGroup: {
-				id: this.props.dragAndDropGroup,
-				moveEvent: this.props.dragAndDropGroup + '-MOVE',
-				resetEvent: this.props.dragAndDropGroup + '-RESET',
-				startEvent: this.props.dragAndDropGroup + '-START',
-				endEvent: this.props.dragAndDropGroup + '-END',
-				scrollEvent: this.props.dragAndDropGroup + '-SCROLL'
-			}
+			dragAndDropGroup: Util.getDragEvents(this.props.dragAndDropGroup)
 		};
 		this.onDragMove = this.onDragMove.bind(this);
 		this.resetPlaceholderIndex = this.resetPlaceholderIndex.bind(this);
@@ -50,9 +44,9 @@ class DragDropContext extends Component {
 
 	dispatchPlaceholder() {
 		if (this.state.draggedElem && this.state.dragActive && this.state.droppableActive) {
-			dispatch(this.props.dragAndDropGroup + '-PLACEHOLDER', this.state.placeholder, this.state.droppableActive);
+			dispatch(this.state.dragAndDropGroup.placeholderEvent, this.state.placeholder, this.state.droppableActive);
 		} else {
-			dispatch(this.props.dragAndDropGroup + '-PLACEHOLDER', null, null);
+			dispatch(this.state.dragAndDropGroup.placeholderEvent, null, null);
 		}
 	}
 
