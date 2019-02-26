@@ -84,8 +84,20 @@ class ExampleBoard extends Component {
 		const elemToAdd = listToRemoveFrom.items.find(entry => entry.id === source.draggableId);
 		let indexToRemove = listToRemoveFrom.items.findIndex(item => item.id === source.draggableId);
 		let indexToInsert = listToAddTo.items.findIndex(item => item.id === placeholderId);
-		listToRemoveFrom.items.splice(indexToRemove, 1);
-		listToAddTo.items.splice(indexToInsert, 0, elemToAdd);
+		// Re-arrange within the same list
+		if (listToRemoveFrom.name === listToAddTo.name) {
+			if (indexToRemove === indexToInsert) {
+				return;
+			}
+			// If we're moving an element below the insertion point, indexes will change.
+			const direction = indexToRemove < indexToInsert ? 1 : 0;
+			listToRemoveFrom.items.splice(indexToRemove, 1);
+			listToAddTo.items.splice(indexToInsert - direction, 0, elemToAdd);
+		} else {
+			listToRemoveFrom.items.splice(indexToRemove, 1);
+			listToAddTo.items.splice(indexToInsert, 0, elemToAdd);
+		}
+
 		const newData = this.state.listData;
 		newData[listToRemoveFrom.index] = listToRemoveFrom;
 		newData[listToAddTo.index] = listToAddTo;
