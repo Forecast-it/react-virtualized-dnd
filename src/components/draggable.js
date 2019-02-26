@@ -67,8 +67,6 @@ class Draggable extends Component {
 				xClickOffset: Math.abs(x - cardLeft) + 8,
 				yClickOffset: Math.abs(y - cardTop) + 8
 			});
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-			dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
 		}
 	}
 	onPointerUp(e) {
@@ -142,8 +140,13 @@ class Draggable extends Component {
 				if (!droppableDraggedOver) {
 					dispatch(this.dragAndDropGroup.resetEvent);
 				}
+				const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
+				if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
+					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+					dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
+				}
 				// We're hovering over a droppable and a draggable
-				if (droppableDraggedOver && draggableHoveringOver && (this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved)) {
+				if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
 					if (!draggableHoveringOver.getAttribute('draggableid').includes('placeholder')) {
 						if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('draggableid')) {
 							const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
@@ -152,7 +155,7 @@ class Draggable extends Component {
 							this.draggableHoveringOver = draggableHoveringOver.getAttribute('draggableid');
 						}
 					}
-				} else if (droppableDraggedOver && (minDistanceMoved || this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved)) {
+				} else if (droppableDraggedOver && shouldRegisterAsDrag) {
 					// We're hovering over a droppable, but no draggable
 					this.droppableDraggedOver = droppableDraggedOver;
 					this.draggableHoveringOver = null;
@@ -160,7 +163,7 @@ class Draggable extends Component {
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver.getAttribute('droppableid'), null, x, y);
 				}
 				this.setState({
-					isDragging: true,
+					isDragging: shouldRegisterAsDrag,
 					// We need to move more than the drag sensitivity before we consider it an intended drag
 					minDragDistanceMoved: minDistanceMoved,
 					left: newLeft,
