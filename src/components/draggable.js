@@ -17,14 +17,26 @@ class Draggable extends Component {
 			dragSensitivityX: 15,
 			dragSensitivityY: 15
 		};
+		this.handleDragShortcuts = this.handleDragShortcuts.bind(this);
 		this.pointerSupport = !!window.PointerEvent;
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
 	}
 
+	componentDidMount() {
+		document.addEventListener('keydown', this.handleDragShortcuts);
+	}
+
 	componentWillUnmount() {
+		document.removeEventListener('keydown', this.handleDragShortcuts);
 		cancelAnimationFrame(this.frame);
 		this.frame = null;
+	}
+
+	handleDragShortcuts(e) {
+		if (e.key === 'Escape') {
+			this.onPointerCancel(e);
+		}
 	}
 
 	onPointerDown(e) {
@@ -279,7 +291,7 @@ class Draggable extends Component {
 
 		const propsObject = {
 			'data-cy': 'draggable-' + this.props.draggableId,
-			className: 'draggable',
+			className: 'draggable' + (active ? ' active' : ''),
 			style: active ? {...draggingStyle} : {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.state.wasClicked ? 'move' : 'grab'},
 			key: this.props.draggableId,
 			draggableid: this.props.draggableId,

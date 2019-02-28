@@ -113,7 +113,8 @@ class Example extends Component {
 
 ## Author
 
-Made by Mikkel Agerlin [MagerlinC](https://github.com/MagerlinC), Full Stack Developer at Forecast.
+Mikkel Agerlin, Full Stack Developer at Forecast.
+[MagerlinC](https://github.com/MagerlinC)
 
 ## License
 

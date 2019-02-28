@@ -43,7 +43,7 @@ class ExampleBoard extends Component {
 			entry.items.forEach(item => {
 				list.push(
 					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
-						<div className={'draggable-test'} style={{border: 'solid 1px black', height: '48px', backgroundColor: 'white', flexGrow: 1}}>
+						<div onClick={() => alert('CLICK')} className={'draggable-test'} style={{border: 'solid 1px black', height: '48px', backgroundColor: 'white', flexGrow: 1}}>
 							<p style={{marginLeft: '5px'}} className={'item-name'}>
 								{item.name}
 							</p>
