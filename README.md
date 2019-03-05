@@ -1,7 +1,7 @@
 # About us
 
 <p align="center" >
-  <img width='150px' src='./images/logo-v2.svg'/>
+  <img width='150px' src='images/logo-v2.svg'/>
 </p>
 
 This library was made by Forecast - powered by AI, Forecast is supporting your work process with a complete Resource & Project Management platform. Connect your work, fill your pipeline, & meet your deadlines at [www.forecast.app](https://www.forecast.app)
@@ -9,7 +9,9 @@ This library was made by Forecast - powered by AI, Forecast is supporting your w
 # react-virtualized-dnd
 
 react-virtualized-dnd is a React-based, fully virtualized drag-and-drop framework, enabling the the cross over of great user interaction and great performance.
-This project was made in response to the large amount of issues created by trying to use other virtualization libraries with other drag and drop libraries - react-virtualized-dnd does it all for you!
+This project was made in response to the large amount of issues experienced trying to use virtualization libraries together with drag and drop libraries - react-virtualized-dnd does it all for you!
+
+[Check it out!](https://forecast-it.github.io/react-virtualized-dnd/)
 
 [![NPM](https://img.shields.io/npm/v/react-virtualized-dnd.svg)](https://www.npmjs.com/package/react-virtualized-dnd) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -33,7 +35,7 @@ _Droppables_ use an internal scrollbar to virtualize its children, and the _Drag
 React-virtualized-dnd places a placeholder in droppables during drag, which is placed after the draggable element hovered over during drag. The placeholderId represents the id of the element it was placed after.
 On drag end, the _DragDropContext_ returns the placeholderId.
 
-An example can be seen below:
+Example code can be seen below. A live example can be found at: https://forecast-it.github.io/react-virtualized-dnd/
 
 ```jsx
 import React, {Component} from 'react';
@@ -109,7 +111,7 @@ class Example extends Component {
 | droppableId      | string   | yes          | Unique identifier for the droppable                              |
 | containerHeight  | number   | yes          | Height for the virtualizing scroll container                     |
 | rowHeight        | number   | no           | Height of each row _with_ borders. Default is 50px.              |
-| disableScroll    | booleans | no           | Flag to disable scrollbars. This disables virtualization as well |
+| disableScroll    | boolean  | no           | Flag to disable scrollbars. This disables virtualization as well |
 
 ## Author
 
