@@ -1,7 +1,7 @@
 # About us
 
 <p align="center" >
-  <img width='150px' src='./images/logo-v2.svg'/>
+  <img width='150px' src='https://avatars3.githubusercontent.com/u/8530033?s=200&v=4'/>
 </p>
 
 This library was made by Forecast - powered by AI, Forecast is supporting your work process with a complete Resource & Project Management platform. Connect your work, fill your pipeline, & meet your deadlines at [www.forecast.app](https://www.forecast.app)
