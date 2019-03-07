@@ -40,10 +40,7 @@ class Draggable extends Component {
 	}
 
 	onPointerDown(e) {
-		if (e.target.id === 'actions-btn' || e.target.className.includes('action')) {
-			return;
-		}
-		if (this.props.disableDrag) {
+		if (e.target.className.includes('no-drag') || this.props.disableDrag) {
 			return;
 		}
 		if (!this.pointerSupport) {

@@ -101,6 +101,8 @@ class Example extends Component {
 | dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |
 | draggableId      | string   | yes          | Unique identifier for the draggable                            |
 
+Draggables will ignore drags started by clicking on any element with the "no-drag" css class. This can be used to control drag interactions with interactive elements, such as inputs or buttons.
+
 ### Droppable
 
 #### Props
