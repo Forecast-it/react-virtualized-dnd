@@ -24,25 +24,29 @@ class VirtualizedScrollBar extends Component {
 		const containerHeight = this.props.containerHeight;
 		const maxVisibleElems = Math.floor(containerHeight / rowHeight);
 		if (!containerHeight || this.state.scrollOffset == null) {
-			return true;
+			return list;
 		}
 
 		let smallestIndexVisible = null;
+		if (this.state.scrollOffset === 0 && this.props.stickyElems.length === 0) {
+			smallestIndexVisible = 0;
+		} else {
+			for (let index = 0; index < list.length; index++) {
+				const child = list[index];
+				// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
+				if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
+					this.stickyElems.push(child);
+				} else {
+					const ySmallerThanList = (index + 1) * rowHeight < this.state.scrollOffset;
 
-		for (let index = 0; index < list.length; index++) {
-			const child = list[index];
-			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
-			if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
-				this.stickyElems.push(child);
-			} else {
-				const ySmallerThanList = (index + 1) * rowHeight < this.state.scrollOffset;
-
-				if (ySmallerThanList) {
-					// Keep overwriting to obtain the last element that is not smaller
-					smallestIndexVisible = index;
+					if (ySmallerThanList) {
+						// Keep overwriting to obtain the last element that is not smaller
+						smallestIndexVisible = index;
+					}
 				}
 			}
 		}
+
 		const start = Math.max(0, (smallestIndexVisible != null ? smallestIndexVisible : 0) - this.state.elemOverScan);
 		// start plus number of visible elements plus overscan
 		const end = smallestIndexVisible + maxVisibleElems + this.state.elemOverScan;
@@ -62,7 +66,7 @@ class VirtualizedScrollBar extends Component {
 		const containerHeight = this.props.containerHeight;
 		const overScan = 0; //this.state.elemOverScan * this.state.rowHeight;
 		if (!containerHeight || this.state.scrollOffset == null) {
-			return true;
+			return list;
 		}
 
 		if (this.props.staticRowHeight) {
@@ -113,9 +117,11 @@ class VirtualizedScrollBar extends Component {
 		const height = rowCount * this.state.rowHeight;
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index}));
 
+		const hasScrolled = this.state.scrollOffset > 0;
+
 		const listToRender = this.getListToRender(childrenWithProps);
 
-		const unrenderedBelow = (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.stickyElems ? 1 : 0);
+		const unrenderedBelow = hasScrolled ? (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.stickyElems ? this.stickyElems.length : 0) : 0;
 		const unrenderedAbove = listToRender && listToRender.length > 0 ? childrenWithProps.length - (listToRender[listToRender.length - 1].props.originalindex + 1) : 0;
 		const belowSpacerStyle = {width: '100%', height: unrenderedBelow ? unrenderedBelow * this.state.rowHeight : 0};
 		const aboveSpacerStyle = {width: '100%', height: unrenderedAbove ? unrenderedAbove * this.state.rowHeight : 0};

@@ -155,7 +155,7 @@ class Droppable extends Component {
 			<CustomTag {...propsObject} style={{height: containerHeight, minHeight: containerHeight, maxHeight: containerHeight}}>
 				{shouldScroll && !this.props.disableScroll ? (
 					<VirtualizedScrollBar
-						stickyElems={[draggedElemId]}
+						stickyElems={draggedElemId ? [draggedElemId] : []}
 						staticRowHeight={this.props.rowHeight ? this.props.rowHeight : 50}
 						ref={scrollDiv => (this.scrollBars = scrollDiv)}
 						containerHeight={this.props.containerHeight}
