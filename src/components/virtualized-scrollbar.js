@@ -64,13 +64,9 @@ class VirtualizedScrollBar extends Component {
 		this.stickyElems = [];
 		const rowHeight = this.state.rowHeight;
 		const containerHeight = this.props.containerHeight;
-		const overScan = 0; //this.state.elemOverScan * this.state.rowHeight;
+		const overScan = this.state.elemOverScan * this.state.rowHeight;
 		if (!containerHeight || this.state.scrollOffset == null) {
 			return list;
-		}
-
-		if (this.props.staticRowHeight) {
-			return this.getListToRenderStaticOptimization(list);
 		}
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
@@ -119,7 +115,7 @@ class VirtualizedScrollBar extends Component {
 
 		const hasScrolled = this.state.scrollOffset > 0;
 
-		const listToRender = this.getListToRender(childrenWithProps);
+		const listToRender = this.props.staticRowHeight ? this.getListToRenderStaticOptimization(childrenWithProps) : this.getListToRender(childrenWithProps);
 
 		const unrenderedBelow = hasScrolled ? (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.stickyElems ? this.stickyElems.length : 0) : 0;
 		const unrenderedAbove = listToRender && listToRender.length > 0 ? childrenWithProps.length - (listToRender[listToRender.length - 1].props.originalindex + 1) : 0;
