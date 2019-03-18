@@ -39,6 +39,13 @@ class Draggable extends Component {
 		}
 	}
 
+	setPointerCapture() {
+		if (!this.state.capturing) {
+			this.draggable.setPointerCapture(this.state.pointerId);
+			this.setState({capturing: true});
+		}
+	}
+
 	onPointerDown(e) {
 		if (e.target.className.includes('no-drag') || this.props.disableDrag) {
 			return;
@@ -46,7 +53,6 @@ class Draggable extends Component {
 		if (!this.pointerSupport) {
 			document.addEventListener('mousemove', this.onPointerMove, true);
 		}
-
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
 			e.preventDefault();
 			e.stopPropagation();
@@ -61,10 +67,9 @@ class Draggable extends Component {
 			let cardWidth = this.draggable.offsetWidth;
 			const cardTop = this.draggable.getBoundingClientRect().top;
 			const cardLeft = this.draggable.getBoundingClientRect().left;
-			if (this.pointerSupport && e.pointerId != null) {
-				this.draggable.setPointerCapture(e.pointerId);
-			}
+
 			this.setState({
+				pointerId: e.pointerId,
 				width: cardWidth,
 				didMoveMinDistanceDuringDrag: false,
 				minDragDistanceMoved: false,
@@ -81,15 +86,12 @@ class Draggable extends Component {
 	onPointerUp(e) {
 		e.preventDefault();
 		e.stopPropagation();
-
 		if (this.props.disableDrag) {
 			return;
 		}
-		if (!this.pointerSupport) {
-			document.removeEventListener('mousemove', this.onPointerMove);
-		}
-		if (this.pointerSupport && e.pointerId) {
-			this.draggable.releasePointerCapture(e.pointerId);
+		if (this.pointerSupport && this.state.pointerId) {
+			//this.draggable.releasePointerCapture(e.pointerId);
+			this.draggable.releasePointerCapture(this.state.pointerId);
 		}
 		if (this.state.didMoveMinDistanceDuringDrag && this.state.minDragDistanceMoved) {
 			dispatch(this.dragAndDropGroup.endEvent);
@@ -98,6 +100,7 @@ class Draggable extends Component {
 		this.draggableHoveringOver = null;
 		this.setState({
 			isDragging: false,
+			capturing: false,
 			didMoveMinDistanceDuringDrag: false,
 			minDragDistanceMoved: false,
 			cardLeft: 0,
@@ -106,15 +109,16 @@ class Draggable extends Component {
 			left: null,
 			wasClicked: false
 		});
-	}
-	onPointerCancel() {
 		if (!this.pointerSupport) {
 			document.removeEventListener('mousemove', this.onPointerMove);
 		}
+	}
+	onPointerCancel() {
 		dispatch(this.dragAndDropGroup.resetEvent);
 		this.draggableHoveringOver = null;
 		this.setState({
 			isDragging: false,
+			capturing: false,
 			didMoveMinDistanceDuringDrag: false,
 			minDragDistanceMoved: false,
 			left: null,
@@ -123,6 +127,12 @@ class Draggable extends Component {
 			cardTop: 0,
 			wasClicked: false
 		});
+		if (!this.pointerSupport) {
+			document.removeEventListener('mousemove', this.onPointerMove);
+		}
+		if (this.pointerSupport && this.state.pointerId) {
+			this.draggable.releasePointerCapture(this.state.pointerId);
+		}
 	}
 
 	onPointerMove(e) {
@@ -133,6 +143,9 @@ class Draggable extends Component {
 		}
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
 			const moveCard = (x, y) => {
+				if (!this.state.wasClicked) {
+					return;
+				}
 				let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
 				let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
 				const newLeft = x - this.state.xClickOffset;
@@ -181,6 +194,7 @@ class Draggable extends Component {
 			};
 			const x = e.clientX;
 			const y = e.clientY;
+			this.setPointerCapture();
 			requestAnimationFrame(() => moveCard(x, y));
 		} else {
 			this.onPointerCancel();
