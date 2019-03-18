@@ -120,7 +120,7 @@ class ExampleBoard extends Component {
 				<DragDropContext dragAndDropGroup={this.dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
-							<div className={'sizer'} style={{flexGrow: 1}} key={index + elem.droppableId}>
+							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 								<Droppable containerHeight={500} dragAndDropGroup={this.dragAndDropGroupName} droppableId={elem.droppableId} key={elem.droppableId}>
 									{elem.items}
 								</Droppable>

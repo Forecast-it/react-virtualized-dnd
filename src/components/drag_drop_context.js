@@ -87,8 +87,10 @@ class DragDropContext extends Component {
 
 		var w = this.container.getBoundingClientRect().right - this.container.getBoundingClientRect().left;
 		var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
+		const yDistanceFromContainerTop = y - this.container.getBoundingClientRect().top;
 		// Scroll when within 10% of edge or min 25px
 		const scrollThreshold = Math.max(h * 0.1, 25);
+		console.log(h, y, h - y, scrollThreshold);
 
 		if (w - x < scrollThreshold) {
 			// Scroll right
@@ -111,7 +113,7 @@ class DragDropContext extends Component {
 				shouldScrollX: false
 			});
 		}
-		if (h - y <= scrollThreshold) {
+		if (h - yDistanceFromContainerTop <= scrollThreshold) {
 			//Scroll down
 			if (this.state.droppableActive) {
 				this.setState({
@@ -119,7 +121,7 @@ class DragDropContext extends Component {
 					scrollYUp: true
 				});
 			}
-		} else if (y - this.container.getBoundingClientRect().top <= scrollThreshold) {
+		} else if (yDistanceFromContainerTop - this.container.getBoundingClientRect().top <= scrollThreshold) {
 			//Scroll up
 			if (this.state.droppableActive) {
 				this.setState(prevState => {
@@ -143,7 +145,7 @@ class DragDropContext extends Component {
 		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
 			if (this.state.shouldScrollX && this.outerScrollBar) {
 				if (this.state.scrollXRight) {
-					// Stop scroll if we're within a card width of the edge.
+					// Stop scroll if we're within 10px of the edge
 					if (this.outerScrollBar && this.outerScrollBar.getScrollLeft() + 10 >= this.outerScrollBar.getScrollWidth()) {
 						this.frame = null;
 						return;
