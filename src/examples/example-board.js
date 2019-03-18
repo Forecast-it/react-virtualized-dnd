@@ -8,7 +8,7 @@ class ExampleBoard extends Component {
 		super(props);
 		this.state = {
 			listData: [],
-			numItems: 65,
+			numItems: 100,
 			numColumns: 4
 		};
 		this.dragAndDropGroupName = 'exampleboard';

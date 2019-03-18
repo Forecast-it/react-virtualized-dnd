@@ -87,12 +87,13 @@ class DragDropContext extends Component {
 
 		var w = this.container.getBoundingClientRect().right - this.container.getBoundingClientRect().left;
 		var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
+
+		// Subtract distance to container box
 		const yDistanceFromContainerTop = y - this.container.getBoundingClientRect().top;
+		const xDistanceFromContainerLeft = x - this.container.getBoundingClientRect().left;
 		// Scroll when within 10% of edge or min 25px
 		const scrollThreshold = Math.max(h * 0.1, 25);
-		console.log(h, y, h - y, scrollThreshold);
-
-		if (w - x < scrollThreshold) {
+		if (w - xDistanceFromContainerLeft < scrollThreshold) {
 			// Scroll right
 			if (this.outerScrollBar) {
 				this.setState({
@@ -100,7 +101,7 @@ class DragDropContext extends Component {
 					scrollXRight: true
 				});
 			}
-		} else if (x < scrollThreshold) {
+		} else if (xDistanceFromContainerLeft < scrollThreshold) {
 			// Scroll left
 			if (this.outerScrollBar) {
 				this.setState({
