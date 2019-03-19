@@ -63,6 +63,8 @@
 		"dist"
 	],
 	"dependencies": {
-		"react-custom-scrollbars": "^4.2.1"
-	}
+		"react-custom-scrollbars": "^4.2.1",
+		"rebound": "^0.1.0"
+	},
+	"style": "styles.css"
 }

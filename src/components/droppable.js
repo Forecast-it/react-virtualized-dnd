@@ -38,6 +38,30 @@ class Droppable extends Component {
 		unsubscribe(this.state.dragAndDropGroup.scrollEvent, this.onScrollChange);
 	}
 
+	getScrollTop() {
+		if (this.scrollBars) {
+			return this.scrollBars.getScrollTop();
+		}
+	}
+
+	animateScrollTop(val) {
+		if (this.scrollBars) {
+			this.scrollBars.animateScrollTop(val);
+		}
+	}
+
+	scrollTop(val) {
+		if (this.scrollBars) {
+			this.scrollBars.scrollTop(val);
+		}
+	}
+
+	getScrollHeight() {
+		if (this.scrollBars) {
+			return this.scrollBars.getScrollHeight();
+		}
+	}
+
 	onDragEnd(draggedElem) {
 		this.setState({currentlyActiveDraggable: null});
 	}

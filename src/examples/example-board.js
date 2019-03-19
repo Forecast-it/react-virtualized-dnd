@@ -12,6 +12,7 @@ class ExampleBoard extends Component {
 			numColumns: 4
 		};
 		this.dragAndDropGroupName = 'exampleboard';
+		this.droppables = [];
 	}
 
 	componentDidMount() {
@@ -78,6 +79,12 @@ class ExampleBoard extends Component {
 		this.setState({numColumns: Number(e.target.value)});
 	}
 
+	scroll(ref) {
+		if (ref) {
+			ref.animateScrollTop(ref.getScrollTop() + 200);
+		}
+	}
+
 	onDragEnd(source, destinationId, placeholderId) {
 		const listToRemoveFrom = this.state.listData.find(list => list.name.includes(source.droppableId));
 		const listToAddTo = this.state.listData.find(list => list.name.includes(destinationId));
@@ -121,9 +128,18 @@ class ExampleBoard extends Component {
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
-								<Droppable containerHeight={500} dragAndDropGroup={this.dragAndDropGroupName} droppableId={elem.droppableId} key={elem.droppableId}>
+								<Droppable
+									ref={div => this.droppables.push(div)}
+									containerHeight={500}
+									dragAndDropGroup={this.dragAndDropGroupName}
+									droppableId={elem.droppableId}
+									key={elem.droppableId}
+								>
 									{elem.items}
 								</Droppable>
+								<button className={'scroll-button'} onClick={() => this.scroll(this.droppables[index])}>
+									Scroll
+								</button>
 							</div>
 						))}
 					</div>

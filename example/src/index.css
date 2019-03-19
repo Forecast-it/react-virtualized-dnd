@@ -1,5 +1,20 @@
 body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
+	margin: 0;
+	padding: 0;
+	font-family: sans-serif;
+}
+
+.scroll-button {
+	width: 95%;
+	height: 30px;
+	text-transform: uppercase;
+	border: 1px solid #e6e6e6;
+	background: white;
+	color: grey;
+	margin: 2.5%;
+	cursor: pointer;
+}
+.scroll-button:hover {
+	border-color: grey;
+	color: black;
 }

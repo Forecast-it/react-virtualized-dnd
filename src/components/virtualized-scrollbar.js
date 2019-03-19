@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import {Scrollbars} from 'react-custom-scrollbars';
+//import {SpringSystem} from 'rebound';
+import Rebound from 'rebound';
 
 class VirtualizedScrollBar extends Component {
 	constructor(props) {
@@ -14,6 +16,26 @@ class VirtualizedScrollBar extends Component {
 			unrenderedAbove: 0
 		};
 		this.stickyElems = null;
+	}
+
+	componentDidMount() {
+		this.springSystem = new Rebound.SpringSystem();
+		this.spring = this.springSystem.createSpring();
+		this.spring.setOvershootClampingEnabled(true);
+		this.spring.addListener({onSpringUpdate: this.handleSpringUpdate.bind(this)});
+	}
+
+	componentWillUnmount() {
+		this.springSystem.deregisterSpring(this.spring);
+		this.springSystem.removeAllListeners();
+		this.springSystem = undefined;
+		this.spring.destroy();
+		this.spring = undefined;
+	}
+
+	handleSpringUpdate(spring) {
+		const val = spring.getCurrentValue();
+		this.scrollBars.scrollTop(val);
 	}
 
 	// If we use static row height, we can optimizie by finding the first element to render, and rendering (containersize + overScan / index * height) elems after the first.
@@ -92,6 +114,13 @@ class VirtualizedScrollBar extends Component {
 		if (this.state.scrollOffset !== scrollOffset) {
 			this.setState({scrollOffset: scrollOffset});
 		}
+	}
+
+	// Animated scroll to top
+	animateScrollTop(top) {
+		const scrollTop = this.scrollBars.getScrollTop();
+		this.spring.setCurrentValue(scrollTop).setAtRest();
+		this.spring.setEndValue(top);
 	}
 
 	// Get height of virtualized scroll container
