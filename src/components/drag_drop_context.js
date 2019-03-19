@@ -85,15 +85,18 @@ class DragDropContext extends Component {
 			});
 		}
 
-		var w = this.container.getBoundingClientRect().right - this.container.getBoundingClientRect().left;
 		var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
 
-		// Subtract distance to container box
-		const yDistanceFromContainerTop = y - this.container.getBoundingClientRect().top;
-		const xDistanceFromContainerLeft = x - this.container.getBoundingClientRect().left;
-		// Scroll when within 10% of edge or min 25px
-		const scrollThreshold = Math.max(h * 0.1, 25);
-		if (w - xDistanceFromContainerLeft < scrollThreshold) {
+		// Scroll when within 10% of edge or min 50px
+		const scrollThreshold = Math.max(h * 0.1, 80);
+
+		const isNearYBottom = this.container.getBoundingClientRect().bottom - y <= scrollThreshold;
+		const isNearYTop = y - this.container.getBoundingClientRect().top <= scrollThreshold;
+
+		const isNearXLeft = x - this.container.getBoundingClientRect().left <= scrollThreshold;
+		const isNearXRight = this.container.getBoundingClientRect().right - x <= scrollThreshold;
+
+		if (isNearXRight) {
 			// Scroll right
 			if (this.outerScrollBar) {
 				this.setState({
@@ -101,7 +104,7 @@ class DragDropContext extends Component {
 					scrollXRight: true
 				});
 			}
-		} else if (xDistanceFromContainerLeft < scrollThreshold) {
+		} else if (isNearXLeft) {
 			// Scroll left
 			if (this.outerScrollBar) {
 				this.setState({
@@ -114,19 +117,19 @@ class DragDropContext extends Component {
 				shouldScrollX: false
 			});
 		}
-		if (h - yDistanceFromContainerTop <= scrollThreshold) {
-			//Scroll down
+		if (isNearYBottom) {
+			//Scroll down the page, increase y values
 			if (this.state.droppableActive) {
 				this.setState({
 					shouldScrollY: true,
-					scrollYUp: true
+					increaseYScroll: true
 				});
 			}
-		} else if (yDistanceFromContainerTop - this.container.getBoundingClientRect().top <= scrollThreshold) {
+		} else if (isNearYTop) {
 			//Scroll up
 			if (this.state.droppableActive) {
 				this.setState(prevState => {
-					return {shouldScrollY: true, scrollYUp: false};
+					return {shouldScrollY: true, increaseYScroll: false};
 				});
 			}
 		} else {
@@ -144,7 +147,14 @@ class DragDropContext extends Component {
 
 	autoScroll(x, y) {
 		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
-			if (this.state.shouldScrollX && this.outerScrollBar) {
+			if (this.state.shouldScrollY) {
+				if (this.state.increaseYScroll) {
+					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, 15);
+				} else {
+					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, -15);
+				}
+				requestAnimationFrame(() => this.autoScroll(x, y));
+			} else if (this.state.shouldScrollX && this.outerScrollBar) {
 				if (this.state.scrollXRight) {
 					// Stop scroll if we're within 10px of the edge
 					if (this.outerScrollBar && this.outerScrollBar.getScrollLeft() + 10 >= this.outerScrollBar.getScrollWidth()) {
@@ -158,13 +168,6 @@ class DragDropContext extends Component {
 						return;
 					}
 					this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() - 10);
-				}
-				requestAnimationFrame(() => this.autoScroll(x, y));
-			} else if (this.state.shouldScrollY) {
-				if (this.state.scrollYUp) {
-					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, 15);
-				} else {
-					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, -15);
 				}
 				requestAnimationFrame(() => this.autoScroll(x, y));
 			} else {
