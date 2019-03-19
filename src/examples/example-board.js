@@ -9,7 +9,7 @@ class ExampleBoard extends Component {
 		this.state = {
 			listData: [],
 			numItems: 100,
-			numColumns: 4
+			numColumns: 6
 		};
 		this.dragAndDropGroupName = 'exampleboard';
 		this.droppables = [];
@@ -85,6 +85,10 @@ class ExampleBoard extends Component {
 		}
 	}
 
+	sideScroll(val) {
+		this.dragDropContext.sideScroll(this.dragDropContext.getSideScroll() + val);
+	}
+
 	onDragEnd(source, destinationId, placeholderId) {
 		const listToRemoveFrom = this.state.listData.find(list => list.name.includes(source.droppableId));
 		const listToAddTo = this.state.listData.find(list => list.name.includes(destinationId));
@@ -115,7 +119,15 @@ class ExampleBoard extends Component {
 		const elemsToRender = this.getElemsToRender(this.state.listData);
 		return (
 			<div className="example-board">
-				<h1>Example Board</h1>
+				<div className={'title-and-controls'}>
+					<div className={'title'}>
+						<h1>Example Board</h1>
+					</div>
+					<div className={'controls'}>
+						<div title={'Sidescroll Backwards'} className={'backwards'} onClick={this.sideScroll.bind(this, -50)} />
+						<div itle={'Sidescroll Forwards'} className={'forwards'} onClick={this.sideScroll.bind(this, 50)} />
+					</div>
+				</div>
 				<div className={'input-section'} style={{display: 'flex'}}>
 					<p>Items per column</p>
 					<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numItems} onChange={this.handleInputChange.bind(this)} />
@@ -124,7 +136,7 @@ class ExampleBoard extends Component {
 					<p>Number of columns</p>
 					<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numColumns} onChange={this.handleColumnInputChange.bind(this)} />
 				</div>
-				<DragDropContext dragAndDropGroup={this.dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
+				<DragDropContext ref={div => (this.dragDropContext = div)} dragAndDropGroup={this.dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>

@@ -145,6 +145,18 @@ class DragDropContext extends Component {
 		}
 	}
 
+	sideScroll(val) {
+		if (this.outerScrollBar) {
+			this.outerScrollBar.scrollLeft(val);
+		}
+	}
+
+	getSideScroll() {
+		if (this.outerScrollBar) {
+			return this.outerScrollBar.getScrollLeft();
+		}
+	}
+
 	autoScroll(x, y) {
 		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
 			if (this.state.shouldScrollY) {
