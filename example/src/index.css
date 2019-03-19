@@ -28,7 +28,7 @@ body {
 }
 .backwards,
 .forwards {
-	margin-top: 32px;
+	margin-top: 30px;
 	margin-left: 24px;
 	cursor: pointer;
 }
