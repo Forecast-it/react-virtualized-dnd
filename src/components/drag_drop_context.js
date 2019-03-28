@@ -159,6 +159,15 @@ class DragDropContext extends Component {
 
 	autoScroll(x, y) {
 		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
+			const screenBottom = 0;
+			const screenTop = window.innerHeight;
+			if (screenTop - y <= 80) {
+				this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() + 15);
+				//requestAnimationFrame(() => this.autoScroll(x, y));
+			} else if (x - screenBottom <= 50) {
+				this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() - 15);
+				//requestAnimationFrame(() => this.autoScroll(x, y));
+			}
 			if (this.state.shouldScrollY) {
 				if (this.state.increaseYScroll) {
 					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, 15);
@@ -195,7 +204,7 @@ class DragDropContext extends Component {
 	render() {
 		return this.props.horizontalScroll ? (
 			<div ref={div => (this.container = div)} className={'drag-drop-context'}>
-				<Scrollbars ref={scrollDiv => (this.outerScrollBar = scrollDiv)} autoHeight={true} autoHeightMin={1} autoHeightMax={2500}>
+				<Scrollbars ref={scrollDiv => (this.outerScrollBar = scrollDiv)} autoHeight={true} autoHeightMin={1} autoHeightMax={9999}>
 					{this.props.children}
 				</Scrollbars>
 			</div>

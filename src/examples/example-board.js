@@ -142,7 +142,7 @@ class ExampleBoard extends Component {
 							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 								<Droppable
 									ref={div => this.droppables.push(div)}
-									containerHeight={500}
+									containerHeight={1000}
 									dragAndDropGroup={this.dragAndDropGroupName}
 									droppableId={elem.droppableId}
 									key={elem.droppableId}
