@@ -110,7 +110,7 @@ class Draggable extends Component {
 			wasClicked: false
 		});
 		if (!this.pointerSupport) {
-			document.removeEventListener('mousemove', this.onPointerMove);
+			document.removeEventListener('mousemove', this.onPointerMove, true);
 		}
 	}
 	onPointerCancel() {
@@ -136,6 +136,7 @@ class Draggable extends Component {
 	}
 
 	onPointerMove(e) {
+		console.log('OnPointerMove Called');
 		e.preventDefault();
 		e.stopPropagation();
 		if (this.props.disableDrag || !this.state.wasClicked) {
@@ -148,6 +149,7 @@ class Draggable extends Component {
 				}
 				let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
 				let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
+				console.log(draggableHoveringOver);
 				const newLeft = x - this.state.xClickOffset;
 				const newTop = y - this.state.yClickOffset;
 				const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
@@ -194,7 +196,7 @@ class Draggable extends Component {
 			};
 			const x = e.clientX;
 			const y = e.clientY;
-			this.setPointerCapture();
+			if (this.pointerSupport) this.setPointerCapture();
 			requestAnimationFrame(() => moveCard(x, y));
 		} else {
 			this.onPointerCancel();
@@ -313,7 +315,7 @@ class Draggable extends Component {
 			onPointerCancel: e => (this.pointerSupport ? this.onPointerCancel(e) : null),
 			onMouseDown: e => (!this.pointerSupport ? this.onPointerDown(e) : null),
 			onMouseUp: e => (!this.pointerSupport ? this.onPointerUp(e) : null),
-			onLostPointerCapture: e => this.handlePointerCaptureLoss(e),
+			onLostPointerCapture: e => (this.pointerSupport ? this.handlePointerCaptureLoss(e) : null),
 			tabIndex: '0',
 			ref: div => (this.draggable = div),
 			'aria-grabbed': true,
