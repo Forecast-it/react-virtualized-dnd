@@ -89,12 +89,22 @@ class DragDropContext extends Component {
 
 		// Scroll when within 10% of edge or min 50px
 		const scrollThreshold = Math.max(h * 0.1, 80);
+		const screenPosition = {
+			bottom: 0 + this.outerScrollBar.getScrollTop(),
+			top: window.innerHeight + this.outerScrollBar.getScrollTop()
+		};
+		const boundaries = {
+			left: this.container.getBoundingClientRect().left,
+			right: this.container.getBoundingClientRect().right,
+			top: Math.max(this.container.getBoundingClientRect().top, screenPosition.bottom),
+			bottom: Math.min(this.container.getBoundingClientRect().bottom, screenPosition.top)
+		};
 
-		const isNearYBottom = this.container.getBoundingClientRect().bottom - y <= scrollThreshold;
-		const isNearYTop = y - this.container.getBoundingClientRect().top <= scrollThreshold;
+		const isNearYBottom = boundaries.bottom - y <= scrollThreshold;
+		const isNearYTop = y - boundaries.top <= scrollThreshold;
 
-		const isNearXLeft = x - this.container.getBoundingClientRect().left <= scrollThreshold;
-		const isNearXRight = this.container.getBoundingClientRect().right - x <= scrollThreshold;
+		const isNearXLeft = x - boundaries.left <= scrollThreshold;
+		const isNearXRight = boundaries.right - x <= scrollThreshold;
 
 		if (isNearXRight) {
 			// Scroll right
@@ -202,7 +212,7 @@ class DragDropContext extends Component {
 	}
 
 	render() {
-		return this.props.horizontalScroll ? (
+		return this.props.outerScrollBar ? (
 			<div ref={div => (this.container = div)} className={'drag-drop-context'}>
 				<Scrollbars ref={scrollDiv => (this.outerScrollBar = scrollDiv)} autoHeight={true} autoHeightMin={1} autoHeightMax={9999}>
 					{this.props.children}

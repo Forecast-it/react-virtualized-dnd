@@ -136,13 +136,13 @@ class ExampleBoard extends Component {
 					<p>Number of columns</p>
 					<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numColumns} onChange={this.handleColumnInputChange.bind(this)} />
 				</div>
-				<DragDropContext ref={div => (this.dragDropContext = div)} dragAndDropGroup={this.dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
+				<DragDropContext ref={div => (this.dragDropContext = div)} dragAndDropGroup={this.dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} outerScrollBar={true}>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 								<Droppable
 									ref={div => this.droppables.push(div)}
-									containerHeight={500}
+									containerHeight={1000}
 									dragAndDropGroup={this.dragAndDropGroupName}
 									droppableId={elem.droppableId}
 									key={elem.droppableId}

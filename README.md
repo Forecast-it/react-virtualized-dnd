@@ -85,12 +85,12 @@ class Example extends Component {
 
 #### Props
 
-| **Prop**         | **Type** | **Required** | **Description**                                                |
-| ---------------- | -------- | ------------ | -------------------------------------------------------------- |
-| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |
-| horizontalScroll | boolean  | no           | Enables or disables horizontal scrolling of the context        |
-| onDragEnd        | function | no           | Function fired on drag end.                                    |
-| onDragStart      | function | no           | Function fired on drag start.                                  |
+| **Prop**         | **Type** | **Required** | **Description**                                                                   |
+| ---------------- | -------- | ------------ | --------------------------------------------------------------------------------- |
+| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses                    |
+| outerScrollBar   | boolean  | no           | Enables or disables global outer scrolling of the context (triggered by dragging) |
+| onDragEnd        | function | no           | Function fired on drag end.                                                       |
+| onDragStart      | function | no           | Function fired on drag start.                                                     |
 
 ### Draggable
 
