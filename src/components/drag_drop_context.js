@@ -61,7 +61,8 @@ class DragDropContext extends Component {
 
 	onDragEnd() {
 		if (this.props.onDragEnd && this.state.draggedElem && this.state.droppableActive) {
-			this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, this.state.placeholder);
+			const placeholder = this.state.placeholder != null ? this.state.placeholder : 'END_OF_LIST';
+			this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder);
 		}
 		this.setState({
 			draggedElem: null,

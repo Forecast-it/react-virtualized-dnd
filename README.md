@@ -83,6 +83,8 @@ class Example extends Component {
 | onDragStart      | function | no           | Function fired on drag start. Returns the draggableId of the dragged element.                                               |
 | dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses                                                              |
 
+The placeholder ID can be used to determine where to place the dragged element on drag end. The placeholderID returns the string "END_OF_LIST" if dragged below the last element of a droppable.
+
 #### Props
 
 | **Prop**         | **Type** | **Required** | **Description**                                                                   |
