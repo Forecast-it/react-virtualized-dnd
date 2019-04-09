@@ -89,9 +89,10 @@ class DragDropContext extends Component {
 
 		// Scroll when within 10% of edge or min 50px
 		const scrollThreshold = Math.max(h * 0.1, 80);
+		const scrollOffsetY = this.outerScrollBar ? this.outerScrollBar.getScrollTop() : 0;
 		const screenPosition = {
-			bottom: 0 + this.outerScrollBar.getScrollTop(),
-			top: window.innerHeight + this.outerScrollBar.getScrollTop()
+			bottom: 0 + scrollOffsetY,
+			top: window.innerHeight + scrollOffsetY
 		};
 		const boundaries = {
 			left: this.container.getBoundingClientRect().left,
@@ -168,7 +169,7 @@ class DragDropContext extends Component {
 	}
 
 	autoScroll(x, y) {
-		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
+		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive && this.outerScrollBar) {
 			const screenBottom = 0;
 			const screenTop = window.innerHeight;
 			if (screenTop - y <= 80) {

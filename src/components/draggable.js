@@ -136,7 +136,6 @@ class Draggable extends Component {
 	}
 
 	onPointerMove(e) {
-		console.log('OnPointerMove Called');
 		e.preventDefault();
 		e.stopPropagation();
 		if (this.props.disableDrag || !this.state.wasClicked) {
@@ -149,7 +148,6 @@ class Draggable extends Component {
 				}
 				let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
 				let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
-				console.log(draggableHoveringOver);
 				const newLeft = x - this.state.xClickOffset;
 				const newTop = y - this.state.yClickOffset;
 				const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
