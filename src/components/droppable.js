@@ -167,10 +167,11 @@ class Droppable extends Component {
 			);
 			listToRender = childrenWithProps;
 		}
-		const rowsTotalHeight = listToRender.length * (this.props.rowHeight ? this.props.rowHeight : 50);
+		const rowHeight = this.props.rowHeight ? this.props.rowHeight : 50;
+		const rowsTotalHeight = listToRender.length * rowHeight;
 		const shouldScroll = this.props.containerHeight < rowsTotalHeight;
 		// Always at least one rowheight larger during drag, to allow DnD on empty lists/below small lists
-		const containerHeight = shouldScroll ? this.props.containerHeight : rowsTotalHeight + (this.state.droppableActive ? this.props.rowHeight : 0);
+		const containerHeight = shouldScroll ? this.props.containerHeight : rowsTotalHeight + rowHeight;
 
 		const draggedElemId = this.state.currentlyActiveDraggable ? this.state.currentlyActiveDraggable.draggableId : null;
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
