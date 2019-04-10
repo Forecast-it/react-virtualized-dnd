@@ -109,13 +109,16 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 
 #### Props
 
-| **Prop**         | **Type** | **Required** | **Description**                                                  |
-| ---------------- | -------- | ------------ | ---------------------------------------------------------------- |
-| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses   |
-| droppableId      | string   | yes          | Unique identifier for the droppable                              |
-| containerHeight  | number   | yes          | Height for the virtualizing scroll container                     |
-| rowHeight        | number   | no           | Height of each row _with_ borders. Default is 50px.              |
-| disableScroll    | boolean  | no           | Flag to disable scrollbars. This disables virtualization as well |
+| **Prop**          | **Type**     | **Required**             | **Description**                                                                      |
+| ----------------- | ------------ | ------------------------ | ------------------------------------------------------------------------------------ |
+| dragAndDropGroup  | string       | yes                      | Unique identifier for the drag and drop group the context uses                       |
+| droppableId       | string       | yes                      | Unique identifier for the droppable                                                  |
+| containerHeight   | number       | yes                      | Height of the virtualizing scroll container                                          |
+| rowHeight         | number       | no                       | Height of each row _with_ borders. Default is 50px.                                  |
+| disableScroll     | boolean      | no                       | Flag to disable scrollbars. This disables virtualization as well                     |
+| listHeader        | HTML element | no                       | Element to use as header for a droppable list, to react to drops on top of the list. |
+| listHeaderHeight  | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                            |
+| activeHeaderClass | string       | no                       | CSS class added to the header when an active drag is hovering over the list header   |
 
 ## Author
 
