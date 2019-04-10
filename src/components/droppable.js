@@ -171,13 +171,22 @@ class Droppable extends Component {
 		const rowsTotalHeight = listToRender.length * rowHeight;
 		const shouldScroll = this.props.containerHeight < rowsTotalHeight;
 		// Always at least one rowheight larger during drag, to allow DnD on empty lists/below small lists
-		const containerHeight = shouldScroll ? this.props.containerHeight : rowsTotalHeight + rowHeight;
+		const outerContainerHeight = (shouldScroll ? this.props.containerHeight : rowsTotalHeight + rowHeight) + (this.props.listHeader != null ? this.props.listHeaderHeight : 0);
 
 		const draggedElemId = this.state.currentlyActiveDraggable ? this.state.currentlyActiveDraggable.draggableId : null;
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
+		const headerWithProps =
+			this.props.listHeader != null && this.props.listHeaderHeight != null
+				? React.cloneElement(this.props.listHeader, {
+						draggableid: this.props.droppableId + '-header'
+				  })
+				: null;
+		const isActive = this.state.droppableActive && this.state.droppableActive === this.props.droppableId;
+		const headerActive = isActive && this.state.placeholder && this.state.placeholder.includes('header');
 
 		return (
-			<CustomTag {...propsObject} style={{height: containerHeight, minHeight: containerHeight, maxHeight: containerHeight}}>
+			<CustomTag {...propsObject} style={{height: outerContainerHeight, minHeight: outerContainerHeight, maxHeight: outerContainerHeight}}>
+				<div className={'header-wrapper ' + (headerActive ? this.props.activeHeaderClass : '')}>{headerWithProps}</div>
 				{shouldScroll && !this.props.disableScroll ? (
 					<VirtualizedScrollBar
 						stickyElems={draggedElemId ? [draggedElemId] : []}
@@ -185,12 +194,10 @@ class Droppable extends Component {
 						ref={scrollDiv => (this.scrollBars = scrollDiv)}
 						containerHeight={this.props.containerHeight}
 					>
-						{this.state.droppableActive && this.state.droppableActive === this.props.droppableId ? this.pushPlaceholder(listToRender) : listToRender}
+						{isActive ? this.pushPlaceholder(listToRender) : listToRender}
 					</VirtualizedScrollBar>
 				) : (
-					<div className={'no-scroll-container'}>
-						{this.state.droppableActive && this.state.droppableActive === this.props.droppableId ? this.pushPlaceholder(listToRender) : listToRender}
-					</div>
+					<div className={'no-scroll-container'}>{isActive ? this.pushPlaceholder(listToRender) : listToRender}</div>
 				)}
 			</CustomTag>
 		);

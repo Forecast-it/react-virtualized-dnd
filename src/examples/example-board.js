@@ -94,7 +94,7 @@ class ExampleBoard extends Component {
 		const listToAddTo = this.state.listData.find(list => list.name.includes(destinationId));
 		const elemToAdd = listToRemoveFrom.items.find(entry => entry.id === source.draggableId);
 		let indexToRemove = listToRemoveFrom.items.findIndex(item => item.id === source.draggableId);
-		let indexToInsert = placeholderId === 'END_OF_LIST' ? listToAddTo.items.findIndex(item => item.id === placeholderId) : listToAddTo.items.lenght - 1;
+		let indexToInsert = placeholderId === 'END_OF_LIST' ? listToAddTo.items.findIndex(item => item.id === placeholderId) : placeholderId.includes('header') ? 0 : listToAddTo.items.lenght - 1;
 		// Re-arrange within the same list
 		if (listToRemoveFrom.name === listToAddTo.name) {
 			if (indexToRemove === indexToInsert) {
@@ -117,6 +117,15 @@ class ExampleBoard extends Component {
 
 	render() {
 		const elemsToRender = this.getElemsToRender(this.state.listData);
+		const getListHeader = index => (
+			<div className={'list-header'} style={{height: 60}}>
+				<div className={'list-header-text'}>List {index}</div>
+				<button className={'scroll-button'} onClick={() => this.scroll(this.droppables[index])}>
+					Scroll
+				</button>
+			</div>
+		);
+
 		return (
 			<div className="example-board">
 				<div className={'title-and-controls'}>
@@ -128,11 +137,11 @@ class ExampleBoard extends Component {
 						<div itle={'Sidescroll Forwards'} className={'forwards'} onClick={this.sideScroll.bind(this, 50)} />
 					</div>
 				</div>
-				<div className={'input-section'} style={{display: 'flex'}}>
+				<div className={'input-section'}>
 					<p>Items per column</p>
 					<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numItems} onChange={this.handleInputChange.bind(this)} />
 				</div>
-				<div className={'input-section'} style={{display: 'flex'}}>
+				<div className={'input-section'}>
 					<p>Number of columns</p>
 					<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numColumns} onChange={this.handleColumnInputChange.bind(this)} />
 				</div>
@@ -141,6 +150,9 @@ class ExampleBoard extends Component {
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 								<Droppable
+									activeHeaderClass={'active'}
+									listHeader={getListHeader(index)}
+									listHeaderHeight={60}
 									ref={div => this.droppables.push(div)}
 									containerHeight={1000}
 									dragAndDropGroup={this.dragAndDropGroupName}
@@ -149,9 +161,6 @@ class ExampleBoard extends Component {
 								>
 									{elem.items}
 								</Droppable>
-								<button className={'scroll-button'} onClick={() => this.scroll(this.droppables[index])}>
-									Scroll
-								</button>
 							</div>
 						))}
 					</div>

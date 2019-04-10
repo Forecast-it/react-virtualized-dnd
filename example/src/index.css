@@ -7,13 +7,15 @@ body {
 	margin: 10px 0 0 10px;
 }
 .scroll-button {
-	width: 95%;
+	flex-grow: 0;
+	width: 120px;
 	height: 30px;
 	text-transform: uppercase;
 	border: 1px solid #e6e6e6;
 	background: white;
 	color: grey;
-	margin: 2.5%;
+	margin-top: 15px;
+	margin-right: 10px;
 	cursor: pointer;
 }
 .scroll-button:hover {
@@ -49,4 +51,28 @@ body {
 	background-position: center;
 	background-repeat: no-repeat;
 	transform: rotate(270deg);
+}
+.input-section {
+	display: flex;
+}
+.list-header {
+	display: flex;
+	flex-direction: row;
+	position: relative;
+	border-right: 1px solid white;
+}
+.list-header-text {
+	flex-grow: 1;
+	color: white;
+	font-weight: 600;
+	font-size: 16px;
+	text-align: left;
+	margin-top: 22px;
+	margin-left: 16px;
+}
+.header-wrapper {
+	background: #6e0fea;
+}
+.active {
+	transform: scale(1.1);
 }
