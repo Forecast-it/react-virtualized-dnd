@@ -56,9 +56,9 @@ class Draggable extends Component {
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
 			e.preventDefault();
 			e.stopPropagation();
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 			if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
-				const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-				dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 				this.droppableDraggedOver = null;
 				this.draggableHoveringOver = null;
 			}
@@ -138,14 +138,13 @@ class Draggable extends Component {
 	onPointerMove(e) {
 		e.preventDefault();
 		e.stopPropagation();
+
 		if (this.props.disableDrag || !this.state.wasClicked) {
 			return;
 		}
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
 			const moveCard = (x, y) => {
-				if (!this.state.wasClicked) {
-					return;
-				}
+				let hasDispatched = false;
 				let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
 				let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
 				const newLeft = x - this.state.xClickOffset;
@@ -157,15 +156,18 @@ class Draggable extends Component {
 				if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
+					hasDispatched = true;
 					return;
 				}
 				if (!droppableDraggedOver) {
 					dispatch(this.dragAndDropGroup.resetEvent);
+					hasDispatched = true;
 				}
 				const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
 				if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
 					dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
+					hasDispatched = true;
 				}
 				// We're hovering over a droppable and a draggable
 				if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
@@ -173,6 +175,7 @@ class Draggable extends Component {
 						if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('draggableid')) {
 							const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
 							dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver.getAttribute('droppableid'), draggableHoveringOver.getAttribute('draggableid'), x, y);
+							hasDispatched = true;
 							this.droppableDraggedOver = droppableDraggedOver;
 							this.draggableHoveringOver = draggableHoveringOver.getAttribute('draggableid');
 						}
@@ -183,6 +186,11 @@ class Draggable extends Component {
 					this.draggableHoveringOver = null;
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver.getAttribute('droppableid'), null, x, y);
+					hasDispatched = true;
+				}
+				if (!hasDispatched) {
+					// If nothing changed, we still wanna notify move for scrolling
+					dispatch(this.dragAndDropGroup.moveEvent, null, null, null, x, y);
 				}
 				this.setState({
 					isDragging: shouldRegisterAsDrag,
@@ -302,7 +310,7 @@ class Draggable extends Component {
 
 		const propsObject = {
 			'data-cy': 'draggable-' + this.props.draggableId,
-			className: 'draggable' + (active ? ' active' : ''),
+			className: 'draggable' + (active ? this.props.dragActiveClass : ''),
 			style: active ? {...draggingStyle} : {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.state.wasClicked ? 'move' : 'grab'},
 			key: this.props.draggableId,
 			draggableid: this.props.draggableId,

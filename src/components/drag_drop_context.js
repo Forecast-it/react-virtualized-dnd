@@ -75,85 +75,122 @@ class DragDropContext extends Component {
 			dragStarted: false
 		});
 	}
-
-	onDragMove(draggable, droppableId, draggableHoveredOverId, x, y) {
-		// Update if field is currently not set, and it is in nextstate, or if the two IDs differ.
-		const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
-		const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppableId : droppableId != null;
-		const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
-		if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder) {
-			this.setState({
-				draggedElem: draggable,
-				droppableActive: droppableId,
-				placeholder: draggableHoveredOverId
-			});
-		}
-
+	// When a card is moved, check for autoScroll
+	onMoveScroll(x, y) {
 		var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
-
 		// Scroll when within 10% of edge or min 50px
 		const scrollThreshold = Math.max(h * 0.1, 80);
-		const scrollOffsetY = this.outerScrollBar ? this.outerScrollBar.getScrollTop() : 0;
+
+		// Top = high y coordinates
 		const screenPosition = {
-			bottom: 0 + scrollOffsetY,
-			top: window.innerHeight + scrollOffsetY
+			bottom: 0,
+			top: window.innerHeight,
+			left: 0,
+			right: window.innerWidth
 		};
-		const boundaries = {
-			left: this.container.getBoundingClientRect().left,
-			right: this.container.getBoundingClientRect().right,
-			top: Math.max(this.container.getBoundingClientRect().top, screenPosition.bottom),
-			bottom: Math.min(this.container.getBoundingClientRect().bottom, screenPosition.top)
-		};
+		const isNearPageBottom = y != null && screenPosition.top - y <= scrollThreshold;
+		const isNearPageTop = y != null && y <= scrollThreshold;
+		const isNearPageLeft = x != null && x - screenPosition.left <= scrollThreshold;
+		const isNearPageRight = x != null && screenPosition.right - x <= scrollThreshold;
+		const shouldScrollGlobally = isNearPageBottom || isNearPageTop || isNearPageLeft || isNearPageRight;
 
-		const isNearYBottom = boundaries.bottom - y <= scrollThreshold;
-		const isNearYTop = y - boundaries.top <= scrollThreshold;
-
-		const isNearXLeft = x - boundaries.left <= scrollThreshold;
-		const isNearXRight = boundaries.right - x <= scrollThreshold;
-
-		if (isNearXRight) {
-			// Scroll right
+		// BEGIN GLOBAL SCROLLING //
+		if (shouldScrollGlobally) {
 			if (this.outerScrollBar) {
-				this.setState({
-					shouldScrollX: true,
-					scrollXRight: true
-				});
-			}
-		} else if (isNearXLeft) {
-			// Scroll left
-			if (this.outerScrollBar) {
-				this.setState({
-					shouldScrollX: true,
-					scrollXRight: false
-				});
+				if (isNearPageRight) {
+					// Scroll right
+					console.log('Global right trigger');
+					this.setState({
+						globalScroll: true,
+						globalScrollXDirection: 'right'
+					});
+				} else if (isNearPageLeft) {
+					// Scroll left
+					console.log('Global left trigger');
+					this.setState({
+						globalScroll: true,
+						globalScrollXDirection: 'left'
+					});
+				} else {
+					this.setState({
+						globalScrollXDirection: null
+					});
+				}
+
+				if (isNearPageBottom) {
+					console.log('Global down trigger');
+
+					this.setState({
+						globalScroll: true,
+						globalScrollYDirection: 'down'
+					});
+				} else if (isNearPageTop) {
+					console.log('Global up trigger');
+					this.setState({
+						globalScroll: true,
+						globalScrollYDirection: 'up'
+					});
+				} else {
+					this.setState({globalScrollYDirection: null});
+				}
+				if (!this.frame) {
+					this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
+				}
 			}
 		} else {
-			this.setState({
-				shouldScrollX: false
-			});
-		}
-		if (isNearYBottom) {
-			//Scroll down the page, increase y values
-			if (this.state.droppableActive) {
-				this.setState({
-					shouldScrollY: true,
-					increaseYScroll: true
-				});
+			// END GLOBAL SCROLLING //
+			const containerBoundaries = {
+				left: this.container.getBoundingClientRect().left,
+				right: this.container.getBoundingClientRect().right,
+				top: this.container.getBoundingClientRect().top,
+				bottom: this.container.getBoundingClientRect().bottom
+			};
+
+			// Dispatch to active droppable the coordinates, check if scroll down
+			return;
+
+			const isNearYBottom = containerBoundaries.bottom - y <= scrollThreshold;
+			const isNearYTop = y - containerBoundaries.top <= scrollThreshold;
+
+			if (isNearYBottom) {
+				//Scroll down the page, increase y values
+				if (this.state.droppableActive) {
+					this.setState({
+						shouldScrollY: true,
+						increaseYScroll: true
+					});
+				}
+			} else if (isNearYTop) {
+				//Scroll up
+				if (this.state.droppableActive) {
+					this.setState({shouldScrollY: true, increaseYScroll: false});
+				}
+			} else {
+				this.setState({shouldScrollY: false});
 			}
-		} else if (isNearYTop) {
-			//Scroll up
-			if (this.state.droppableActive) {
-				this.setState(prevState => {
-					return {shouldScrollY: true, increaseYScroll: false};
-				});
+			if (!this.frame) {
+				this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
 			}
-		} else {
-			this.setState({shouldScrollY: false});
-		}
-		if (!this.frame) {
-			this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
 		}
 	}
+
+	onDragMove(draggable, droppableId, draggableHoveredOverId, x, y) {
+		if (draggable && droppableId) {
+			const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
+			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppableId : droppableId != null;
+			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
+			// Update if field is currently not set, and it is in nextstate, or if the two IDs differ.
+			if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder) {
+				this.setState({
+					draggedElem: draggable,
+					droppableActive: droppableId,
+					placeholder: draggableHoveredOverId
+				});
+			}
+		}
+		this.onMoveScroll(x, y);
+	}
+
 	resetPlaceholderIndex() {
 		if (this.state.placeholder != null || this.state.droppableActive != null) {
 			this.setState({placeholder: null, droppableActive: null});
@@ -173,37 +210,42 @@ class DragDropContext extends Component {
 	}
 
 	autoScroll(x, y) {
-		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive && this.outerScrollBar) {
-			const screenBottom = 0;
-			const screenTop = window.innerHeight;
-			if (screenTop - y <= 80) {
-				this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() + 15);
-				//requestAnimationFrame(() => this.autoScroll(x, y));
-			} else if (x - screenBottom <= 50) {
-				this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() - 15);
-				//requestAnimationFrame(() => this.autoScroll(x, y));
-			}
-			if (this.state.shouldScrollY) {
+		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
+			if (this.state.globalScroll && this.outerScrollBar) {
+				switch (this.state.globalScrollYDirection) {
+					case 'down':
+						if (this.outerScrollBar.getScrollTop() < this.outerScrollBar.getScrollHeight()) {
+							this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() + 10);
+						}
+						break;
+					case 'up':
+						if (this.outerScrollBar.getScrollTop() > 0) {
+							this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() - 10);
+						}
+						break;
+					default:
+						break;
+				}
+				switch (this.state.globalScrollXDirection) {
+					case 'right':
+						if (this.outerScrollBar.getScrollLeft() < this.outerScrollBar.getScrollWidth()) {
+							this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() + 10);
+						}
+						break;
+					case 'left':
+						if (this.outerScrollBar.getScrollLeft() > 0) {
+							this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() - 10);
+						}
+						break;
+					default:
+						break;
+				}
+				requestAnimationFrame(() => this.autoScroll(x, y));
+			} else if (this.state.shouldScrollY) {
 				if (this.state.increaseYScroll) {
 					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, 15);
 				} else {
 					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, -15);
-				}
-				requestAnimationFrame(() => this.autoScroll(x, y));
-			} else if (this.state.shouldScrollX && this.outerScrollBar) {
-				if (this.state.scrollXRight) {
-					// Stop scroll if we're within 10px of the edge
-					if (this.outerScrollBar && this.outerScrollBar.getScrollLeft() + 10 >= this.outerScrollBar.getScrollWidth()) {
-						this.frame = null;
-						return;
-					}
-					this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() + 10);
-				} else {
-					if (this.outerScrollBar && this.outerScrollBar.getScrollLeft() <= 0) {
-						this.frame = null;
-						return;
-					}
-					this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() - 10);
 				}
 				requestAnimationFrame(() => this.autoScroll(x, y));
 			} else {

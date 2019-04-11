@@ -6,7 +6,12 @@ body {
 .example-board {
 	margin: 10px 0 0 10px;
 }
-.scroll-button {
+.row-splitter {
+	margin-top: 10px;
+	margin-left: 10px;
+}
+.scroll-button,
+.row-split-button {
 	flex-grow: 0;
 	width: 120px;
 	height: 30px;
@@ -17,6 +22,11 @@ body {
 	margin-top: 15px;
 	margin-right: 10px;
 	cursor: pointer;
+	outline: none;
+}
+.active {
+	background-color: #6e0fea;
+	color: white;
 }
 .scroll-button:hover {
 	border-color: grey;

@@ -115,6 +115,12 @@ class ExampleBoard extends Component {
 		this.setState({testData: newData});
 	}
 
+	toggleSplit() {
+		this.setState(prevState => {
+			return {split: !prevState.split};
+		});
+	}
+
 	render() {
 		const elemsToRender = this.getElemsToRender(this.state.listData);
 		const getListHeader = index => (
@@ -144,6 +150,11 @@ class ExampleBoard extends Component {
 							<div title={'Sidescroll Backwards'} className={'backwards'} onClick={this.sideScroll.bind(this, -50)} />
 							<div itle={'Sidescroll Forwards'} className={'forwards'} onClick={this.sideScroll.bind(this, 50)} />
 						</div>
+						<div className={'row-splitter'}>
+							<button className={'row-split-button' + (this.state.split ? ' active' : '')} onClick={this.toggleSplit.bind(this)}>
+								MultiRow
+							</button>
+						</div>
 					</div>
 					<div className={'input-section'}>
 						<p>Items per column</p>
@@ -154,23 +165,47 @@ class ExampleBoard extends Component {
 						<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numColumns} onChange={this.handleColumnInputChange.bind(this)} />
 					</div>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
-						{elemsToRender.map((elem, index) => (
-							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
-								<Droppable
-									activeHeaderClass={'header-active'}
-									listHeader={getListHeader(index)}
-									listHeaderHeight={60}
-									ref={div => this.droppables.push(div)}
-									containerHeight={400}
-									dragAndDropGroup={this.dragAndDropGroupName}
-									droppableId={elem.droppableId}
-									key={elem.droppableId}
-								>
-									{elem.items}
-								</Droppable>
-							</div>
-						))}
+						{elemsToRender.map((elem, index) =>
+							!this.state.split || index < elemsToRender.length / 2 ? (
+								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
+									<Droppable
+										activeHeaderClass={'header-active'}
+										listHeader={getListHeader(index)}
+										listHeaderHeight={60}
+										ref={div => this.droppables.push(div)}
+										containerHeight={500}
+										dragAndDropGroup={this.dragAndDropGroupName}
+										droppableId={elem.droppableId}
+										key={elem.droppableId}
+									>
+										{elem.items}
+									</Droppable>
+								</div>
+							) : null
+						)}
 					</div>
+					{this.state.split ? (
+						<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
+							{elemsToRender.map((elem, index) =>
+								index >= elemsToRender.length / 2 ? (
+									<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
+										<Droppable
+											activeHeaderClass={'header-active'}
+											listHeader={getListHeader(index)}
+											listHeaderHeight={60}
+											ref={div => this.droppables.push(div)}
+											containerHeight={500}
+											dragAndDropGroup={this.dragAndDropGroupName}
+											droppableId={elem.droppableId}
+											key={elem.droppableId}
+										>
+											{elem.items}
+										</Droppable>
+									</div>
+								) : null
+							)}
+						</div>
+					) : null}
 				</DragDropContext>
 			</div>
 		);
