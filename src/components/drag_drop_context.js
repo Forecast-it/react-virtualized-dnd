@@ -3,6 +3,9 @@ import {dispatch, subscribe, unsubscribe} from '../util/event_manager';
 import {Scrollbars} from 'react-custom-scrollbars';
 import Util from './../util/util';
 
+const SCROLLTYPE = {GLOBAL: 'global', COLUMN: 'column'};
+const SCROLL_DIRECTION = {LEFT: 'left', RIGHT: 'RIGHT', UP: 'UP', DOWN: 'DOWN'};
+
 class DragDropContext extends Component {
 	constructor(props) {
 		super(props);
@@ -215,8 +218,8 @@ class DragDropContext extends Component {
 
 	render() {
 		return this.props.outerScrollBar ? (
-			<div ref={div => (this.container = div)} className={'drag-drop-context'}>
-				<Scrollbars ref={scrollDiv => (this.outerScrollBar = scrollDiv)} autoHeight={true} autoHeightMin={1} autoHeightMax={9999}>
+			<div ref={div => (this.container = div)} className={'drag-drop-context'} style={{display: 'flex', flexDirection: 'column'}}>
+				<Scrollbars ref={scrollDiv => (this.outerScrollBar = scrollDiv)} autoHeight={true} autoHeightMin={1} autoHeightMax={this.props.height}>
 					{this.props.children}
 				</Scrollbars>
 			</div>

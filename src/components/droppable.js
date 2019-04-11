@@ -185,7 +185,7 @@ class Droppable extends Component {
 		const headerActive = isActive && this.state.placeholder && this.state.placeholder.includes('header');
 
 		return (
-			<CustomTag {...propsObject} style={{height: outerContainerHeight, minHeight: outerContainerHeight, maxHeight: outerContainerHeight}}>
+			<CustomTag {...propsObject} style={{height: outerContainerHeight, minHeight: outerContainerHeight, maxHeight: outerContainerHeight, overflow: 'hidden'}}>
 				<div className={'header-wrapper ' + (headerActive ? this.props.activeHeaderClass : '')}>{headerWithProps}</div>
 				{shouldScroll && !this.props.disableScroll ? (
 					<VirtualizedScrollBar

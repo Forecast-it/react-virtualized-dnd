@@ -154,7 +154,13 @@ class VirtualizedScrollBar extends Component {
 			listToRender.push(this.stickyElems[0]);
 		}
 		return (
-			<Scrollbars onScroll={this.handleScroll.bind(this)} ref={div => (this.scrollBars = div)} autoHeight={false} autoHeightMax={500} autoHeightMin={500}>
+			<Scrollbars
+				onScroll={this.handleScroll.bind(this)}
+				ref={div => (this.scrollBars = div)}
+				autoHeight={true}
+				autoHeightMax={this.props.containerHeight}
+				autoHeightMin={this.props.containerHeight}
+			>
 				<div
 					className={'virtualized-scrollbar-inner'}
 					style={{

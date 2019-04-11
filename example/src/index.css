@@ -52,6 +52,9 @@ body {
 	background-repeat: no-repeat;
 	transform: rotate(270deg);
 }
+.test-container {
+	margin-bottom: 36px;
+}
 .input-section {
 	display: flex;
 }

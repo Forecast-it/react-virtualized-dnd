@@ -128,24 +128,31 @@ class ExampleBoard extends Component {
 
 		return (
 			<div className="example-board">
-				<div className={'title-and-controls'}>
-					<div className={'title'}>
-						<h1>Example Board</h1>
+				<DragDropContext
+					ref={div => (this.dragDropContext = div)}
+					// 10px margin around page
+					height={window.innerHeight - 10}
+					dragAndDropGroup={this.dragAndDropGroupName}
+					onDragEnd={this.onDragEnd.bind(this)}
+					outerScrollBar={true}
+				>
+					<div className={'title-and-controls'}>
+						<div className={'title'}>
+							<h1>Example Board</h1>
+						</div>
+						<div className={'controls'}>
+							<div title={'Sidescroll Backwards'} className={'backwards'} onClick={this.sideScroll.bind(this, -50)} />
+							<div itle={'Sidescroll Forwards'} className={'forwards'} onClick={this.sideScroll.bind(this, 50)} />
+						</div>
 					</div>
-					<div className={'controls'}>
-						<div title={'Sidescroll Backwards'} className={'backwards'} onClick={this.sideScroll.bind(this, -50)} />
-						<div itle={'Sidescroll Forwards'} className={'forwards'} onClick={this.sideScroll.bind(this, 50)} />
+					<div className={'input-section'}>
+						<p>Items per column</p>
+						<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numItems} onChange={this.handleInputChange.bind(this)} />
 					</div>
-				</div>
-				<div className={'input-section'}>
-					<p>Items per column</p>
-					<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numItems} onChange={this.handleInputChange.bind(this)} />
-				</div>
-				<div className={'input-section'}>
-					<p>Number of columns</p>
-					<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numColumns} onChange={this.handleColumnInputChange.bind(this)} />
-				</div>
-				<DragDropContext ref={div => (this.dragDropContext = div)} dragAndDropGroup={this.dragAndDropGroupName} onDragEnd={this.onDragEnd.bind(this)} outerScrollBar={true}>
+					<div className={'input-section'}>
+						<p>Number of columns</p>
+						<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numColumns} onChange={this.handleColumnInputChange.bind(this)} />
+					</div>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
@@ -154,7 +161,7 @@ class ExampleBoard extends Component {
 									listHeader={getListHeader(index)}
 									listHeaderHeight={60}
 									ref={div => this.droppables.push(div)}
-									containerHeight={1000}
+									containerHeight={400}
 									dragAndDropGroup={this.dragAndDropGroupName}
 									droppableId={elem.droppableId}
 									key={elem.droppableId}
