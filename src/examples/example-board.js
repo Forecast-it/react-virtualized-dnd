@@ -90,11 +90,12 @@ class ExampleBoard extends Component {
 	}
 
 	onDragEnd(source, destinationId, placeholderId) {
+		console.log(placeholderId);
 		const listToRemoveFrom = this.state.listData.find(list => list.name.includes(source.droppableId));
 		const listToAddTo = this.state.listData.find(list => list.name.includes(destinationId));
 		const elemToAdd = listToRemoveFrom.items.find(entry => entry.id === source.draggableId);
 		let indexToRemove = listToRemoveFrom.items.findIndex(item => item.id === source.draggableId);
-		let indexToInsert = placeholderId === 'END_OF_LIST' ? listToAddTo.items.findIndex(item => item.id === placeholderId) : placeholderId.includes('header') ? 0 : listToAddTo.items.lenght - 1;
+		let indexToInsert = placeholderId === 'END_OF_LIST' ? listToAddTo.items.length - 1 : placeholderId.includes('header') ? 0 : listToAddTo.items.findIndex(item => item.id === placeholderId);
 		// Re-arrange within the same list
 		if (listToRemoveFrom.name === listToAddTo.name) {
 			if (indexToRemove === indexToInsert) {
