@@ -90,7 +90,6 @@ class ExampleBoard extends Component {
 	}
 
 	onDragEnd(source, destinationId, placeholderId) {
-		console.log(placeholderId);
 		const listToRemoveFrom = this.state.listData.find(list => list.name.includes(source.droppableId));
 		const listToAddTo = this.state.listData.find(list => list.name.includes(destinationId));
 		const elemToAdd = listToRemoveFrom.items.find(entry => entry.id === source.draggableId);
@@ -158,7 +157,7 @@ class ExampleBoard extends Component {
 						{elemsToRender.map((elem, index) => (
 							<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 								<Droppable
-									activeHeaderClass={'active'}
+									activeHeaderClass={'header-active'}
 									listHeader={getListHeader(index)}
 									listHeaderHeight={60}
 									ref={div => this.droppables.push(div)}

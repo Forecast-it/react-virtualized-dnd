@@ -76,6 +76,6 @@ body {
 .header-wrapper {
 	background: #6e0fea;
 }
-.active {
+.header-active {
 	transform: scale(1.1);
 }
