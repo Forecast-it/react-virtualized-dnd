@@ -173,7 +173,7 @@ class Draggable extends Component {
 					if (!draggableHoveringOver.getAttribute('draggableid').includes('placeholder')) {
 						if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('draggableid')) {
 							const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-							dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver.getAttribute('droppableid'), draggableHoveringOver.getAttribute('draggableid'), x, y);
+							dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, draggableHoveringOver.getAttribute('draggableid'), x, y);
 							hasDispatched = true;
 							this.droppableDraggedOver = droppableDraggedOver;
 							this.draggableHoveringOver = draggableHoveringOver.getAttribute('draggableid');
@@ -184,7 +184,7 @@ class Draggable extends Component {
 					this.droppableDraggedOver = droppableDraggedOver;
 					this.draggableHoveringOver = null;
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver.getAttribute('droppableid'), null, x, y);
+					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, null, x, y);
 					hasDispatched = true;
 				}
 				if (!hasDispatched) {

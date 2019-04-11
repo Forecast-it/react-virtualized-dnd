@@ -3,9 +3,6 @@ import {dispatch, subscribe, unsubscribe} from '../util/event_manager';
 import {Scrollbars} from 'react-custom-scrollbars';
 import Util from './../util/util';
 
-const SCROLLTYPE = {GLOBAL: 'global', COLUMN: 'column'};
-const SCROLL_DIRECTION = {LEFT: 'left', RIGHT: 'RIGHT', UP: 'UP', DOWN: 'DOWN'};
-
 class DragDropContext extends Component {
 	constructor(props) {
 		super(props);
@@ -72,14 +69,34 @@ class DragDropContext extends Component {
 			placeholder: null,
 			dragActive: false,
 			droppableActive: null,
-			dragStarted: false
+			dragStarted: false,
+			globalScroll: null,
+			globalScrollXDirection: null,
+			globalScrollYDirection: null
 		});
 	}
+	// Check if global scroll is at appropriate edge already
+	getCanScrollDirection(dir) {
+		if (!this.outerScrollBar) {
+			return false;
+		}
+		switch (dir) {
+			case 'down':
+				return this.outerScrollBar.getScrollTop() < this.outerScrollBar.getScrollHeight() - window.innerHeight;
+			case 'up':
+				return this.outerScrollBar.getScrollTop() > 0;
+			case 'left':
+				return this.outerScrollBar.getScrollLeft() > 0;
+			case 'right':
+				return this.outerScrollBar.getScrollLeft() < this.outerScrollBar.getScrollWidth() - window.innerWidth;
+		}
+	}
+
 	// When a card is moved, check for autoScroll
-	onMoveScroll(x, y) {
-		var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
-		// Scroll when within 10% of edge or min 50px
-		const scrollThreshold = Math.max(h * 0.1, 80);
+	onMoveScroll(x, y, droppable) {
+		//var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
+		// Scroll when within 80px of edge
+		const scrollThreshold = 80;
 
 		// Top = high y coordinates
 		const screenPosition = {
@@ -92,21 +109,20 @@ class DragDropContext extends Component {
 		const isNearPageTop = y != null && y <= scrollThreshold;
 		const isNearPageLeft = x != null && x - screenPosition.left <= scrollThreshold;
 		const isNearPageRight = x != null && screenPosition.right - x <= scrollThreshold;
-		const shouldScrollGlobally = isNearPageBottom || isNearPageTop || isNearPageLeft || isNearPageRight;
 
+		const shouldScrollGlobally = isNearPageBottom || isNearPageTop || isNearPageLeft || isNearPageRight;
+		const canScrollGlobally = this.getCanScrollDirection(isNearPageBottom ? 'down' : isNearPageTop ? 'up' : isNearPageLeft ? 'left' : isNearPageRight ? 'right' : '');
 		// BEGIN GLOBAL SCROLLING //
-		if (shouldScrollGlobally) {
+		if (shouldScrollGlobally && canScrollGlobally) {
 			if (this.outerScrollBar) {
 				if (isNearPageRight) {
 					// Scroll right
-					console.log('Global right trigger');
 					this.setState({
 						globalScroll: true,
 						globalScrollXDirection: 'right'
 					});
 				} else if (isNearPageLeft) {
 					// Scroll left
-					console.log('Global left trigger');
 					this.setState({
 						globalScroll: true,
 						globalScrollXDirection: 'left'
@@ -116,20 +132,18 @@ class DragDropContext extends Component {
 						globalScrollXDirection: null
 					});
 				}
-
 				if (isNearPageBottom) {
-					console.log('Global down trigger');
-
 					this.setState({
 						globalScroll: true,
 						globalScrollYDirection: 'down'
 					});
+					// can only scroll down if the current scroll is less than height
 				} else if (isNearPageTop) {
-					console.log('Global up trigger');
 					this.setState({
 						globalScroll: true,
 						globalScrollYDirection: 'up'
 					});
+					// can only scroll up if current scroll is larger than 0
 				} else {
 					this.setState({globalScrollYDirection: null});
 				}
@@ -137,34 +151,29 @@ class DragDropContext extends Component {
 					this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
 				}
 			}
-		} else {
 			// END GLOBAL SCROLLING //
+		} else if (droppable) {
+			// Clear global scroll
+			this.setState({globalScroll: null});
 			const containerBoundaries = {
-				left: this.container.getBoundingClientRect().left,
-				right: this.container.getBoundingClientRect().right,
-				top: this.container.getBoundingClientRect().top,
-				bottom: this.container.getBoundingClientRect().bottom
+				left: droppable.getBoundingClientRect().left,
+				right: droppable.getBoundingClientRect().right,
+				top: droppable.getBoundingClientRect().top,
+				bottom: droppable.getBoundingClientRect().bottom
 			};
-
-			// Dispatch to active droppable the coordinates, check if scroll down
-			return;
 
 			const isNearYBottom = containerBoundaries.bottom - y <= scrollThreshold;
 			const isNearYTop = y - containerBoundaries.top <= scrollThreshold;
 
 			if (isNearYBottom) {
 				//Scroll down the page, increase y values
-				if (this.state.droppableActive) {
-					this.setState({
-						shouldScrollY: true,
-						increaseYScroll: true
-					});
-				}
+				this.setState({
+					shouldScrollY: true,
+					increaseYScroll: true
+				});
 			} else if (isNearYTop) {
 				//Scroll up
-				if (this.state.droppableActive) {
-					this.setState({shouldScrollY: true, increaseYScroll: false});
-				}
+				this.setState({shouldScrollY: true, increaseYScroll: false});
 			} else {
 				this.setState({shouldScrollY: false});
 			}
@@ -174,22 +183,22 @@ class DragDropContext extends Component {
 		}
 	}
 
-	onDragMove(draggable, droppableId, draggableHoveredOverId, x, y) {
-		if (draggable && droppableId) {
+	onDragMove(draggable, droppable, draggableHoveredOverId, x, y) {
+		if (draggable && droppable) {
 			const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
-			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppableId : droppableId != null;
+			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppable : droppable != null;
 			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
 			// Update if field is currently not set, and it is in nextstate, or if the two IDs differ.
 			if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder) {
 				this.setState({
 					draggedElem: draggable,
-					droppableActive: droppableId,
+					droppableActive: droppable.getAttribute('droppableid'),
 					placeholder: draggableHoveredOverId
 				});
 			}
 		}
 		// Register move no matter what (even if draggable/droppably wasnt updated here)
-		this.onMoveScroll(x, y);
+		this.onMoveScroll(x, y, droppable);
 	}
 
 	resetPlaceholderIndex() {
@@ -212,7 +221,7 @@ class DragDropContext extends Component {
 
 	autoScroll(x, y) {
 		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
-			if (this.state.globalScroll && this.outerScrollBar) {
+			if (this.state.globalScroll && (this.state.globalScrollXDirection || this.state.globalScrollYDirection) && this.outerScrollBar) {
 				switch (this.state.globalScrollYDirection) {
 					case 'down':
 						if (this.outerScrollBar.getScrollTop() < this.outerScrollBar.getScrollHeight()) {
