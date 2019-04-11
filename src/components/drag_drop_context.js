@@ -99,13 +99,8 @@ class DragDropContext extends Component {
 		const scrollThreshold = 80;
 
 		// Top = high y coordinates
-		const screenPosition = {
-			bottom: 0,
-			top: window.innerHeight,
-			left: 0,
-			right: window.innerWidth
-		};
-		const isNearPageBottom = y != null && screenPosition.top - y <= scrollThreshold;
+		const screenPosition = this.container.getBoundingClientRect();
+		const isNearPageBottom = y != null && screenPosition.bottom - y <= scrollThreshold;
 		const isNearPageTop = y != null && y <= scrollThreshold;
 		const isNearPageLeft = x != null && x - screenPosition.left <= scrollThreshold;
 		const isNearPageRight = x != null && screenPosition.right - x <= scrollThreshold;
