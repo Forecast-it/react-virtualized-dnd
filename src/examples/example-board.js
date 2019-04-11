@@ -176,7 +176,7 @@ class ExampleBoard extends Component {
 										listHeader={getListHeader(index)}
 										listHeaderHeight={60}
 										ref={div => this.droppables.push(div)}
-										containerHeight={500}
+										containerHeight={620}
 										dragAndDropGroup={this.dragAndDropGroupName}
 										droppableId={elem.droppableId}
 										key={elem.droppableId}

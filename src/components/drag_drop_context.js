@@ -82,7 +82,7 @@ class DragDropContext extends Component {
 		}
 		switch (dir) {
 			case 'down':
-				return this.outerScrollBar.getScrollTop() < this.outerScrollBar.getScrollHeight() - window.innerHeight;
+				return this.outerScrollBar.getScrollTop() < this.outerScrollBar.getScrollHeight() - this.props.scrollContainerHeight;
 			case 'up':
 				return this.outerScrollBar.getScrollTop() > 0;
 			case 'left':
@@ -97,14 +97,12 @@ class DragDropContext extends Component {
 		//var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
 		// Scroll when within 80px of edge
 		const scrollThreshold = 80;
-
 		const scrollContainerPos = this.container.getBoundingClientRect();
 
 		const isNearPageBottom = y != null && scrollContainerPos.bottom - y <= scrollThreshold;
 		const isNearPageTop = y != null && y - scrollContainerPos.top <= scrollThreshold;
 		const isNearPageLeft = x != null && x - scrollContainerPos.left <= scrollThreshold;
 		const isNearPageRight = x != null && scrollContainerPos.right - x <= scrollThreshold;
-
 		const shouldScrollGlobally = isNearPageBottom || isNearPageTop || isNearPageLeft || isNearPageRight;
 		const canScrollGlobally = this.getCanScrollDirection(isNearPageBottom ? 'down' : isNearPageTop ? 'up' : isNearPageLeft ? 'left' : isNearPageRight ? 'right' : '');
 		// BEGIN GLOBAL SCROLLING //
@@ -215,7 +213,7 @@ class DragDropContext extends Component {
 	}
 
 	autoScroll(x, y) {
-		if (this.state.dragActive && this.state.draggedElem && this.state.droppableActive) {
+		if (this.state.dragActive && this.state.draggedElem) {
 			if (this.state.globalScroll && (this.state.globalScrollXDirection || this.state.globalScrollYDirection) && this.outerScrollBar) {
 				switch (this.state.globalScrollYDirection) {
 					case 'down':
@@ -246,7 +244,7 @@ class DragDropContext extends Component {
 						break;
 				}
 				requestAnimationFrame(() => this.autoScroll(x, y));
-			} else if (this.state.shouldScrollY) {
+			} else if (this.state.droppableActive && this.state.shouldScrollY) {
 				if (this.state.increaseYScroll) {
 					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, 15);
 				} else {

@@ -160,7 +160,6 @@ class Draggable extends Component {
 				}
 				if (!droppableDraggedOver) {
 					dispatch(this.dragAndDropGroup.resetEvent);
-					hasDispatched = true;
 				}
 				const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
 				if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
@@ -190,6 +189,7 @@ class Draggable extends Component {
 				if (!hasDispatched) {
 					// If nothing changed, we still wanna notify move for scrolling
 					dispatch(this.dragAndDropGroup.moveEvent, null, null, null, x, y);
+					hasDispatched = true;
 				}
 				this.setState({
 					isDragging: shouldRegisterAsDrag,
