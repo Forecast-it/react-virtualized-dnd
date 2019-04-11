@@ -24,6 +24,15 @@ body {
 	cursor: pointer;
 	outline: none;
 }
+.row-split-button {
+	margin-right: 0;
+}
+.first-button {
+	border-right: none;
+}
+.second-button {
+	border-left: none;
+}
 .active {
 	background-color: #6e0fea;
 	color: white;

@@ -188,6 +188,7 @@ class DragDropContext extends Component {
 				});
 			}
 		}
+		// Register move no matter what (even if draggable/droppably wasnt updated here)
 		this.onMoveScroll(x, y);
 	}
 

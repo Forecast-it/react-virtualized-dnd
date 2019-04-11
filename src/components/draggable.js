@@ -138,7 +138,6 @@ class Draggable extends Component {
 	onPointerMove(e) {
 		e.preventDefault();
 		e.stopPropagation();
-
 		if (this.props.disableDrag || !this.state.wasClicked) {
 			return;
 		}

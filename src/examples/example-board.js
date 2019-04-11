@@ -151,8 +151,11 @@ class ExampleBoard extends Component {
 							<div itle={'Sidescroll Forwards'} className={'forwards'} onClick={this.sideScroll.bind(this, 50)} />
 						</div>
 						<div className={'row-splitter'}>
-							<button className={'row-split-button' + (this.state.split ? ' active' : '')} onClick={this.toggleSplit.bind(this)}>
-								MultiRow
+							<button className={'row-split-button first-button' + (!this.state.split ? ' active' : '')} onClick={this.toggleSplit.bind(this)}>
+								Single Row
+							</button>
+							<button className={'row-split-button second-button' + (this.state.split ? ' active' : '')} onClick={this.toggleSplit.bind(this)}>
+								Multi Row
 							</button>
 						</div>
 					</div>
