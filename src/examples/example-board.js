@@ -137,7 +137,7 @@ class ExampleBoard extends Component {
 				<DragDropContext
 					ref={div => (this.dragDropContext = div)}
 					// 10px margin around page
-					height={window.innerHeight - 10}
+					scrollContainerHeight={window.innerHeight - 10}
 					dragAndDropGroup={this.dragAndDropGroupName}
 					onDragEnd={this.onDragEnd.bind(this)}
 					outerScrollBar={true}
