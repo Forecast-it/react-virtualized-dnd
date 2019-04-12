@@ -90,6 +90,8 @@ The placeholder ID can be used to determine where to place the dragged element o
 | --------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------- |
 | dragAndDropGroup      | string   | yes                         | Unique identifier for the drag and drop group the context uses                    |
 | outerScrollBar        | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging) |
+| scrollYSpeed          | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                            |
+| scrollXSpeed          | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                            |
 | scrollContainerHeight | function | no, yes with outerScrollBar | Height of the outer scrollable container                                          |
 | onDragEnd             | function | no                          | Function fired on drag end.                                                       |
 | onDragStart           | function | no                          | Function fired on drag start.                                                     |
