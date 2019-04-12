@@ -218,12 +218,12 @@ class DragDropContext extends Component {
 				switch (this.state.globalScrollYDirection) {
 					case 'down':
 						if (this.outerScrollBar.getScrollTop() < this.outerScrollBar.getScrollHeight()) {
-							this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() + 10);
+							this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() + (this.props.scrollYSpeed ? this.props.scrollYSpeed : 10));
 						}
 						break;
 					case 'up':
 						if (this.outerScrollBar.getScrollTop() > 0) {
-							this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() - 10);
+							this.outerScrollBar.scrollTop(this.outerScrollBar.getScrollTop() - (this.props.scrollYSpeed ? this.props.scrollYSpeed : 10));
 						}
 						break;
 					default:
@@ -232,12 +232,12 @@ class DragDropContext extends Component {
 				switch (this.state.globalScrollXDirection) {
 					case 'right':
 						if (this.outerScrollBar.getScrollLeft() < this.outerScrollBar.getScrollWidth()) {
-							this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() + 10);
+							this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() + (this.props.scrollXSpeed ? this.props.scrollXSpeed : 10));
 						}
 						break;
 					case 'left':
 						if (this.outerScrollBar.getScrollLeft() > 0) {
-							this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() - 10);
+							this.outerScrollBar.scrollLeft(this.outerScrollBar.getScrollLeft() - (this.props.scrollXSpeed ? this.props.scrollXSpeed : 10));
 						}
 						break;
 					default:
