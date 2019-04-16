@@ -1,10 +1,13 @@
 body {
 	margin: 0;
 	padding: 0;
-	font-family: sans-serif;
+	font-family: 'Roboto';
 }
 .example-board {
 	margin: 10px 0 0 10px;
+}
+input {
+	font-family: 'Roboto';
 }
 .row-splitter {
 	margin-top: 10px;
@@ -12,6 +15,7 @@ body {
 }
 .scroll-button,
 .row-split-button {
+	font-family: 'Roboto';
 	flex-grow: 0;
 	width: 120px;
 	height: 30px;

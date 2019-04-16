@@ -1,6 +1,6 @@
 {
 	"name": "react-virtualized-dnd",
-	"version": "1.5.5",
+	"version": "1.5.6",
 	"description": "A React-based, virtualized drag-and-drop framework.",
 	"author": "MagerlinC",
 	"license": "MIT",

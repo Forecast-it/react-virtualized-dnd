@@ -289,7 +289,7 @@ class Draggable extends Component {
 	}
 
 	handlePointerCaptureLoss(e) {
-		if (this.state.wasClicked && e.pointerId) {
+		if (this.state.wasClicked && e.pointerId != null) {
 			this.draggable.setPointerCapture(e.pointerId);
 		}
 	}
