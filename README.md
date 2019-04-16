@@ -122,6 +122,7 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | listHeader        | HTML element | no                       | Element to use as header for a droppable list, to react to drops on top of the list. |
 | listHeaderHeight  | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                            |
 | activeHeaderClass | string       | no                       | CSS class added to the header when an active drag is hovering over the list header   |
+| hideList          | boolean      | no                       | hides all droppable elements in the list                                             |
 
 ## Author
 
