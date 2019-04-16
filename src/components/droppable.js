@@ -167,7 +167,7 @@ class Droppable extends Component {
 			);
 			listToRender = childrenWithProps;
 		}
-		const rowHeight = this.props.rowHeight ? this.props.rowHeight : 50;
+		const rowHeight = this.props.hideList ? 0 : this.props.rowHeight ? this.props.rowHeight : 50;
 		const rowsTotalHeight = listToRender.length * rowHeight;
 		const shouldScroll = this.props.containerHeight < rowsTotalHeight;
 		// Always at least one rowheight larger during drag, to allow DnD on empty lists/below small lists
