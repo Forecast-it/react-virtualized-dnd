@@ -123,6 +123,27 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | listHeaderHeight  | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                            |
 | activeHeaderClass | string       | no                       | CSS class added to the header when an active drag is hovering over the list header   |
 | hideList          | boolean      | no                       | hides all droppable elements in the list                                             |
+| customScrollbars  | component    | no                       | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars  |
+
+#### Example Custom Scroll Bar
+
+This component requires the usage of React's forwardRef to pass along the parent reference to the Scrollbars Element.  
+Please see [react-custom-scrollbars](https://github.com/malte-wessel/react-custom-scrollbars) for more information on how to customize a scrollbar.
+
+##### Usage:
+
+```jsx
+import {Scrollbars} from 'react-custom-scrollbars';
+
+const CustomScrollBars = React.forwardRef((props, ref) => {
+	const {children, ...rest} = props;
+	return (
+		<Scrollbars ref={ref} renderThumbVertical={({style, ...props}) => <div style={{...style, backgroundColor: 'blue'}} {...props} />} {...rest}>
+			{children}
+		</Scrollbars>
+	);
+});
+```
 
 ## Author
 
