@@ -47,7 +47,7 @@ class Draggable extends Component {
 	}
 
 	onPointerDown(e) {
-		if (e.target.className.includes('no-drag') || this.props.disableDrag) {
+		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disableDrag) {
 			return;
 		}
 		if (!this.pointerSupport) {
