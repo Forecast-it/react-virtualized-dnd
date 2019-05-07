@@ -75,26 +75,20 @@ class Example extends Component {
 
 ### DragDropContext
 
-#### API
-
-| **Prop**    | **Type** | **Required** | **Description**                                                                                                             |
-| ----------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| onDragEnd   | function | no           | Fired on drag end. Returns the source object, the droppableId of the destination, and the id of the placeholder dropped on. |
-| onDragStart | function | no           | Function fired on drag start. Returns the draggableId of the dragged element.                                               |
-
-The placeholder ID can be used to determine where to place the dragged element on drag end. The placeholderID returns the string "END_OF_LIST" if dragged below the last element of a droppable.
-
 #### Props
 
-| **Prop**              | **Type** | **Required**                | **Description**                                                                   |
-| --------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------- |
-| dragAndDropGroup      | string   | yes                         | Unique identifier for the drag and drop group the context uses                    |
-| outerScrollBar        | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging) |
-| scrollYSpeed          | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                            |
-| scrollXSpeed          | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                            |
-| scrollContainerHeight | function | no, yes with outerScrollBar | Height of the outer scrollable container                                          |
-| onDragEnd             | function | no                          | Function fired on drag end.                                                       |
-| onDragStart           | function | no                          | Function fired on drag start.                                                     |
+| **Prop**                       | **Type** | **Required**                | **Description**                                                                                                                  |
+| ------------------------------ | -------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| dragAndDropGroup               | string   | yes                         | Unique identifier for the drag and drop group the context uses                                                                   |
+| outerScrollBar                 | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging)                                                |
+| scrollYSpeed                   | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                                                                           |
+| scrollXSpeed                   | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                                                                           |
+| scrollContainerHeight          | number   | no, yes with outerScrollBar | Height of the outer scrollable container                                                                                         |
+| scrollContainerHeightMinHeight | number   | no                          | Minimum height of the outer scrollable container                                                                                 |
+| onDragEnd                      | function | no                          | Fired on drag end with the source object, the droppableId of the destination, and the ID of the placeholder dropped on as params |
+| onDragStart                    | function | no                          | Function fired on drag start with the draggableId of the dragged element as params                                               |
+
+The placeholder ID can be used to determine where to place the dragged element on drag end. The placeholderID returns the string "END_OF_LIST" if dragged below the last element of a droppable.
 
 ### Draggable
 
@@ -105,6 +99,7 @@ The placeholder ID can be used to determine where to place the dragged element o
 | dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |
 | draggableId      | string   | yes          | Unique identifier for the draggable                            |
 | dragActiveClass  | string   | no           | CSS class applied to a draggable element during an active drag |
+| dragDisabled     | bool     | no           | Flag to disabled dragging of element                           |
 
 Draggables will ignore drags started by clicking on any element with the "no-drag" css class. This can be used to control drag interactions with interactive elements, such as inputs or buttons.
 
