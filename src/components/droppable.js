@@ -208,6 +208,7 @@ Droppable.propTypes = {
 	droppableId: PropTypes.string.isRequired,
 	dragAndDropGroup: PropTypes.string.isRequired,
 	containerHeight: PropTypes.number.isRequired,
+	placeholderStyle: PropTypes.object,
 	rowHeight: PropTypes.number,
 	disableScroll: PropTypes.bool
 };

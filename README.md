@@ -77,16 +77,16 @@ class Example extends Component {
 
 #### Props
 
-| **Prop**                       | **Type** | **Required**                | **Description**                                                                                                                  |
-| ------------------------------ | -------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| dragAndDropGroup               | string   | yes                         | Unique identifier for the drag and drop group the context uses                                                                   |
-| outerScrollBar                 | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging)                                                |
-| scrollYSpeed                   | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                                                                           |
-| scrollXSpeed                   | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                                                                           |
-| scrollContainerHeight          | number   | no, yes with outerScrollBar | Height of the outer scrollable container                                                                                         |
-| scrollContainerHeightMinHeight | number   | no                          | Minimum height of the outer scrollable container                                                                                 |
-| onDragEnd                      | function | no                          | Fired on drag end with the source object, the droppableId of the destination, and the ID of the placeholder dropped on as params |
-| onDragStart                    | function | no                          | Function fired on drag start with the draggableId of the dragged element as params                                               |
+| **Prop**                 | **Type** | **Required**                | **Description**                                                                                                                  |
+| ------------------------ | -------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| dragAndDropGroup         | string   | yes                         | Unique identifier for the drag and drop group the context uses                                                                   |
+| outerScrollBar           | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging)                                                |
+| scrollYSpeed             | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                                                                           |
+| scrollXSpeed             | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                                                                           |
+| scrollContainerHeight    | number   | no, yes with outerScrollBar | Height of the outer scrollable container                                                                                         |
+| scrollContainerMinHeight | number   | no                          | Minimum height of the outer scrollable container                                                                                 |
+| onDragEnd                | function | no                          | Fired on drag end with the source object, the droppableId of the destination, and the ID of the placeholder dropped on as params |
+| onDragStart              | function | no                          | Function fired on drag start with the draggableId of the dragged element as params                                               |
 
 The placeholder ID can be used to determine where to place the dragged element on drag end. The placeholderID returns the string "END_OF_LIST" if dragged below the last element of a droppable.
 
@@ -105,12 +105,15 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 
 ### Droppable
 
+i
+
 #### Props
 
 | **Prop**          | **Type**     | **Required**             | **Description**                                                                      |
 | ----------------- | ------------ | ------------------------ | ------------------------------------------------------------------------------------ |
 | dragAndDropGroup  | string       | yes                      | Unique identifier for the drag and drop group the context uses                       |
 | droppableId       | string       | yes                      | Unique identifier for the droppable                                                  |
+| placeholderStyle  | object       | no                       | Style object for placeholder. Defaults to a 50px height box if omitted.              |
 | containerHeight   | number       | yes                      | Height of the virtualizing scroll container                                          |
 | rowHeight         | number       | no                       | Height of each row _with_ borders. Default is 50px.                                  |
 | disableScroll     | boolean      | no                       | Flag to disable scrollbars. This disables virtualization as well                     |
