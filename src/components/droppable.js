@@ -133,7 +133,12 @@ class Droppable extends Component {
 			});
 		} else if (!pushedPlaceholder) {
 			listToRender.push(
-				<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={{border: 'solid 1px black', height: '50px', backgroundColor: 'grey'}}>
+				<div
+					key={'placeholder'}
+					draggableid={'placeholder'}
+					className={'draggable-test'}
+					style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: this.props.rowHeight ? this.props.rowHeight : 50, backgroundColor: 'grey'}}
+				>
 					<p className={'placeholder-text'} />
 				</div>
 			);
