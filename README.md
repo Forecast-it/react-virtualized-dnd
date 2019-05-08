@@ -113,7 +113,7 @@ i
 | ----------------- | ------------ | ------------------------ | ------------------------------------------------------------------------------------ |
 | dragAndDropGroup  | string       | yes                      | Unique identifier for the drag and drop group the context uses                       |
 | droppableId       | string       | yes                      | Unique identifier for the droppable                                                  |
-| placeholderStyle  | object       | no                       | Style object for placeholder. Defaults to a 50px height box if omitted.              |
+| placeholderStyle  | object       | no                       | Style object for placeholder. If included, remember to include placeholder height.   |
 | containerHeight   | number       | yes                      | Height of the virtualizing scroll container                                          |
 | rowHeight         | number       | no                       | Height of each row _with_ borders. Default is 50px.                                  |
 | disableScroll     | boolean      | no                       | Flag to disable scrollbars. This disables virtualization as well                     |

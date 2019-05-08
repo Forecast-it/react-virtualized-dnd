@@ -119,7 +119,7 @@ class Droppable extends Component {
 							key={'placeholder'}
 							draggableid={'placeholder'}
 							className={'draggable-test'}
-							style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: '50px', backgroundColor: 'grey'}}
+							style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: this.props.rowHeight, backgroundColor: 'grey'}}
 						>
 							<p className={'placeholder-text'} />
 						</div>
