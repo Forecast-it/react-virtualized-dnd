@@ -106,8 +106,6 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 
 ### Droppable
 
-i
-
 #### Props
 
 | **Prop**          | **Type**     | **Required**             | **Description**                                                                      |
