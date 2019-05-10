@@ -118,26 +118,27 @@ class Droppable extends Component {
 	pushPlaceholder(children) {
 		let pushedPlaceholder = false;
 		const listToRender = [...children];
+
+		let style;
+
+		if (this.props.placeholderStyle) {
+			style = this.props.placeholderStyle;
+			style.height = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50;
+		} else {
+			style = {
+				border: 'solid 1px black',
+				height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50,
+				backgroundColor: 'grey'
+			};
+		}
+
 		if (this.state.placeholder) {
 			listToRender.forEach((elem, index) => {
 				if (elem && elem.props && elem.props.draggableId === this.state.placeholder && !pushedPlaceholder) {
 					listToRender.splice(
 						index,
 						0,
-						<div
-							key={'placeholder'}
-							draggableid={'placeholder'}
-							className={'draggable-test'}
-							style={
-								this.props.placeholderStyle
-									? this.props.placeholderStyle
-									: {
-											border: 'solid 1px black',
-											height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50,
-											backgroundColor: 'grey'
-									  }
-							}
-						>
+						<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={style}>
 							<p className={'placeholder-text'} />
 						</div>
 					);
