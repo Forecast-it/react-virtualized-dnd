@@ -122,7 +122,7 @@ class Droppable extends Component {
 		let style;
 
 		if (this.props.placeholderStyle) {
-			style = this.props.placeholderStyle;
+			style = {...this.props.placeholderStyle};
 			style.height = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50;
 		} else {
 			style = {
