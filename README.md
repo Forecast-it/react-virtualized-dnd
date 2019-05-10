@@ -115,7 +115,7 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | placeholderStyle   | object       | no                       | Style object for placeholder. If included, remember to include placeholder height.         |
 | containerHeight    | number       | yes                      | Height of the virtualizing scroll container                                                |
 | containerMinHeight | number       | no                       | Minimum height of the virtualizing scroll container (if larger than total height of elems) |
-| rowHeight          | number       | no                       | Height of each row _with_ borders. Default is 50px.                                        |
+| elemHeight         | number       | no                       | Height of each elem in the scrollable list _with_ borders. Default is 50px.                |
 | disableScroll      | boolean      | no                       | Flag to disable scrollbars. This disables virtualization as well                           |
 | listHeader         | HTML element | no                       | Element to use as header for a droppable list, to react to drops on top of the list.       |
 | listHeaderHeight   | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                                  |

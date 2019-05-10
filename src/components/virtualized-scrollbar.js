@@ -8,7 +8,7 @@ class VirtualizedScrollBar extends Component {
 		super(props);
 		this.state = {
 			// Update this when dynamic row height becomes a thing
-			rowHeight: this.props.staticRowHeight ? this.props.staticRowHeight : 50,
+			elemHeight: this.props.staticElemHeight ? this.props.staticElemHeight : 50,
 			scrollOffset: 0,
 			elemOverScan: this.props.overScan ? this.props.overScan : 3,
 			topSpacerHeight: 0,
@@ -42,9 +42,9 @@ class VirtualizedScrollBar extends Component {
 	getListToRenderStaticOptimization(list) {
 		let listToRender = [];
 		this.stickyElems = [];
-		const rowHeight = this.state.rowHeight;
+		const elemHeight = this.state.elemHeight;
 		const containerHeight = this.props.containerHeight;
-		const maxVisibleElems = Math.floor(containerHeight / rowHeight);
+		const maxVisibleElems = Math.floor(containerHeight / elemHeight);
 		if (!containerHeight || this.state.scrollOffset == null) {
 			return list;
 		}
@@ -59,7 +59,7 @@ class VirtualizedScrollBar extends Component {
 				if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
 					this.stickyElems.push(child);
 				} else {
-					const ySmallerThanList = (index + 1) * rowHeight < this.state.scrollOffset;
+					const ySmallerThanList = (index + 1) * elemHeight < this.state.scrollOffset;
 
 					if (ySmallerThanList) {
 						// Keep overwriting to obtain the last element that is not smaller
@@ -84,9 +84,9 @@ class VirtualizedScrollBar extends Component {
 	getListToRender(list) {
 		let listToRender = [];
 		this.stickyElems = [];
-		const rowHeight = this.state.rowHeight;
+		const elemHeight = this.state.elemHeight;
 		const containerHeight = this.props.containerHeight;
-		const overScan = this.state.elemOverScan * this.state.rowHeight;
+		const overScan = this.state.elemOverScan * this.state.elemHeight;
 		if (!containerHeight || this.state.scrollOffset == null) {
 			return list;
 		}
@@ -96,8 +96,8 @@ class VirtualizedScrollBar extends Component {
 				this.stickyElems.push(child);
 			} else {
 				// Don't render if we're below the current scroll offset, or if we're above the containerHeight + scrollOffset
-				const ySmallerThanList = (index + 1) * rowHeight + overScan < this.state.scrollOffset;
-				const yLargerThanList = (index + 1) * rowHeight - overScan > this.state.scrollOffset + containerHeight;
+				const ySmallerThanList = (index + 1) * elemHeight + overScan < this.state.scrollOffset;
+				const yLargerThanList = (index + 1) * elemHeight - overScan > this.state.scrollOffset + containerHeight;
 
 				if (!ySmallerThanList && !yLargerThanList) {
 					listToRender.push(child);
@@ -139,21 +139,21 @@ class VirtualizedScrollBar extends Component {
 	render() {
 		const {children} = this.props;
 		const rowCount = children.length;
-		const height = rowCount * this.state.rowHeight;
+		const height = rowCount * this.state.elemHeight;
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index}));
 
 		const hasScrolled = this.state.scrollOffset > 0;
 
 		const listToRender = this.props.disableVirtualization
 			? childrenWithProps
-			: this.props.staticRowHeight
+			: this.props.staticElemHeight
 			? this.getListToRenderStaticOptimization(childrenWithProps)
 			: this.getListToRender(childrenWithProps);
 
 		const unrenderedBelow = hasScrolled ? (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.stickyElems ? this.stickyElems.length : 0) : 0;
 		const unrenderedAbove = listToRender && listToRender.length > 0 ? childrenWithProps.length - (listToRender[listToRender.length - 1].props.originalindex + 1) : 0;
-		const belowSpacerStyle = this.props.disableVirtualization ? {width: '100%', height: 0} : {width: '100%', height: unrenderedBelow ? unrenderedBelow * this.state.rowHeight : 0};
-		const aboveSpacerStyle = this.props.disableVirtualization ? {width: '100%', height: 0} : {width: '100%', height: unrenderedAbove ? unrenderedAbove * this.state.rowHeight : 0};
+		const belowSpacerStyle = this.props.disableVirtualization ? {width: '100%', height: 0} : {width: '100%', height: unrenderedBelow ? unrenderedBelow * this.state.elemHeight : 0};
+		const aboveSpacerStyle = this.props.disableVirtualization ? {width: '100%', height: 0} : {width: '100%', height: unrenderedAbove ? unrenderedAbove * this.state.elemHeight : 0};
 		if (this.stickyElems && this.stickyElems.length > 0) {
 			listToRender.push(this.stickyElems[0]);
 		}

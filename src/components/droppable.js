@@ -112,7 +112,7 @@ class Droppable extends Component {
 		if (this.state.currentlyActiveDraggable) {
 			return this.state.currentlyActiveDraggable.height;
 		}
-		return this.props.rowHeight ? this.props.rowHeight : 50;
+		return this.props.elemHeight ? this.props.elemHeight : 50;
 	}
 
 	pushPlaceholder(children) {
@@ -133,7 +133,7 @@ class Droppable extends Component {
 									? this.props.placeholderStyle
 									: {
 											border: 'solid 1px black',
-											height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.rowHeight ? this.props.rowHeight : 50,
+											height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50,
 											backgroundColor: 'grey'
 									  }
 							}
@@ -150,7 +150,7 @@ class Droppable extends Component {
 					key={'placeholder'}
 					draggableid={'placeholder'}
 					className={'draggable-test'}
-					style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: this.props.rowHeight ? this.props.rowHeight : 50, backgroundColor: 'grey'}}
+					style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: this.props.elemHeight ? this.props.elemHeight : 50, backgroundColor: 'grey'}}
 				>
 					<p className={'placeholder-text'} />
 				</div>
@@ -190,20 +190,20 @@ class Droppable extends Component {
 			listToRender = childrenWithProps;
 		}
 
-		let rowHeight = 0;
+		let elemHeight = 0;
 		let rowsTotalHeight = 0;
 		let shouldScroll = true;
 		let calculatedRowMinHeight = 0;
 		const listHeaderHeight = this.props.listHeader != null ? this.props.listHeaderHeight : 0;
 		let outerContainerHeight = this.props.containerHeight;
 		if (!this.props.dynamicElemHeight) {
-			rowHeight = this.props.hideList ? 0 : this.props.rowHeight ? this.props.rowHeight : 50;
-			rowsTotalHeight = listToRender.length * rowHeight;
+			elemHeight = this.props.hideList ? 0 : this.props.elemHeight ? this.props.elemHeight : 50;
+			rowsTotalHeight = listToRender.length * elemHeight;
 			// Container smaller than calculated height of rows?
 			shouldScroll = this.props.containerHeight < rowsTotalHeight;
 
 			// Total rows + height of one row (required for DnD to empty lists/dropping below list)
-			calculatedRowMinHeight = rowsTotalHeight + rowHeight;
+			calculatedRowMinHeight = rowsTotalHeight + elemHeight;
 
 			// The minimum height of the container is the # of elements + 1 (same reason as above), unless a minimum height is specificied that is larger than this.
 			// If the minimum height exceeds the containerHeight, we limit it to containerHeight and enable scroll instead
@@ -231,7 +231,7 @@ class Droppable extends Component {
 					<VirtualizedScrollBar
 						disableVirtualization={this.props.dynamicElemHeight}
 						stickyElems={draggedElemId ? [draggedElemId] : []}
-						staticRowHeight={rowHeight}
+						staticElemHeight={elemHeight}
 						ref={scrollDiv => (this.scrollBars = scrollDiv)}
 						containerHeight={this.props.containerHeight - listHeaderHeight}
 					>
@@ -250,7 +250,7 @@ Droppable.propTypes = {
 	dragAndDropGroup: PropTypes.string.isRequired,
 	containerHeight: PropTypes.number.isRequired,
 	placeholderStyle: PropTypes.object,
-	rowHeight: PropTypes.number,
+	elemHeight: PropTypes.number,
 	dynamicElemHeight: PropTypes.bool,
 	disableScroll: PropTypes.bool
 };
