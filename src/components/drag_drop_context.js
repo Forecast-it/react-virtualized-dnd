@@ -44,7 +44,7 @@ class DragDropContext extends Component {
 
 	dispatchPlaceholder() {
 		if (this.state.draggedElem && this.state.dragActive && this.state.droppableActive) {
-			dispatch(this.state.dragAndDropGroup.placeholderEvent, this.state.placeholder, this.state.droppableActive);
+			dispatch(this.state.dragAndDropGroup.placeholderEvent, this.state.placeholder, this.state.droppableActive, this.state.draggedElem);
 		} else {
 			dispatch(this.state.dragAndDropGroup.placeholderEvent, null, null);
 		}

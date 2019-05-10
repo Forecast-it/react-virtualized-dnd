@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {subscribe, unsubscribe} from '../util/event_manager';
 import VirtualizedScrollBar from './virtualized-scrollbar';
 import Util from './../util/util';
+import {Scrollbars} from 'react-custom-scrollbars';
 
 class Droppable extends Component {
 	constructor(props) {
@@ -20,6 +21,7 @@ class Droppable extends Component {
 		this.onScrollChange = this.onScrollChange.bind(this);
 		this.onDragEnd = this.onDragEnd.bind(this);
 		this.onDragStart = this.onDragStart.bind(this);
+		this.getDraggedElemHeight = this.getDraggedElemHeight.bind(this);
 		//this.getShouldAlwaysRender = this.getShouldAlwaysRender.bind(this);
 	}
 
@@ -106,6 +108,13 @@ class Droppable extends Component {
 		return true;
 	}
 
+	getDraggedElemHeight() {
+		if (this.state.currentlyActiveDraggable) {
+			return this.state.currentlyActiveDraggable.height;
+		}
+		return this.props.rowHeight ? this.props.rowHeight : 50;
+	}
+
 	pushPlaceholder(children) {
 		let pushedPlaceholder = false;
 		const listToRender = [...children];
@@ -122,7 +131,11 @@ class Droppable extends Component {
 							style={
 								this.props.placeholderStyle
 									? this.props.placeholderStyle
-									: {border: 'solid 1px black', height: this.props.rowHeight ? this.props.rowHeight : 50, backgroundColor: 'grey'}
+									: {
+											border: 'solid 1px black',
+											height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.rowHeight ? this.props.rowHeight : 50,
+											backgroundColor: 'grey'
+									  }
 							}
 						>
 							<p className={'placeholder-text'} />
@@ -209,10 +222,11 @@ class Droppable extends Component {
 				<div className={'header-wrapper ' + (headerActive ? this.props.activeHeaderClass : '')}>{headerWithProps}</div>
 				{this.props.hideList ? null : shouldScroll && !this.props.disableScroll ? (
 					<VirtualizedScrollBar
+						disableVirtualization={this.props.dynamicElemHeight}
 						stickyElems={draggedElemId ? [draggedElemId] : []}
-						staticRowHeight={this.props.rowHeight ? this.props.rowHeight : 50}
+						staticRowHeight={rowHeight}
 						ref={scrollDiv => (this.scrollBars = scrollDiv)}
-						containerHeight={this.props.containerHeight}
+						containerHeight={this.props.containerHeight - listHeaderHeight}
 					>
 						{isActive ? this.pushPlaceholder(listToRender) : listToRender}
 					</VirtualizedScrollBar>
@@ -230,6 +244,7 @@ Droppable.propTypes = {
 	containerHeight: PropTypes.number.isRequired,
 	placeholderStyle: PropTypes.object,
 	rowHeight: PropTypes.number,
+	dynamicElemHeight: PropTypes.bool,
 	disableScroll: PropTypes.bool
 };
 export default Droppable;

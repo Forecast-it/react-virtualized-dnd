@@ -146,6 +146,7 @@ class Draggable extends Component {
 				let hasDispatched = false;
 				let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
 				let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
+
 				const newLeft = x - this.state.xClickOffset;
 				const newTop = y - this.state.yClickOffset;
 				const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
@@ -163,7 +164,7 @@ class Draggable extends Component {
 				}
 				const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
 				if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
-					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, height: this.draggable ? this.draggable.clientHeight : null};
 					dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
 					hasDispatched = true;
 				}
@@ -210,24 +211,16 @@ class Draggable extends Component {
 
 	getDroppableElemUnderDrag(x, y) {
 		let colUnder = null;
-		// The Element we're dragging
-		//let draggingElement = document.elementFromPoint(x, y);
-		//draggingElement = this.getDraggableParentElement(draggingElement);
 		let draggingElement = this.draggable;
 		// Disable pointer events to look through element
 		if (draggingElement) {
 			draggingElement.style.pointerEvents = 'none';
-			// Call something here to force recalculate style
-			//draggingElement.getBoundingClientRect();
 			// Get element under dragged  (look through)
 			let elementUnder = document.elementFromPoint(x, y);
 			// Reset dragged element's pointers
 			draggingElement.style.pointerEvents = 'all';
-			colUnder = this.getDroppableParentElement(elementUnder);
-		} /*else {
-			let elementUnder = document.elementFromPoint(x, y);
-			colUnder = this.getDroppableParentElement(elementUnder);
-		}*/
+			colUnder = Util.getDroppableParentElement(elementUnder, this.props.dragAndDropGroup);
+		}
 		return colUnder;
 	}
 
@@ -238,54 +231,16 @@ class Draggable extends Component {
 		let cardUnder = null;
 		// The Element we're dragging
 		let draggingElement = this.draggable;
-		// Disable pointer events to look through element
 		if (draggingElement) {
+			// Disable pointer events to look through element
 			draggingElement.style.pointerEvents = 'none';
-			// Call something here to force recalculate style?
-			//draggingElement.getBoundingClientRect();
 			// Get element under dragged tasks (look through)
 			let elementUnder = document.elementFromPoint(x, y);
 			// Reset dragged element's pointers
-			cardUnder = this.getDraggableParentElement(elementUnder);
-			if (!cardUnder) {
-				// Try again just above, to avoid weird flickers in the spaces between cards
-				/*elementUnder = document.elementFromPoint(x, y + 5);
-				cardUnder = this.getDraggableParentElement(elementUnder);
-				*/
-			}
+			cardUnder = Util.getDraggableParentElement(elementUnder);
 			draggingElement.style.pointerEvents = 'all';
 		}
 		return cardUnder;
-	}
-
-	getDroppableParentElement(element) {
-		let count = 0;
-		let maxTries = 15;
-		let droppableParentElem = null;
-		while (element && element.parentNode && !droppableParentElem && element.tagName !== 'body' && count <= maxTries) {
-			const dragAndDropGroup = element.getAttribute('droppablegroup');
-			if (dragAndDropGroup && dragAndDropGroup.includes(this.props.dragAndDropGroup)) {
-				droppableParentElem = element;
-			}
-			element = element.parentNode;
-			count++;
-		}
-		return droppableParentElem;
-	}
-
-	getDraggableParentElement(element) {
-		let count = 0;
-		let maxTries = 10;
-		let draggableParentElem = null;
-		while (element && element.parentNode && !draggableParentElem && element.tagName !== 'body' && count <= maxTries) {
-			if (element.getAttribute('draggableid')) {
-				draggableParentElem = element;
-				break;
-			}
-			element = element.parentNode;
-			count++;
-		}
-		return draggableParentElem;
 	}
 
 	handlePointerCaptureLoss(e) {

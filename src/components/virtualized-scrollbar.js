@@ -144,15 +144,32 @@ class VirtualizedScrollBar extends Component {
 
 		const hasScrolled = this.state.scrollOffset > 0;
 
-		const listToRender = this.props.staticRowHeight ? this.getListToRenderStaticOptimization(childrenWithProps) : this.getListToRender(childrenWithProps);
+		const listToRender = this.props.disableVirtualization
+			? childrenWithProps
+			: this.props.staticRowHeight
+			? this.getListToRenderStaticOptimization(childrenWithProps)
+			: this.getListToRender(childrenWithProps);
 
 		const unrenderedBelow = hasScrolled ? (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.stickyElems ? this.stickyElems.length : 0) : 0;
 		const unrenderedAbove = listToRender && listToRender.length > 0 ? childrenWithProps.length - (listToRender[listToRender.length - 1].props.originalindex + 1) : 0;
-		const belowSpacerStyle = {width: '100%', height: unrenderedBelow ? unrenderedBelow * this.state.rowHeight : 0};
-		const aboveSpacerStyle = {width: '100%', height: unrenderedAbove ? unrenderedAbove * this.state.rowHeight : 0};
+		const belowSpacerStyle = this.props.disableVirtualization ? {width: '100%', height: 0} : {width: '100%', height: unrenderedBelow ? unrenderedBelow * this.state.rowHeight : 0};
+		const aboveSpacerStyle = this.props.disableVirtualization ? {width: '100%', height: 0} : {width: '100%', height: unrenderedAbove ? unrenderedAbove * this.state.rowHeight : 0};
 		if (this.stickyElems && this.stickyElems.length > 0) {
 			listToRender.push(this.stickyElems[0]);
 		}
+
+		const innerStyle = {
+			width: '100%',
+			display: 'flex',
+			flexDirection: 'column',
+			flexGrow: '1'
+		};
+		if (!this.props.disableVirtualization) {
+			innerStyle.minHeight = height;
+			innerStyle.height = height;
+			innerStyle.maxHeight = height;
+		}
+
 		return (
 			<Scrollbars
 				onScroll={this.handleScroll.bind(this)}
@@ -161,19 +178,7 @@ class VirtualizedScrollBar extends Component {
 				autoHeightMax={this.props.containerHeight}
 				autoHeightMin={this.props.containerHeight}
 			>
-				<div
-					className={'virtualized-scrollbar-inner'}
-					style={{
-						width: '100%',
-						display: 'flex',
-						flexDirection: 'column',
-						flexGrow: '1',
-						minHeight: height,
-						height: height,
-						maxHeight: height
-					}}
-					ref={div => (this._test = div)}
-				>
+				<div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this._test = div)}>
 					<div style={belowSpacerStyle} className={'below-spacer'} />
 					{listToRender}
 					<div style={aboveSpacerStyle} className={'above-spacer'} />
