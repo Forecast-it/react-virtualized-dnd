@@ -18,8 +18,9 @@ class Draggable extends Component {
 			dragSensitivityY: 15
 		};
 		this.handleDragShortcuts = this.handleDragShortcuts.bind(this);
-		this.pointerSupport = !!window.PointerEvent;
+		this.pointerSupport = false; //!!window.PointerEvent;
 		this.onPointerMove = this.onPointerMove.bind(this);
+		this.onPointerUp = this.onPointerUp.bind(this);
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
 	}
 
@@ -57,7 +58,8 @@ class Draggable extends Component {
 			return;
 		}
 		if (!this.pointerSupport) {
-			document.addEventListener('mousemove', this.onPointerMove, true);
+			document.addEventListener('mousemove', this.onPointerMove);
+			document.addEventListener('click', this.onPointerUp);
 		}
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
 			e.preventDefault();
@@ -97,7 +99,6 @@ class Draggable extends Component {
 		}
 		if (this.pointerSupport && this.state.pointerId) {
 			this.releasePointerCapture();
-			//this.draggable.releasePointerCapture(this.state.pointerId);
 		}
 		if (this.state.didMoveMinDistanceDuringDrag && this.state.minDragDistanceMoved) {
 			dispatch(this.dragAndDropGroup.endEvent);
@@ -116,7 +117,8 @@ class Draggable extends Component {
 			wasClicked: false
 		});
 		if (!this.pointerSupport) {
-			document.removeEventListener('mousemove', this.onPointerMove, true);
+			document.removeEventListener('mousemove', this.onPointerMove);
+			document.removeEventListener('mouseup', this.onPointerUp);
 		}
 	}
 	onPointerCancel() {
@@ -135,6 +137,7 @@ class Draggable extends Component {
 		});
 		if (!this.pointerSupport) {
 			document.removeEventListener('mousemove', this.onPointerMove);
+			document.removeEventListener('mouseup', this.onPointerUp);
 		}
 		this.releasePointerCapture();
 	}
@@ -295,7 +298,7 @@ class Draggable extends Component {
 			propsObject.onLostPointerCapture = e => this.handlePointerCaptureLoss(e);
 		} else {
 			propsObject.onMouseDown = e => this.onPointerDown(e);
-			propsObject.onMouseUp = e => this.onPointerUp(e);
+			//propsObject.onMouseUp = e => this.onPointerUp(e);
 		}
 
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
