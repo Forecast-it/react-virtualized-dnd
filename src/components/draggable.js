@@ -46,6 +46,12 @@ class Draggable extends Component {
 		}
 	}
 
+	releasePointerCapture() {
+		if (this.pointerSupport && this.state.pointerId && this.draggable) {
+			this.draggable.releasePointerCapture(this.state.pointerId);
+		}
+	}
+
 	onPointerDown(e) {
 		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disableDrag) {
 			return;
@@ -90,8 +96,8 @@ class Draggable extends Component {
 			return;
 		}
 		if (this.pointerSupport && this.state.pointerId) {
-			//this.draggable.releasePointerCapture(e.pointerId);
-			this.draggable.releasePointerCapture(this.state.pointerId);
+			this.releasePointerCapture();
+			//this.draggable.releasePointerCapture(this.state.pointerId);
 		}
 		if (this.state.didMoveMinDistanceDuringDrag && this.state.minDragDistanceMoved) {
 			dispatch(this.dragAndDropGroup.endEvent);
@@ -130,80 +136,87 @@ class Draggable extends Component {
 		if (!this.pointerSupport) {
 			document.removeEventListener('mousemove', this.onPointerMove);
 		}
-		if (this.pointerSupport && this.state.pointerId) {
-			this.draggable.releasePointerCapture(this.state.pointerId);
+		this.releasePointerCapture();
+	}
+
+	moveElement(x, y) {
+		let hasDispatched = false;
+		let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
+		let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
+
+		const newLeft = x - this.state.xClickOffset;
+		const newTop = y - this.state.yClickOffset;
+		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
+		if (minDistanceMoved && !this.state.minDragDistanceMoved) {
+			this.setState({didMoveMinDistanceDuringDrag: true});
 		}
+		if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
+			hasDispatched = true;
+			return;
+		}
+		if (!droppableDraggedOver) {
+			dispatch(this.dragAndDropGroup.resetEvent);
+		}
+		const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
+		if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, height: this.draggable ? this.draggable.clientHeight : null};
+			dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
+			hasDispatched = true;
+		}
+		// We're hovering over a droppable and a draggable
+		if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
+			if (!draggableHoveringOver.getAttribute('draggableid').includes('placeholder')) {
+				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('draggableid')) {
+					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, draggableHoveringOver.getAttribute('draggableid'), x, y);
+					hasDispatched = true;
+					this.droppableDraggedOver = droppableDraggedOver;
+					this.draggableHoveringOver = draggableHoveringOver.getAttribute('draggableid');
+				}
+			}
+		} else if (droppableDraggedOver && shouldRegisterAsDrag) {
+			// We're hovering over a droppable, but no draggable
+			this.droppableDraggedOver = droppableDraggedOver;
+			this.draggableHoveringOver = null;
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, null, x, y);
+			hasDispatched = true;
+		}
+		if (!hasDispatched) {
+			// If nothing changed, we still wanna notify move for scrolling
+			dispatch(this.dragAndDropGroup.moveEvent, null, null, null, x, y);
+			hasDispatched = true;
+		}
+		this.setState({
+			isDragging: shouldRegisterAsDrag,
+			// We need to move more than the drag sensitivity before we consider it an intended drag
+			minDragDistanceMoved: minDistanceMoved,
+			left: newLeft,
+			top: newTop
+		});
 	}
 
 	onPointerMove(e) {
-		e.preventDefault();
-		e.stopPropagation();
 		if (this.props.disableDrag || !this.state.wasClicked) {
 			return;
 		}
+		const x = e.clientX;
+		const y = e.clientY;
+		if (this.pointerSupport) {
+			this.setPointerCapture();
+		}
+		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
+		if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
+			console.log('Returned because no minDistanceMoved', this.state.startX, x);
+			//this.releasePointerCapture();
+			return;
+		}
+		e.preventDefault();
+		e.stopPropagation();
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
-			const moveCard = (x, y) => {
-				let hasDispatched = false;
-				let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
-				let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
-
-				const newLeft = x - this.state.xClickOffset;
-				const newTop = y - this.state.yClickOffset;
-				const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
-				if (minDistanceMoved && !this.state.minDragDistanceMoved) {
-					this.setState({didMoveMinDistanceDuringDrag: true});
-				}
-				if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
-					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
-					hasDispatched = true;
-					return;
-				}
-				if (!droppableDraggedOver) {
-					dispatch(this.dragAndDropGroup.resetEvent);
-				}
-				const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
-				if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
-					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, height: this.draggable ? this.draggable.clientHeight : null};
-					dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
-					hasDispatched = true;
-				}
-				// We're hovering over a droppable and a draggable
-				if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
-					if (!draggableHoveringOver.getAttribute('draggableid').includes('placeholder')) {
-						if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('draggableid')) {
-							const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-							dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, draggableHoveringOver.getAttribute('draggableid'), x, y);
-							hasDispatched = true;
-							this.droppableDraggedOver = droppableDraggedOver;
-							this.draggableHoveringOver = draggableHoveringOver.getAttribute('draggableid');
-						}
-					}
-				} else if (droppableDraggedOver && shouldRegisterAsDrag) {
-					// We're hovering over a droppable, but no draggable
-					this.droppableDraggedOver = droppableDraggedOver;
-					this.draggableHoveringOver = null;
-					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, null, x, y);
-					hasDispatched = true;
-				}
-				if (!hasDispatched) {
-					// If nothing changed, we still wanna notify move for scrolling
-					dispatch(this.dragAndDropGroup.moveEvent, null, null, null, x, y);
-					hasDispatched = true;
-				}
-				this.setState({
-					isDragging: shouldRegisterAsDrag,
-					// We need to move more than the drag sensitivity before we consider it an intended drag
-					minDragDistanceMoved: minDistanceMoved,
-					left: newLeft,
-					top: newTop
-				});
-			};
-			const x = e.clientX;
-			const y = e.clientY;
-			if (this.pointerSupport) this.setPointerCapture();
-			requestAnimationFrame(() => moveCard(x, y));
+			requestAnimationFrame(() => this.moveElement(x, y));
 		} else {
 			this.onPointerCancel();
 		}
@@ -269,18 +282,21 @@ class Draggable extends Component {
 			key: this.props.draggableId,
 			draggableid: this.props.draggableId,
 			index: this.props.innerIndex,
-			onPointerDown: e => (this.pointerSupport ? this.onPointerDown(e) : null),
-			onPointerMove: e => (this.pointerSupport ? this.onPointerMove(e) : null),
-			onPointerUp: e => (this.pointerSupport ? this.onPointerUp(e) : null),
-			onPointerCancel: e => (this.pointerSupport ? this.onPointerCancel(e) : null),
-			onMouseDown: e => (!this.pointerSupport ? this.onPointerDown(e) : null),
-			onMouseUp: e => (!this.pointerSupport ? this.onPointerUp(e) : null),
-			onLostPointerCapture: e => (this.pointerSupport ? this.handlePointerCaptureLoss(e) : null),
 			tabIndex: '0',
 			ref: div => (this.draggable = div),
 			'aria-grabbed': true,
 			'aria-dropeffect': 'move'
 		};
+		if (this.pointerSupport) {
+			propsObject.onPointerDown = e => this.onPointerDown(e);
+			propsObject.onPointerMove = e => this.onPointerMove(e);
+			propsObject.onPointerUp = e => this.onPointerUp(e);
+			propsObject.onPointerCancel = e => this.onPointerCancel(e);
+			propsObject.onLostPointerCapture = e => this.handlePointerCaptureLoss(e);
+		} else {
+			propsObject.onMouseDown = e => this.onPointerDown(e);
+			propsObject.onMouseUp = e => this.onPointerUp(e);
+		}
 
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 
