@@ -18,7 +18,7 @@ class Draggable extends Component {
 			dragSensitivityY: 15
 		};
 		this.handleDragShortcuts = this.handleDragShortcuts.bind(this);
-		this.pointerSupport = false; //!!window.PointerEvent;
+		this.usePointerEvents = this.props.usePointerEvents && !!window.PointerEvent;
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
@@ -48,7 +48,7 @@ class Draggable extends Component {
 	}
 
 	releasePointerCapture() {
-		if (this.pointerSupport && this.state.pointerId && this.draggable) {
+		if (this.usePointerEvents && this.state.pointerId && this.draggable) {
 			this.draggable.releasePointerCapture(this.state.pointerId);
 		}
 	}
@@ -57,11 +57,11 @@ class Draggable extends Component {
 		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disableDrag) {
 			return;
 		}
-		if (!this.pointerSupport) {
+		if (!this.usePointerEvents) {
 			document.addEventListener('mousemove', this.onPointerMove);
 			document.addEventListener('mouseup', this.onPointerUp);
 		}
-		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
+		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
 			//e.preventDefault();
 			//e.stopPropagation();
 			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
@@ -97,7 +97,7 @@ class Draggable extends Component {
 		if (this.props.disableDrag) {
 			return;
 		}
-		if (this.pointerSupport && this.state.pointerId) {
+		if (this.usePointerEvents && this.state.pointerId) {
 			this.releasePointerCapture();
 		}
 		if (this.state.didMoveMinDistanceDuringDrag && this.state.minDragDistanceMoved) {
@@ -116,7 +116,7 @@ class Draggable extends Component {
 			left: null,
 			wasClicked: false
 		});
-		if (!this.pointerSupport) {
+		if (!this.usePointerEvents) {
 			document.removeEventListener('mousemove', this.onPointerMove);
 			document.removeEventListener('mouseup', this.onPointerUp);
 		}
@@ -135,7 +135,7 @@ class Draggable extends Component {
 			cardTop: 0,
 			wasClicked: false
 		});
-		if (!this.pointerSupport) {
+		if (!this.usePointerEvents) {
 			document.removeEventListener('mousemove', this.onPointerMove);
 			document.removeEventListener('mouseup', this.onPointerUp);
 		}
@@ -207,7 +207,7 @@ class Draggable extends Component {
 		}
 		const x = e.clientX;
 		const y = e.clientY;
-		if (this.pointerSupport) {
+		if (this.usePointerEvents) {
 			this.setPointerCapture();
 		}
 		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
@@ -217,7 +217,7 @@ class Draggable extends Component {
 		}
 		e.preventDefault();
 		e.stopPropagation();
-		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
+		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
 			requestAnimationFrame(() => this.moveElement(x, y));
 		} else {
 			this.onPointerCancel();
@@ -289,7 +289,7 @@ class Draggable extends Component {
 			'aria-grabbed': true,
 			'aria-dropeffect': 'move'
 		};
-		if (this.pointerSupport) {
+		if (this.usePointerEvents) {
 			propsObject.onPointerDown = e => this.onPointerDown(e);
 			propsObject.onPointerMove = e => this.onPointerMove(e);
 			propsObject.onPointerUp = e => this.onPointerUp(e);
@@ -309,7 +309,8 @@ class Draggable extends Component {
 Draggable.propTypes = {
 	dragAndDropGroup: PropTypes.string.isRequired,
 	draggableId: PropTypes.string.isRequired,
-	dragDisabled: PropTypes.bool
+	dragDisabled: PropTypes.bool,
+	usePointerEvents: PropTypes.bool
 };
 
 export default Draggable;
