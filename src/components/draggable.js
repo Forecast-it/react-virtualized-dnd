@@ -212,8 +212,8 @@ class Draggable extends Component {
 	getDroppableElemUnderDrag(x, y) {
 		let colUnder = null;
 		let draggingElement = this.draggable;
-		// Disable pointer events to look through element
 		if (draggingElement) {
+			// Disable pointer events to look through element
 			draggingElement.style.pointerEvents = 'none';
 			// Get element under dragged  (look through)
 			let elementUnder = document.elementFromPoint(x, y);
