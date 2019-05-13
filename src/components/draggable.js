@@ -59,11 +59,11 @@ class Draggable extends Component {
 		}
 		if (!this.pointerSupport) {
 			document.addEventListener('mousemove', this.onPointerMove);
-			document.addEventListener('click', this.onPointerUp);
+			document.addEventListener('mouseup', this.onPointerUp);
 		}
 		if (!this.pointerSupport || e.buttons === 1 || e.pointerType === 'touch') {
-			e.preventDefault();
-			e.stopPropagation();
+			//e.preventDefault();
+			//e.stopPropagation();
 			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 			if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
@@ -212,7 +212,6 @@ class Draggable extends Component {
 		}
 		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
 		if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
-			console.log('Returned because no minDistanceMoved', this.state.startX, x);
 			//this.releasePointerCapture();
 			return;
 		}

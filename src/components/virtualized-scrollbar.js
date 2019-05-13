@@ -141,7 +141,6 @@ class VirtualizedScrollBar extends Component {
 		const rowCount = children.length;
 		const height = rowCount * this.state.elemHeight;
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index}));
-
 		const hasScrolled = this.state.scrollOffset > 0;
 
 		const listToRender = this.props.disableVirtualization

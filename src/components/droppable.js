@@ -65,7 +65,7 @@ class Droppable extends Component {
 	}
 
 	onDragEnd(draggedElem) {
-		this.setState({currentlyActiveDraggable: null});
+		this.setState({currentlyActiveDraggable: null}, () => this.forceUpdate());
 	}
 
 	onDragStart(draggedElem) {
