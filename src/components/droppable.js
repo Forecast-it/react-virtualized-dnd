@@ -119,16 +119,16 @@ class Droppable extends Component {
 	pushPlaceholder(children) {
 		let pushedPlaceholder = false;
 		const listToRender = [...children];
-
+		const placeholderHeight = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
 		let style;
 
 		if (this.props.placeholderStyle) {
 			style = {...this.props.placeholderStyle};
-			style.height = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
+			style.height = placeholderHeight;
 		} else {
 			style = {
 				border: '1px dashed grey',
-				height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight,
+				height: placeholderHeight,
 				backgroundColor: 'transparent'
 			};
 		}
