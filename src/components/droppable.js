@@ -22,6 +22,7 @@ class Droppable extends Component {
 		this.onDragEnd = this.onDragEnd.bind(this);
 		this.onDragStart = this.onDragStart.bind(this);
 		this.getDraggedElemHeight = this.getDraggedElemHeight.bind(this);
+		this.defaultElemHeight = 50;
 		//this.getShouldAlwaysRender = this.getShouldAlwaysRender.bind(this);
 	}
 
@@ -112,7 +113,7 @@ class Droppable extends Component {
 		if (this.state.currentlyActiveDraggable) {
 			return this.state.currentlyActiveDraggable.height;
 		}
-		return this.props.elemHeight ? this.props.elemHeight : 50;
+		return this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
 	}
 
 	pushPlaceholder(children) {
@@ -123,11 +124,11 @@ class Droppable extends Component {
 
 		if (this.props.placeholderStyle) {
 			style = {...this.props.placeholderStyle};
-			style.height = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50;
+			style.height = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
 		} else {
 			style = {
 				border: '1px dashed grey',
-				height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50,
+				height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight,
 				backgroundColor: 'transparent'
 			};
 		}
@@ -147,12 +148,7 @@ class Droppable extends Component {
 			});
 		} else if (!pushedPlaceholder) {
 			listToRender.push(
-				<div
-					key={'placeholder'}
-					draggableid={'placeholder'}
-					className={'draggable-test'}
-					style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: this.props.elemHeight ? this.props.elemHeight : 50, backgroundColor: 'grey'}}
-				>
+				<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={style}>
 					<p className={'placeholder-text'} />
 				</div>
 			);
@@ -198,7 +194,7 @@ class Droppable extends Component {
 		const listHeaderHeight = this.props.listHeader != null ? this.props.listHeaderHeight : 0;
 		let outerContainerHeight = this.props.containerHeight;
 		if (!this.props.dynamicElemHeight) {
-			elemHeight = this.props.hideList ? 0 : this.props.elemHeight ? this.props.elemHeight : 50;
+			elemHeight = this.props.hideList ? 0 : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
 			rowsTotalHeight = listToRender.length * elemHeight;
 			// Container smaller than calculated height of rows?
 			shouldScroll = this.props.containerHeight < rowsTotalHeight;
