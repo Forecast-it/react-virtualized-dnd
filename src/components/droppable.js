@@ -126,9 +126,9 @@ class Droppable extends Component {
 			style.height = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50;
 		} else {
 			style = {
-				border: 'solid 1px black',
+				border: '1px dashed grey',
 				height: this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : 50,
-				backgroundColor: 'grey'
+				backgroundColor: 'transparent'
 			};
 		}
 
