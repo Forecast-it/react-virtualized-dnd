@@ -57,6 +57,10 @@ class Draggable extends Component {
 		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disableDrag) {
 			return;
 		}
+		if (e) {
+			e.preventDefault();
+			e.stopPropagation();
+		}
 		if (!this.usePointerEvents) {
 			document.addEventListener('mousemove', this.onPointerMove);
 			document.addEventListener('mouseup', this.onPointerUp);
