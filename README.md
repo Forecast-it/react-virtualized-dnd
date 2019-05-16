@@ -30,7 +30,7 @@ React-Virtualized-DnD utilizes a three part abstraction for drag and drop:
 -   _Droppables_, which indicate a drop zone that _Draggables_ can be dropped on, and create the virtualizing container.
     _Draggables_ and _Droppables_ can be organized in groups.
 
-_Droppables_ use an internal scrollbar to virtualize its children, and the _DragDropContext_ offers the option to include a horizontal scrollbar.
+_Droppables_ use an internal scrollbar to virtualize its children, and the _DragDropContext_ offers the option to include an outer scrollbar that can be scrolled while dragging.
 
 React-virtualized-dnd places a placeholder in droppables during drag, which is placed after the draggable element hovered over during drag. The placeholderId represents the id of the element it was placed after.
 On drag end, the _DragDropContext_ returns the placeholderId.
@@ -47,7 +47,7 @@ class Example extends Component {
     const name = 'my-group';
     const elemsToRender = [... your data here ...];
 		return (
-			<DragDropContext dragAndDropGroup={name} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
+			<DragDropContext dragAndDropGroup={name} onDragEnd={this.onDragEnd.bind(this)} outerScrollBar={true}>
 				<div className={'your-drag-container'}>
 					{elemsToRender.map((elem, index) => (
 						<div className={'your-droppable-container'}>
