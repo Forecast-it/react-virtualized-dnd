@@ -53,6 +53,20 @@ class Draggable extends Component {
 		}
 	}
 
+	removeDragEventListeners() {
+		if (!this.usePointerEvents) {
+			document.removeEventListener('mousemove', this.onPointerMove);
+			document.removeEventListener('mouseup', this.onPointerUp);
+			// Remove the click blocker after ended drag (on next available frame)
+			requestAnimationFrame(() => document.removeEventListener('click', this.clickBlocker, true));
+		}
+	}
+
+	clickBlocker(e) {
+		e.stopPropagation();
+		e.preventDefault();
+	}
+
 	onPointerDown(e) {
 		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disableDrag) {
 			return;
@@ -120,10 +134,7 @@ class Draggable extends Component {
 			left: null,
 			wasClicked: false
 		});
-		if (!this.usePointerEvents) {
-			document.removeEventListener('mousemove', this.onPointerMove);
-			document.removeEventListener('mouseup', this.onPointerUp);
-		}
+		this.removeDragEventListeners();
 	}
 	onPointerCancel() {
 		dispatch(this.dragAndDropGroup.resetEvent);
@@ -139,10 +150,7 @@ class Draggable extends Component {
 			cardTop: 0,
 			wasClicked: false
 		});
-		if (!this.usePointerEvents) {
-			document.removeEventListener('mousemove', this.onPointerMove);
-			document.removeEventListener('mouseup', this.onPointerUp);
-		}
+		this.removeDragEventListeners();
 		this.releasePointerCapture();
 	}
 
@@ -219,6 +227,7 @@ class Draggable extends Component {
 			//this.releasePointerCapture();
 			return;
 		}
+		document.addEventListener('click', this.clickBlocker, true);
 		e.preventDefault();
 		e.stopPropagation();
 		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
