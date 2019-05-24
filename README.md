@@ -100,7 +100,7 @@ The placeholder ID can be used to determine where to place the dragged element o
 | dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses           |
 | draggableId      | string   | yes          | Unique identifier for the draggable                                      |
 | dragActiveClass  | string   | no           | CSS class applied to a draggable element during an active drag           |
-| dragDisabled     | bool     | no           | Flag to disabled dragging of element                                     |
+| disabled         | bool     | no           | Flag to disabled dragging of element                                     |
 | usePointerEvents | bool     | no           | Flag to enable pointer-event based implementation. Experimental for now. |
 
 Draggables will ignore drags started by clicking on any element with the "no-drag" css class. This can be used to control drag interactions with interactive elements, such as inputs or buttons.

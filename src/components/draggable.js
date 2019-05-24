@@ -68,7 +68,7 @@ class Draggable extends Component {
 	}
 
 	onPointerDown(e) {
-		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disableDrag) {
+		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disabled) {
 			return;
 		}
 		if (e) {
@@ -112,7 +112,7 @@ class Draggable extends Component {
 	onPointerUp(e) {
 		e.preventDefault();
 		e.stopPropagation();
-		if (this.props.disableDrag) {
+		if (this.props.disabled) {
 			return;
 		}
 		if (this.usePointerEvents && this.state.pointerId) {
@@ -214,7 +214,7 @@ class Draggable extends Component {
 	}
 
 	onPointerMove(e) {
-		if (this.props.disableDrag || !this.state.wasClicked) {
+		if (this.props.disabled || !this.state.wasClicked) {
 			return;
 		}
 		const x = e.clientX;
