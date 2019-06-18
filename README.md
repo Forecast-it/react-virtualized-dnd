@@ -85,6 +85,7 @@ class Example extends Component {
 | scrollXSpeed             | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                                                                                    |
 | scrollContainerHeight    | number   | no, yes with outerScrollBar | Height of the outer scrollable container                                                                                                  |
 | scrollContainerMinHeight | number   | no                          | Minimum height of the outer scrollable container                                                                                          |
+| onScroll                 | func     | no                          | Function fired when the DragDropContext's outer scrollbar scrolls                                                                         |
 | onDragEnd                | function | no                          | Function fired on drag end with the source object, the droppableId of the destination, and the ID of the placeholder dropped on as params |
 | onDragCancel             | function | no                          | Function fired on drag end if the drop did not occur inside a droppable with the draggableId of the dragged element as params             |
 | onDragStart              | function | no                          | Function fired on drag start with the draggableId of the dragged element as params                                                        |

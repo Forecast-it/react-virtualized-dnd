@@ -271,6 +271,7 @@ class DragDropContext extends Component {
 		return this.props.outerScrollBar ? (
 			<div ref={div => (this.container = div)} className={'drag-drop-context'} style={{display: 'flex', flexDirection: 'column'}}>
 				<Scrollbars
+					onScroll={this.props.onScroll}
 					ref={scrollDiv => (this.outerScrollBar = scrollDiv)}
 					autoHeight={true}
 					autoHeightMin={this.props.scrollContainerMinHeight != null ? this.props.scrollContainerMinHeight : 1}
