@@ -177,6 +177,7 @@ class DynamicHeightExample extends Component {
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
 										dynamicElemHeight={true}
+										minElemHeight={50}
 										activeHeaderClass={'header-active'}
 										listHeader={getListHeader(index)}
 										listHeaderHeight={60}
@@ -199,6 +200,7 @@ class DynamicHeightExample extends Component {
 									<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 										<Droppable
 											dynamicElemHeight={true}
+											minElemHeight={50}
 											activeHeaderClass={'header-active'}
 											listHeader={getListHeader(index)}
 											listHeaderHeight={60}

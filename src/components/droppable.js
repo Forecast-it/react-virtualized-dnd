@@ -226,7 +226,9 @@ class Droppable extends Component {
 				<div className={'header-wrapper ' + (headerActive ? this.props.activeHeaderClass : '')}>{headerWithProps}</div>
 				{this.props.hideList ? null : shouldScroll && !this.props.disableScroll ? (
 					<VirtualizedScrollBar
-						disableVirtualization={this.props.dynamicElemHeight}
+						dynamicElemHeight={this.props.dynamicElemHeight}
+						minElemHeight={this.props.minElemHeight}
+						disableVirtualization={this.props.disableVirtualization}
 						stickyElems={draggedElemId ? [draggedElemId] : []}
 						staticElemHeight={elemHeight}
 						ref={scrollDiv => (this.scrollBars = scrollDiv)}
