@@ -267,11 +267,19 @@ class DragDropContext extends Component {
 		}
 	}
 
+	handleScroll(e) {
+		const scrollOffsetY = this.outerScrollBar ? this.outerScrollBar.getScrollTop() : 0;
+		const scrollOffsetX = this.outerScrollBar ? this.outerScrollBar.getScrollLeft() : 0;
+		if (this.props.onScroll) {
+			this.props.onScroll({scrollX: scrollOffsetX, scrollY: scrollOffsetY});
+		}
+	}
+
 	render() {
 		return this.props.outerScrollBar ? (
 			<div ref={div => (this.container = div)} className={'drag-drop-context'} style={{display: 'flex', flexDirection: 'column'}}>
 				<Scrollbars
-					onScroll={this.props.onScroll}
+					onScroll={this.handleScroll.bind(this)}
 					ref={scrollDiv => (this.outerScrollBar = scrollDiv)}
 					autoHeight={true}
 					autoHeightMin={this.props.scrollContainerMinHeight != null ? this.props.scrollContainerMinHeight : 1}
