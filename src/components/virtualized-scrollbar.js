@@ -6,6 +6,9 @@ import Rebound from 'rebound';
 class VirtualizedScrollBar extends Component {
 	constructor(props) {
 		super(props);
+		const minElemHeight = props.minElemHeight;
+		const containerHeight = props.containerHeight;
+		const maxElemsToRender = Math.floor(containerHeight / minElemHeight);
 		this.state = {
 			// Update this when dynamic row height becomes a thing
 			elemHeight: this.props.staticElemHeight ? this.props.staticElemHeight : 50,
@@ -17,7 +20,9 @@ class VirtualizedScrollBar extends Component {
 			unrenderedAbove: 0,
 			unrenderedAboveHeight: 0,
 			renderBaseIdx: 0,
-			renderBaseBounds: {}
+			renderBaseBounds: {},
+			renderTopIdx: maxElemsToRender,
+			renderTopBounds: {}
 		};
 		this.childRefs = [];
 		this.stickyElems = null;
@@ -29,11 +34,15 @@ class VirtualizedScrollBar extends Component {
 		this.spring = this.springSystem.createSpring();
 		this.spring.setOvershootClampingEnabled(true);
 		this.spring.addListener({onSpringUpdate: this.handleSpringUpdate.bind(this)});
-		// Get height of renderBase elem for dynamic height calculation
-		if (this.props.dynamicElemHeight && this.childRefs[0]) {
-			this.setState({
-				renderBaseBounds: this.childRefs[0].getBoundingClientRect()
-			});
+
+		// Initial start/end for Dynamic height
+		if (this.props.dynamicElemHeight) {
+			if (this.childRefs[this.state.renderBaseIdx] && this.childRefs[this.state.renderTopIdx]) {
+				this.setState({
+					renderBaseBounds: this.childRefs[this.state.renderBaseIdx].getBoundingClientRect(),
+					renderTopBounds: this.childRefs[this.state.renderTopIdx].getBoundingClientRect()
+				});
+			}
 		}
 	}
 
@@ -45,6 +54,15 @@ class VirtualizedScrollBar extends Component {
 			const newUnrenderedBelowHeight = prevState.renderBaseIdx > this.state.renderBaseIdx ? curRenderBaseHeight + curUnrenderedBelow : curRenderBaseHeight - curUnrenderedBelow;
 			if (this.childRefs[idx]) {
 				this.setState({renderBaseBounds: this.childRefs[idx].getBoundingClientRect(), unrenderedBelowHeight: newUnrenderedBelowHeight});
+			}
+		}
+		if (prevState.renderTopIdx !== this.state.renderTopIdx) {
+			const idx = this.state.renderTopIdx;
+			const curUnrederedAbove = this.state.unrenderedAboveHeight;
+			const curRenderTopHeight = this.state.renderTopBounds.bottom - this.state.renderBaseBounds.top;
+			const newUnrenderedAboveHeight = prevState.renderTopIdx < idx ? curRenderTopHeight + curUnrederedAbove : curRenderTopHeight - curUnrederedAbove;
+			if (this.childRefs[idx]) {
+				this.setState({renderTopBounds: this.childRefs[idx].getBoundingClientRect(), unrenderedAboveHeight: newUnrenderedAboveHeight});
 			}
 		}
 	}
@@ -135,11 +153,8 @@ class VirtualizedScrollBar extends Component {
 	getListToRenderDynamic(list) {
 		let listToRender = [];
 		this.stickyElems = [];
-		const minElemHeight = this.props.minElemHeight;
-		const containerHeight = this.props.containerHeight;
-		const maxElemsToRender = Math.floor(containerHeight / minElemHeight);
 
-		if (!containerHeight || this.state.scrollOffset == null || this.state.renderBaseIdx == null) {
+		if (this.state.renderTopIdx == null || this.state.renderBaseIdx == null) {
 			return list;
 		}
 		list.forEach((child, index) => {
@@ -149,8 +164,8 @@ class VirtualizedScrollBar extends Component {
 			}
 		});
 
-		const start = Math.max(this.state.renderBaseIdx - this.state.elemOverScan, 0);
-		const end = this.state.renderBaseIdx + maxElemsToRender + this.state.elemOverScan;
+		const start = Math.max(this.state.renderBaseIdx, 0); // TODO: Overscan
+		const end = this.state.renderBaseIdx + this.state.renderTopIdx;
 
 		// Render from base up to max +1 (because slice isn't inclusive)
 		listToRender = list.slice(start, end + 1);
@@ -163,18 +178,33 @@ class VirtualizedScrollBar extends Component {
 	// Save scroll position in state for virtualization
 	handleScroll(e) {
 		const scrollOffset = this.scrollBars ? this.scrollBars.getScrollTop() : 0;
-		if (this.state.renderBaseBounds && scrollOffset > this.state.renderBaseBounds.bottom) {
+		let newBaseIdx = null;
+		let newTopIdx = null;
+		const curBaseIdx = this.state.renderBaseIdx;
+		const curTopIdx = this.state.renderTopIdx;
+
+		if (this.state.renderBaseBounds && scrollOffset > this.state.renderBaseBounds.top) {
 			// We've scrolled down past our renderbase. Move one down.
-			const idx = this.state.renderBaseIdx;
-			const newIndex = Math.min(idx + 1, this.numChildren ? this.numChildren : this.MAX_RENDERS);
-			this.setState({renderBaseIdx: newIndex});
+			newBaseIdx = Math.min(curBaseIdx + 1, this.numChildren ? this.numChildren : this.MAX_RENDERS);
 		} else if (this.state.renderBaseBounds && scrollOffset < this.state.renderBaseBounds.top) {
 			// We've scrolled up over our renderbase. Move one up.
-			this.setState(prevState => {
-				return {renderBaseIdx: Math.max(prevState.renderBaseIdx - 1, 0)};
-			});
-		} else {
-			console.log('SCROLL BUT NO UPDATE');
+			newBaseIdx = Math.max(curBaseIdx - 1, 0);
+		}
+
+		if (this.state.renderTopBounds && this.props.containerHeight + scrollOffset > this.state.renderTopBounds.top) {
+			// We've scrolled down past our renderTop. Move one down.
+			newTopIdx = Math.min(curTopIdx + 1, this.numChildren ? this.numChildren : this.MAX_RENDERS);
+		} else if (this.state.renderTopBounds && this.props.containerHeight + scrollOffset < this.state.renderTopBounds.top) {
+			// We've scrolled up over our renderbase. Move one up.
+			newTopIdx = Math.max(curTopIdx - 1, 0);
+		}
+
+		if (newBaseIdx != null && newTopIdx != null) {
+			this.setState({renderBaseIdx: newBaseIdx, renderTopIdx: newTopIdx});
+		} else if (newBaseIdx != null) {
+			this.setState({renderBaseIdx: newBaseIdx});
+		} else if (newTopIdx != null) {
+			this.setState({renderTopIdx: newTopIdx});
 		}
 		if (this.state.scrollOffset !== scrollOffset) {
 			this.setState({scrollOffset: scrollOffset});
@@ -219,10 +249,14 @@ class VirtualizedScrollBar extends Component {
 		const belowSpacerStyle = this.props.disableVirtualization
 			? {width: '100%', height: 0}
 			: this.props.dynamicElemHeight
-			? {width: '100%', height: this.state.unrenderedBelowHeight} // TODO MORE OF THIS
+			? {width: '100%', height: this.state.unrenderedBelowHeight}
 			: {width: '100%', height: unrenderedBelow ? unrenderedBelow * elemHeight : 0};
 
-		const aboveSpacerStyle = this.props.disableVirtualization ? {width: '100%', height: 0} : {width: '100%', height: unrenderedAbove ? unrenderedAbove * elemHeight : 0};
+		const aboveSpacerStyle = this.props.disableVirtualization
+			? {width: '100%', height: 0}
+			: this.props.dynamicElemHeight
+			? {width: '100%', height: this.state.unrenderedAboveHeight}
+			: {width: '100%', height: unrenderedAbove ? unrenderedAbove * elemHeight : 0};
 
 		if (this.stickyElems && this.stickyElems.length > 0) {
 			listToRender.push(this.stickyElems[0]);
