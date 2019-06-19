@@ -97,6 +97,7 @@ class DynamicVirtualizedScrollbar extends Component {
     if (!this.firstElemBounds) {
       this.firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
     }
+    console.log(this.itemsContainer.firstElementChild);
     const viewPortTop = this.state.containerTop + scrollOffset;
     const viewPortBottom = this.state.containerTop + scrollOffset + this.props.containerHeight;
 
@@ -112,7 +113,6 @@ class DynamicVirtualizedScrollbar extends Component {
         }
       }, () => this.firstElemBounds = null);
     }
-    console.log(this.lastElemBounds, this.viewPortBottom);
     // If viewport bottom has crossed last elem bottom, move top one down the list
     if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
       const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
@@ -200,6 +200,28 @@ class DynamicVirtualizedScrollbar extends Component {
       flexGrow: '1'
     }
 
+    let firstIndicatorStyle;
+    let lastIndicatorStyle;
+    if (this.firstElemBounds) {
+      firstIndicatorStyle = {
+        top: this.firstElemBounds.top,
+        left: this.firstElemBounds.left,
+        width: this.firstElemBounds.right - this.firstElemBounds.left,
+        height: this.firstElemBounds.bottom - this.firstElemBounds.top,
+        background: 'transparent',
+        border: 'solid 3px green',
+        position: 'fixed'
+      }
+      lastIndicatorStyle = {
+        top: this.lastElemBounds.top,
+        left: this.lastElemBounds.left,
+        width: this.lastElemBounds.right - this.lastElemBounds.left,
+        height: this.lastElemBounds.bottom - this.lastElemBounds.top,
+        background: 'transparent',
+        border: 'solid 3px blue',
+        position: 'fixed'
+      }
+    }
     return (
       <Scrollbars
         onScroll={this.handleScroll.bind(this)}
@@ -208,6 +230,9 @@ class DynamicVirtualizedScrollbar extends Component {
         autoHeightMax={this.props.containerHeight}
         autoHeightMin={this.props.containerHeight}
       >
+        <div className={'first-indicator'} style={firstIndicatorStyle} />
+        <div className={'last-indicator'} style={lastIndicatorStyle} />
+
         <div className={'indicator'} style={{background: 'red', width: '350px', position: 'fixed', height: 6, top: viewPortTop}} />
         <div className={'indicator'} style={{background: 'red', width: '350px', position: 'fixed', height: 6, top: viewPortBottom - 2}} />
         <div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this.inner = div)}>
