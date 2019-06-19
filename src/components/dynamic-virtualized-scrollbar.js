@@ -15,7 +15,7 @@ class DynamicVirtualizedScrollbar extends Component {
       // Update this when dynamic row height becomes a thing
       scrollOffset: 0,
       firstRenderedItemIndex: 0,
-      lastRenderedItemIndex: 20,
+      lastRenderedItemIndex: 10,
       averageItemSize: this.props.minElemHeight,
       belowSpacerHeight: 0
     };
@@ -33,6 +33,12 @@ class DynamicVirtualizedScrollbar extends Component {
     this.spring.addListener({ onSpringUpdate: this.handleSpringUpdate.bind(this) });
     if (this.inner) {
       this.setState({containerTop: this.inner.getBoundingClientRect().top})
+    }
+    if (!this.lastElemBounds) {
+      this.lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
+    }
+    if (!this.firstElemBounds) {
+      this.firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
     }
   }
 
@@ -177,8 +183,8 @@ class DynamicVirtualizedScrollbar extends Component {
     const viewPortTop = this.state.containerTop + this.state.scrollOffset;
     const viewPortBottom = this.state.containerTop + this.state.scrollOffset + this.props.containerHeight;
 
-    const belowSpacerStyle = { width: '100%', height: this.state.belowSpacerHeight };
-    const aboveSpacerStyle = { width: '100%', height: this.aboveSpacerHeight };
+    const belowSpacerStyle = { border: 'solid 3px purple', width: '100%', height: this.state.belowSpacerHeight };
+    const aboveSpacerStyle = { border: 'solid 3px yellow', width: '100%', height: this.aboveSpacerHeight };
 
     if (this.stickyElems && this.stickyElems.length > 0) {
       listToRender.push(this.stickyElems[0]);
