@@ -148,7 +148,7 @@ class DynamicHeightExample extends Component {
 				>
 					<div className={'title-and-controls'}>
 						<div className={'title'}>
-							<h1>Dynamic Example - No Virtualization</h1>
+							<h1>Dynamic Height Example</h1>
 						</div>
 						<div className={'controls'}>
 							<div title={'Sidescroll Backwards'} className={'backwards'} onClick={this.sideScroll.bind(this, -50)} />
