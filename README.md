@@ -30,7 +30,7 @@ React-Virtualized-DnD utilizes a three part abstraction for drag and drop:
 -   _Droppables_, which indicate a drop zone that _Draggables_ can be dropped on, and create the virtualizing container.
     _Draggables_ and _Droppables_ can be organized in groups.
 
-_Droppables_ use an internal scrollbar to virtualize its children, and the _DragDropContext_ offers the option to include a horizontal scrollbar.
+_Droppables_ use an internal scrollbar to virtualize its children, and the _DragDropContext_ offers the option to include an outer scrollbar that can be scrolled while dragging.
 
 React-virtualized-dnd places a placeholder in droppables during drag, which is placed after the draggable element hovered over during drag. The placeholderId represents the id of the element it was placed after.
 On drag end, the _DragDropContext_ returns the placeholderId.
@@ -47,7 +47,7 @@ class Example extends Component {
     const name = 'my-group';
     const elemsToRender = [... your data here ...];
 		return (
-			<DragDropContext dragAndDropGroup={name} onDragEnd={this.onDragEnd.bind(this)} horizontalScroll={true}>
+			<DragDropContext dragAndDropGroup={name} onDragEnd={this.onDragEnd.bind(this)} outerScrollBar={true}>
 				<div className={'your-drag-container'}>
 					{elemsToRender.map((elem, index) => (
 						<div className={'your-droppable-container'}>
@@ -75,42 +75,41 @@ class Example extends Component {
 
 ### DragDropContext
 
-#### API
-
-| **Prop**    | **Type** | **Required** | **Description**                                                                                                             |
-| ----------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| onDragEnd   | function | no           | Fired on drag end. Returns the source object, the droppableId of the destination, and the id of the placeholder dropped on. |
-| onDragStart | function | no           | Function fired on drag start. Returns the draggableId of the dragged element.                                               |
-
-The placeholder ID can be used to determine where to place the dragged element on drag end. The placeholderID returns the string "END_OF_LIST" if dragged below the last element of a droppable.
-
 #### Props
 
-| **Prop**              | **Type** | **Required**                | **Description**                                                                   |
-| --------------------- | -------- | --------------------------- | --------------------------------------------------------------------------------- |
-| dragAndDropGroup      | string   | yes                         | Unique identifier for the drag and drop group the context uses                    |
-| outerScrollBar        | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging) |
-| scrollYSpeed          | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                            |
-| scrollXSpeed          | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                            |
-| scrollContainerHeight | function | no, yes with outerScrollBar | Height of the outer scrollable container                                          |
-| onDragEnd             | function | no                          | Function fired on drag end.                                                       |
-| onDragStart           | function | no                          | Function fired on drag start.                                                     |
+| **Prop**                 | **Type** | **Required**                | **Description**                                                                                                                           |
+| ------------------------ | -------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| dragAndDropGroup         | string   | yes                         | Unique identifier for the drag and drop group the context uses                                                                            |
+| outerScrollBar           | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging)                                                         |
+| scrollYSpeed             | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                                                                                    |
+| scrollXSpeed             | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                                                                                    |
+| scrollContainerHeight    | number   | no, yes with outerScrollBar | Height of the outer scrollable container                                                                                                  |
+| scrollContainerMinHeight | number   | no                          | Minimum height of the outer scrollable container                                                                                          |
+| onScroll                 | func     | no                          | Function fired when the DragDropContext's outer scrollbar scrolls. Return {scrollX, scrollY}                                              |
+| onDragEnd                | function | no                          | Function fired on drag end with the source object, the droppableId of the destination, and the ID of the placeholder dropped on as params |
+| onDragCancel             | function | no                          | Function fired on drag end if the drop did not occur inside a droppable with the draggableId of the dragged element as params             |
+| onDragStart              | function | no                          | Function fired on drag start with the draggableId of the dragged element as params                                                        |
+
+The placeholder ID can be used to determine where to place the dragged element on drag end. The placeholderID returns the string "END_OF_LIST" if dragged below the last element of a droppable.
 
 ### Draggable
 
 #### Props
 
-| **Prop**         | **Type** | **Required** | **Description**                                                |
-| ---------------- | -------- | ------------ | -------------------------------------------------------------- |
-| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses |
-| draggableId      | string   | yes          | Unique identifier for the draggable                            |
-| dragActiveClass  | string   | no           | CSS class applied to a draggable element during an active drag |
+| **Prop**         | **Type** | **Required** | **Description**                                                          |
+| ---------------- | -------- | ------------ | ------------------------------------------------------------------------ |
+| dragAndDropGroup | string   | yes          | Unique identifier for the drag and drop group the context uses           |
+| draggableId      | string   | yes          | Unique identifier for the draggable                                      |
+| dragActiveClass  | string   | no           | CSS class applied to a draggable element during an active drag           |
+| disabled         | bool     | no           | Flag to disabled dragging of element                                     |
+| usePointerEvents | bool     | no           | Flag to enable pointer-event based implementation. Experimental for now. |
 
 Draggables will ignore drags started by clicking on any element with the "no-drag" css class. This can be used to control drag interactions with interactive elements, such as inputs or buttons.
 
 ### Droppable
 
 #### Props
+
 
 | **Prop**          | **Type**     | **Required**             | **Description**                                                                      |
 | ----------------- | ------------ | ------------------------ | ------------------------------------------------------------------------------------ |
@@ -123,7 +122,10 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | listHeaderHeight  | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                            |
 | activeHeaderClass | string       | no                       | CSS class added to the header when an active drag is hovering over the list header   |
 | hideList          | boolean      | no                       | hides all droppable elements in the list                                             |
+| dynamicElemHeight  | boolean      | no                       | Flag to indicate differing/dynamicly changing heights of children elements.\*       |
 | customScrollbars  | component    | no                       | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars  |
+
+\*Enabling dynamic element height currently disables virtualization, but allows usage of the framework for DnD/Autoscroll purposes. Virtualization for dynamicly sized elements will come in a future update.
 
 #### Example Custom Scroll Bar
 

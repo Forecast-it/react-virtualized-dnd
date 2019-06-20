@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {subscribe, unsubscribe} from '../util/event_manager';
 import VirtualizedScrollBar from './virtualized-scrollbar';
 import Util from './../util/util';
+import {Scrollbars} from 'react-custom-scrollbars';
 
 class Droppable extends Component {
 	constructor(props) {
@@ -20,6 +21,8 @@ class Droppable extends Component {
 		this.onScrollChange = this.onScrollChange.bind(this);
 		this.onDragEnd = this.onDragEnd.bind(this);
 		this.onDragStart = this.onDragStart.bind(this);
+		this.getDraggedElemHeight = this.getDraggedElemHeight.bind(this);
+		this.defaultElemHeight = 50;
 		//this.getShouldAlwaysRender = this.getShouldAlwaysRender.bind(this);
 	}
 
@@ -63,7 +66,7 @@ class Droppable extends Component {
 	}
 
 	onDragEnd(draggedElem) {
-		this.setState({currentlyActiveDraggable: null});
+		this.setState({currentlyActiveDraggable: null}, () => this.forceUpdate());
 	}
 
 	onDragStart(draggedElem) {
@@ -106,21 +109,37 @@ class Droppable extends Component {
 		return true;
 	}
 
+	getDraggedElemHeight() {
+		if (this.state.currentlyActiveDraggable) {
+			return this.state.currentlyActiveDraggable.height;
+		}
+		return this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
+	}
+
 	pushPlaceholder(children) {
 		let pushedPlaceholder = false;
 		const listToRender = [...children];
+		const placeholderHeight = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
+		let style;
+
+		if (this.props.placeholderStyle) {
+			style = {...this.props.placeholderStyle};
+			style.height = placeholderHeight;
+		} else {
+			style = {
+				border: '1px dashed grey',
+				height: placeholderHeight,
+				backgroundColor: 'transparent'
+			};
+		}
+
 		if (this.state.placeholder) {
 			listToRender.forEach((elem, index) => {
 				if (elem && elem.props && elem.props.draggableId === this.state.placeholder && !pushedPlaceholder) {
 					listToRender.splice(
 						index,
 						0,
-						<div
-							key={'placeholder'}
-							draggableid={'placeholder'}
-							className={'draggable-test'}
-							style={this.props.placeholderStyle ? this.props.placeholderStyle : {border: 'solid 1px black', height: '50px', backgroundColor: 'grey'}}
-						>
+						<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={style}>
 							<p className={'placeholder-text'} />
 						</div>
 					);
@@ -129,7 +148,7 @@ class Droppable extends Component {
 			});
 		} else if (!pushedPlaceholder) {
 			listToRender.push(
-				<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={{border: 'solid 1px black', height: '50px', backgroundColor: 'grey'}}>
+				<div key={'placeholder'} draggableid={'placeholder'} className={'draggable-test'} style={style}>
 					<p className={'placeholder-text'} />
 				</div>
 			);
@@ -167,12 +186,30 @@ class Droppable extends Component {
 			);
 			listToRender = childrenWithProps;
 		}
-		const rowHeight = this.props.hideList ? 0 : this.props.rowHeight ? this.props.rowHeight : 50;
-		const rowsTotalHeight = listToRender.length * rowHeight;
-		const shouldScroll = this.props.containerHeight < rowsTotalHeight;
-		// Always at least one rowheight larger during drag, to allow DnD on empty lists/below small lists
-		const outerContainerHeight = (shouldScroll ? this.props.containerHeight : rowsTotalHeight + rowHeight) + (this.props.listHeader != null ? this.props.listHeaderHeight : 0);
 
+		let elemHeight = 0;
+		let rowsTotalHeight = 0;
+		let shouldScroll = true;
+		let calculatedRowMinHeight = 0;
+		const listHeaderHeight = this.props.listHeader != null ? this.props.listHeaderHeight : 0;
+		let outerContainerHeight = this.props.containerHeight;
+		if (!this.props.dynamicElemHeight) {
+			elemHeight = this.props.hideList ? 0 : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
+			rowsTotalHeight = listToRender.length * elemHeight;
+			// Container smaller than calculated height of rows?
+			shouldScroll = this.props.containerHeight < rowsTotalHeight;
+
+			// Total rows + height of one row (required for DnD to empty lists/dropping below list)
+			calculatedRowMinHeight = rowsTotalHeight + elemHeight;
+
+			// The minimum height of the container is the # of elements + 1 (same reason as above), unless a minimum height is specificied that is larger than this.
+			// If the minimum height exceeds the containerHeight, we limit it to containerHeight and enable scroll instead
+			outerContainerHeight = shouldScroll
+				? this.props.containerHeight
+				: this.props.containerMinHeight && this.props.containerMinHeight >= calculatedRowMinHeight
+				? this.props.containerMinHeight
+				: calculatedRowMinHeight + listHeaderHeight;
+		}
 		const draggedElemId = this.state.currentlyActiveDraggable ? this.state.currentlyActiveDraggable.draggableId : null;
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 		const headerWithProps =
@@ -189,11 +226,12 @@ class Droppable extends Component {
 				<div className={'header-wrapper ' + (headerActive ? this.props.activeHeaderClass : '')}>{headerWithProps}</div>
 				{this.props.hideList ? null : shouldScroll && !this.props.disableScroll ? (
 					<VirtualizedScrollBar
+						disableVirtualization={this.props.dynamicElemHeight}
 						stickyElems={draggedElemId ? [draggedElemId] : []}
-						staticRowHeight={this.props.rowHeight ? this.props.rowHeight : 50}
+						staticElemHeight={elemHeight}
 						ref={scrollDiv => (this.scrollBars = scrollDiv)}
-						containerHeight={this.props.containerHeight}
 						customScrollbars={customScrollbars}
+						containerHeight={this.props.containerHeight - listHeaderHeight}
 					>
 						{isActive ? this.pushPlaceholder(listToRender) : listToRender}
 					</VirtualizedScrollBar>
@@ -209,7 +247,9 @@ Droppable.propTypes = {
 	droppableId: PropTypes.string.isRequired,
 	dragAndDropGroup: PropTypes.string.isRequired,
 	containerHeight: PropTypes.number.isRequired,
-	rowHeight: PropTypes.number,
+	placeholderStyle: PropTypes.object,
+	elemHeight: PropTypes.number,
+	dynamicElemHeight: PropTypes.bool,
 	disableScroll: PropTypes.bool
 };
 export default Droppable;

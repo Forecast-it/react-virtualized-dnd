@@ -3,7 +3,7 @@ import Droppable from '../components/droppable';
 import Draggable from '../components/draggable';
 import DragDropContext from '../components/drag_drop_context';
 
-class ExampleBoard extends Component {
+class DynamicHeightExample extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -30,21 +30,25 @@ class ExampleBoard extends Component {
 
 	generateTestList(num, numItems) {
 		let entry = {name: 'droppable' + num + 'Items', items: [], index: num};
+		const randomSize = () => 50 + Math.floor(Math.random() * Math.floor(50));
 		for (let i = 0; i < numItems; i++) {
-			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i});
+			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i, height: randomSize()});
 		}
 		return entry;
 	}
 
 	getElemsToRender(list) {
 		let dataToRender = [];
-
 		list.forEach((entry, index) => {
 			const list = [];
 			entry.items.forEach(item => {
 				list.push(
 					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
-						<div onClick={() => alert('A click is not a drag')} className={'draggable-test'} style={{border: 'solid 1px black', height: '48px', backgroundColor: 'white', flexGrow: 1}}>
+						<div
+							onClick={() => alert('A click is not a drag')}
+							className={'draggable-test'}
+							style={{border: 'solid 1px black', height: item.height, backgroundColor: 'white', flexGrow: 1}}
+						>
 							<p style={{marginLeft: '5px'}} className={'item-name'}>
 								{item.name}
 							</p>
@@ -144,7 +148,7 @@ class ExampleBoard extends Component {
 				>
 					<div className={'title-and-controls'}>
 						<div className={'title'}>
-							<h1>Example Board</h1>
+							<h1>Dynamic Example - No Virtualization</h1>
 						</div>
 						<div className={'controls'}>
 							<div title={'Sidescroll Backwards'} className={'backwards'} onClick={this.sideScroll.bind(this, -50)} />
@@ -172,12 +176,12 @@ class ExampleBoard extends Component {
 							!this.state.split || index < elemsToRender.length / 2 ? (
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
+										dynamicElemHeight={true}
 										activeHeaderClass={'header-active'}
 										listHeader={getListHeader(index)}
 										listHeaderHeight={60}
 										ref={div => this.droppables.push(div)}
-										containerHeight={620}
-										elemHeight={50}
+										containerHeight={500}
 										dragAndDropGroup={this.dragAndDropGroupName}
 										droppableId={elem.droppableId}
 										key={elem.droppableId}
@@ -194,6 +198,7 @@ class ExampleBoard extends Component {
 								index >= elemsToRender.length / 2 ? (
 									<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 										<Droppable
+											dynamicElemHeight={true}
 											activeHeaderClass={'header-active'}
 											listHeader={getListHeader(index)}
 											listHeaderHeight={60}
@@ -215,5 +220,5 @@ class ExampleBoard extends Component {
 		);
 	}
 }
-ExampleBoard.propTypes = {};
-export default ExampleBoard;
+DynamicHeightExample.propTypes = {};
+export default DynamicHeightExample;

@@ -44,7 +44,7 @@ class DragDropContext extends Component {
 
 	dispatchPlaceholder() {
 		if (this.state.draggedElem && this.state.dragActive && this.state.droppableActive) {
-			dispatch(this.state.dragAndDropGroup.placeholderEvent, this.state.placeholder, this.state.droppableActive);
+			dispatch(this.state.dragAndDropGroup.placeholderEvent, this.state.placeholder, this.state.droppableActive, this.state.draggedElem);
 		} else {
 			dispatch(this.state.dragAndDropGroup.placeholderEvent, null, null);
 		}
@@ -60,9 +60,15 @@ class DragDropContext extends Component {
 	}
 
 	onDragEnd() {
-		if (this.props.onDragEnd && this.state.draggedElem && this.state.droppableActive) {
+		if (this.state.draggedElem && this.state.droppableActive) {
 			const placeholder = this.state.placeholder != null ? this.state.placeholder : 'END_OF_LIST';
-			this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder);
+			if (this.props.onDragEnd) {
+				this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder);
+			}
+		} else {
+			if (this.props.onDragCancel) {
+				this.props.onDragCancel(this.state.draggedElem);
+			}
 		}
 		this.setState({
 			draggedElem: null,
@@ -261,10 +267,24 @@ class DragDropContext extends Component {
 		}
 	}
 
+	handleScroll(e) {
+		const scrollOffsetY = this.outerScrollBar ? this.outerScrollBar.getScrollTop() : 0;
+		const scrollOffsetX = this.outerScrollBar ? this.outerScrollBar.getScrollLeft() : 0;
+		if (this.props.onScroll) {
+			this.props.onScroll({scrollX: scrollOffsetX, scrollY: scrollOffsetY});
+		}
+	}
+
 	render() {
 		return this.props.outerScrollBar ? (
 			<div ref={div => (this.container = div)} className={'drag-drop-context'} style={{display: 'flex', flexDirection: 'column'}}>
-				<Scrollbars ref={scrollDiv => (this.outerScrollBar = scrollDiv)} autoHeight={true} autoHeightMin={1} autoHeightMax={this.props.scrollContainerHeight}>
+				<Scrollbars
+					onScroll={this.handleScroll.bind(this)}
+					ref={scrollDiv => (this.outerScrollBar = scrollDiv)}
+					autoHeight={true}
+					autoHeightMin={this.props.scrollContainerMinHeight != null ? this.props.scrollContainerMinHeight : 1}
+					autoHeightMax={this.props.scrollContainerHeight}
+				>
 					{this.props.children}
 				</Scrollbars>
 			</div>
