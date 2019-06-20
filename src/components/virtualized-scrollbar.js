@@ -108,7 +108,8 @@ class VirtualizedScrollBar extends Component {
 	}
 
 	render() {
-		const {children} = this.props;
+		const {customScrollbars, children} = this.props;
+		const UseScrollbars = customScrollbars || Scrollbars;
 		const rowCount = children.length;
 		const elemHeight = this.state.elemHeight;
 
@@ -143,7 +144,7 @@ class VirtualizedScrollBar extends Component {
 		}
 
 		return (
-			<Scrollbars
+			<UseScrollbars
 				onScroll={this.handleScroll.bind(this)}
 				ref={div => (this.scrollBars = div)}
 				autoHeight={true}
@@ -155,7 +156,7 @@ class VirtualizedScrollBar extends Component {
 					{listToRender}
 					<div style={aboveSpacerStyle} className={'above-spacer'} />
 				</div>
-			</Scrollbars>
+			</UseScrollbars>
 		);
 	}
 }

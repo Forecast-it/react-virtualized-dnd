@@ -167,7 +167,7 @@ class Droppable extends Component {
 	}
 
 	render() {
-		const {children} = this.props;
+		const {children, customScrollbars} = this.props;
 		// Objects we want to render
 		let listToRender = [];
 		const propsObject = {
@@ -227,6 +227,7 @@ class Droppable extends Component {
 				{this.props.hideList ? null : shouldScroll && !this.props.disableScroll ? (
 					this.props.dynamicElemHeight ? (
 						<DynamicVirtualizedScrollbar
+							disableVirtualization={this.props.disableVirtualization}
 							listLength={listToRender.length}
 							minElemHeight={this.props.minElemHeight}
 							stickyElems={draggedElemId ? [draggedElemId] : []}
@@ -238,12 +239,11 @@ class Droppable extends Component {
 						</DynamicVirtualizedScrollbar>
 					) : (
 						<VirtualizedScrollBar
-							//dynamicElemHeight={this.props.dynamicElemHeight}
-							//minElemHeight={this.props.minElemHeight}
 							disableVirtualization={this.props.disableVirtualization}
 							stickyElems={draggedElemId ? [draggedElemId] : []}
 							staticElemHeight={elemHeight}
 							ref={scrollDiv => (this.scrollBars = scrollDiv)}
+							customScrollbars={customScrollbars}
 							containerHeight={this.props.containerHeight - listHeaderHeight}
 						>
 							{isActive ? this.pushPlaceholder(listToRender) : listToRender}
