@@ -54,7 +54,7 @@ class DynamicHeightExample extends Component {
 						<div
 							onClick={() => alert('A click is not a drag')}
 							className={'draggable-test'}
-							style={{border: 'solid 1px black', height: item.height, backgroundColor: 'white', flexGrow: 1}}
+							style={{border: 'solid 1px black', height: item.height, backgroundColor: 'white', flexGrow: 1, marginBottom: '2.5px', marginTop: '2.5px'}}
 						>
 							<p style={{marginLeft: '5px'}} className={'item-name'}>
 								{item.name}
