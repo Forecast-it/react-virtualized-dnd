@@ -110,21 +110,22 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 
 #### Props
 
-| **Prop**          | **Type**     | **Required**             | **Description**                                                                      |
-| ----------------- | ------------ | ------------------------ | ------------------------------------------------------------------------------------ |
-| dragAndDropGroup  | string       | yes                      | Unique identifier for the drag and drop group the context uses                       |
-| droppableId       | string       | yes                      | Unique identifier for the droppable                                                  |
-| containerHeight   | number       | yes                      | Height of the virtualizing scroll container                                          |
-| rowHeight         | number       | no                       | Height of each row _with_ borders. Default is 50px.                                  |
-| disableScroll     | boolean      | no                       | Flag to disable scrollbars. This disables virtualization as well                     |
-| listHeader        | HTML element | no                       | Element to use as header for a droppable list, to react to drops on top of the list. |
-| listHeaderHeight  | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                            |
-| activeHeaderClass | string       | no                       | CSS class added to the header when an active drag is hovering over the list header   |
-| hideList          | boolean      | no                       | hides all droppable elements in the list                                             |
-| dynamicElemHeight | boolean      | no                       | Flag to indicate differing/dynamicly changing heights of children elements.\*        |
-| customScrollbars  | component    | no                       | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars  |
+| **Prop**          | **Type**     | **Required**                    | **Description**                                                                      |
+| ----------------- | ------------ | ------------------------------- | ------------------------------------------------------------------------------------ |
+| dragAndDropGroup  | string       | yes                             | Unique identifier for the drag and drop group the context uses                       |
+| droppableId       | string       | yes                             | Unique identifier for the droppable                                                  |
+| containerHeight   | Number       | yes                             | Height of the virtualizing scroll container                                          |
+| rowHeight         | Number       | no                              | Height of each row _with_ borders. Default is 50px.                                  |
+| disableScroll     | boolean      | no                              | Flag to disable scrollbars. This disables virtualization as well                     |
+| listHeader        | HTML element | no                              | Element to use as header for a droppable list, to react to drops on top of the list. |
+| listHeaderHeight  | Number       | no (yes with listHeader)        | Height of the header element, necessary for calculations.                            |
+| activeHeaderClass | string       | no                              | CSS class added to the header when an active drag is hovering over the list header   |
+| hideList          | boolean      | no                              | hides all droppable elements in the list                                             |
+| dynamicElemHeight | boolean      | no                              | Flag to indicate differing/dynamicly changing heights of children elements.\*        |
+| elemenMinHeight   | Number       | no (yes with dynamicElemHeight) | Minimum height of children elements. Necessary for calulating scrolling space.       |
+| customScrollbars  | component    | no                              | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars  |
 
-\*This feature is currently in Beta. Enabling dynamic element height fundamentally changes how the scrolling works, and requries some more complex logic.
+\*Enabling dynamic element height fundamentally changes how the scrolling works, and requries some more complex logic that is completely separate from the normal virtualization.
 
 #### Example Custom Scroll Bar
 
