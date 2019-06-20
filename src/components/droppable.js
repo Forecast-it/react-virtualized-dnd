@@ -167,7 +167,7 @@ class Droppable extends Component {
 	}
 
 	render() {
-		const {children} = this.props;
+		const {children, customScrollbars} = this.props;
 		// Objects we want to render
 		let listToRender = [];
 		const propsObject = {
@@ -230,6 +230,7 @@ class Droppable extends Component {
 						stickyElems={draggedElemId ? [draggedElemId] : []}
 						staticElemHeight={elemHeight}
 						ref={scrollDiv => (this.scrollBars = scrollDiv)}
+						customScrollbars={customScrollbars}
 						containerHeight={this.props.containerHeight - listHeaderHeight}
 					>
 						{isActive ? this.pushPlaceholder(listToRender) : listToRender}

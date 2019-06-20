@@ -110,22 +110,42 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 
 #### Props
 
-| **Prop**           | **Type**     | **Required**             | **Description**                                                                            |
-| ------------------ | ------------ | ------------------------ | ------------------------------------------------------------------------------------------ |
-| dragAndDropGroup   | string       | yes                      | Unique identifier for the drag and drop group the context uses                             |
-| droppableId        | string       | yes                      | Unique identifier for the droppable                                                        |
-| placeholderStyle   | object       | no                       | Style object for placeholder. If included, remember to include placeholder height.         |
-| containerHeight    | number       | yes                      | Height of the virtualizing scroll container                                                |
-| containerMinHeight | number       | no                       | Minimum height of the virtualizing scroll container (if larger than total height of elems) |
-| elemHeight         | number       | no                       | Height of each elem in the scrollable list _with_ borders. Default is 50px.                |
-| disableScroll      | boolean      | no                       | Flag to disable scrollbars. This disables virtualization as well                           |
-| listHeader         | HTML element | no                       | Element to use as header for a droppable list, to react to drops on top of the list.       |
-| listHeaderHeight   | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                                  |
-| activeHeaderClass  | string       | no                       | CSS class added to the header when an active drag is hovering over the list header         |
-| hideList           | boolean      | no                       | Hides (unrenders) all droppable elements in the list                                       |
-| dynamicElemHeight  | boolean      | no                       | Flag to indicate differing/dynamicly changing heights of children elements.\*              |
+
+| **Prop**          | **Type**     | **Required**             | **Description**                                                                      |
+| ----------------- | ------------ | ------------------------ | ------------------------------------------------------------------------------------ |
+| dragAndDropGroup  | string       | yes                      | Unique identifier for the drag and drop group the context uses                       |
+| droppableId       | string       | yes                      | Unique identifier for the droppable                                                  |
+| containerHeight   | number       | yes                      | Height of the virtualizing scroll container                                          |
+| rowHeight         | number       | no                       | Height of each row _with_ borders. Default is 50px.                                  |
+| disableScroll     | boolean      | no                       | Flag to disable scrollbars. This disables virtualization as well                     |
+| listHeader        | HTML element | no                       | Element to use as header for a droppable list, to react to drops on top of the list. |
+| listHeaderHeight  | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                            |
+| activeHeaderClass | string       | no                       | CSS class added to the header when an active drag is hovering over the list header   |
+| hideList          | boolean      | no                       | hides all droppable elements in the list                                             |
+| dynamicElemHeight  | boolean      | no                       | Flag to indicate differing/dynamicly changing heights of children elements.\*       |
+| customScrollbars  | component    | no                       | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars  |
 
 \*Enabling dynamic element height currently disables virtualization, but allows usage of the framework for DnD/Autoscroll purposes. Virtualization for dynamicly sized elements will come in a future update.
+
+#### Example Custom Scroll Bar
+
+This component requires the usage of React's forwardRef to pass along the parent reference to the Scrollbars Element.  
+Please see [react-custom-scrollbars](https://github.com/malte-wessel/react-custom-scrollbars) for more information on how to customize a scrollbar.
+
+##### Usage:
+
+```jsx
+import {Scrollbars} from 'react-custom-scrollbars';
+
+const CustomScrollBars = React.forwardRef((props, ref) => {
+	const {children, ...rest} = props;
+	return (
+		<Scrollbars ref={ref} renderThumbVertical={({style, ...props}) => <div style={{...style, backgroundColor: 'blue'}} {...props} />} {...rest}>
+			{children}
+		</Scrollbars>
+	);
+});
+```
 
 ## Author
 
