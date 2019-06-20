@@ -53,6 +53,12 @@ class Draggable extends Component {
 		}
 	}
 
+	getBoundingClientRect() {
+		if (this.draggable) {
+			return this.draggable.getBoundingClientRect();
+		}
+	}
+
 	removeDragEventListeners() {
 		if (!this.usePointerEvents) {
 			document.removeEventListener('mousemove', this.onPointerMove);

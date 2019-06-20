@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {subscribe, unsubscribe} from '../util/event_manager';
 import VirtualizedScrollBar from './virtualized-scrollbar';
 import Util from './../util/util';
-import {Scrollbars} from 'react-custom-scrollbars';
+import DynamicVirtualizedScrollbar from './dynamic-virtualized-scrollbar';
 
 class Droppable extends Component {
 	constructor(props) {
@@ -225,16 +225,30 @@ class Droppable extends Component {
 			<CustomTag {...propsObject} style={{height: outerContainerHeight, minHeight: outerContainerHeight, maxHeight: outerContainerHeight, overflow: 'hidden'}}>
 				<div className={'header-wrapper ' + (headerActive ? this.props.activeHeaderClass : '')}>{headerWithProps}</div>
 				{this.props.hideList ? null : shouldScroll && !this.props.disableScroll ? (
-					<VirtualizedScrollBar
-						disableVirtualization={this.props.dynamicElemHeight}
-						stickyElems={draggedElemId ? [draggedElemId] : []}
-						staticElemHeight={elemHeight}
-						ref={scrollDiv => (this.scrollBars = scrollDiv)}
-						customScrollbars={customScrollbars}
-						containerHeight={this.props.containerHeight - listHeaderHeight}
-					>
-						{isActive ? this.pushPlaceholder(listToRender) : listToRender}
-					</VirtualizedScrollBar>
+					this.props.dynamicElemHeight ? (
+						<DynamicVirtualizedScrollbar
+							disableVirtualization={this.props.disableVirtualization}
+							listLength={listToRender.length}
+							minElemHeight={this.props.minElemHeight}
+							stickyElems={draggedElemId ? [draggedElemId] : []}
+							ref={scrollDiv => (this.scrollBars = scrollDiv)}
+							containerHeight={this.props.containerHeight - listHeaderHeight}
+							showIndicators={this.props.showIndicators}
+						>
+							{isActive ? this.pushPlaceholder(listToRender) : listToRender}
+						</DynamicVirtualizedScrollbar>
+					) : (
+						<VirtualizedScrollBar
+							disableVirtualization={this.props.disableVirtualization}
+							stickyElems={draggedElemId ? [draggedElemId] : []}
+							staticElemHeight={elemHeight}
+							ref={scrollDiv => (this.scrollBars = scrollDiv)}
+							customScrollbars={customScrollbars}
+							containerHeight={this.props.containerHeight - listHeaderHeight}
+						>
+							{isActive ? this.pushPlaceholder(listToRender) : listToRender}
+						</VirtualizedScrollBar>
+					)
 				) : (
 					<div className={'no-scroll-container'}>{isActive ? this.pushPlaceholder(listToRender) : listToRender}</div>
 				)}
