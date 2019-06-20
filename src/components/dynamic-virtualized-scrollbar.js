@@ -27,6 +27,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastElemBounds = null;
 		this.firstElemBounds = null;
 		this.MAX_RENDERS = 200;
+		this.seenIdxs = [];
 	}
 
 	componentDidMount() {
@@ -47,6 +48,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (prevState.averageItemSize !== this.state.averageItemSize) {
 			this.setState({belowSpacerHeight: (this.props.listLength - this.state.firstRenderedItemIndex + 1) * this.state.averageItemSize});
 		}
+		this.seenIdxs.push(prevState.firstRenderedItemIndex);
 	}
 
 	componentWillUnmount() {
@@ -115,6 +117,14 @@ class DynamicVirtualizedScrollbar extends Component {
 			this.setState({firstElemBounds: this.itemsContainer.firstElementChild.getBoundingClientRect()});
 		}
 
+		// Remove all spacing at end of list
+		if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
+			this.setState({
+				belowSpacerHeight: 0
+			});
+			return;
+		}
+
 		const viewPortTop = this.state.containerTop;
 		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
 
@@ -142,10 +152,14 @@ class DynamicVirtualizedScrollbar extends Component {
 				};
 				// If we're still rendering new things
 				if (this.state.lastRenderedItemIndex < this.props.listLength) {
-					// How much bigger is this elem than the min height?
-					const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
-					// Increase above spacer height by the difference from min, to make sure we have enough space to scroll to
-					stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
+					// Only do it the first time we see the new elem
+					if (!this.seenIdxs.includes(this.state.lastRenderedItemIndex)) {
+						// How much bigger is this elem than the min height?
+						const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
+						// Increase above spacer height by the difference from min, to make sure we have enough space to scroll to
+						stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
+						this.seenIdxs.push(this.state.lastRenderedItemIndex);
+					}
 				}
 				this.setState(stateUpdate);
 			}
@@ -227,8 +241,9 @@ class DynamicVirtualizedScrollbar extends Component {
 			firstIndicatorStyle = {
 				top: this.state.firstElemBounds.top,
 				left: this.state.firstElemBounds.left,
-				width: this.state.firstElemBounds.right - this.state.firstElemBounds.left,
-				height: this.state.firstElemBounds.bottom - this.state.firstElemBounds.top,
+				width: this.state.firstElemBounds.right - this.state.firstElemBounds.left - 6,
+				height: this.state.firstElemBounds.bottom - this.state.firstElemBounds.top - 6,
+				boxSizing: 'border-box',
 				background: 'transparent',
 				border: 'solid 3px green',
 				position: 'fixed'
@@ -236,8 +251,9 @@ class DynamicVirtualizedScrollbar extends Component {
 			lastIndicatorStyle = {
 				top: this.state.lastElemBounds.top,
 				left: this.state.lastElemBounds.left,
-				width: this.state.lastElemBounds.right - this.state.lastElemBounds.left,
-				height: this.state.lastElemBounds.bottom - this.state.lastElemBounds.top,
+				width: this.state.lastElemBounds.right - this.state.lastElemBounds.left - 6,
+				height: this.state.lastElemBounds.bottom - this.state.lastElemBounds.top - 6,
+				boxSizing: 'border-box',
 				background: 'transparent',
 				border: 'solid 3px blue',
 				position: 'fixed'
@@ -251,10 +267,10 @@ class DynamicVirtualizedScrollbar extends Component {
 				autoHeightMax={this.props.containerHeight}
 				autoHeightMin={this.props.containerHeight}
 			>
-				<div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this.inner = div)}>
-					{this.props.showIndicators ? <div className={'first-indicator'} style={firstIndicatorStyle} /> : null}
-					{this.props.showIndicators ? <div className={'last-indicator'} style={lastIndicatorStyle} /> : null}
+				{this.props.showIndicators ? <div className={'first-indicator'} style={firstIndicatorStyle} /> : null}
+				{this.props.showIndicators ? <div className={'last-indicator'} style={lastIndicatorStyle} /> : null}
 
+				<div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this.inner = div)}>
 					<div style={aboveSpacerStyle} className={'above-spacer'} />
 					<div className={'list-items'} style={listItemsStyle} ref={div => (this.itemsContainer = div)}>
 						{listToRender}
