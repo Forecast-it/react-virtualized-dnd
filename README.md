@@ -122,7 +122,7 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | activeHeaderClass | string       | no                              | CSS class added to the header when an active drag is hovering over the list header   |
 | hideList          | boolean      | no                              | hides all droppable elements in the list                                             |
 | dynamicElemHeight | boolean      | no                              | Flag to indicate differing/dynamicly changing heights of children elements.\*        |
-| elemenMinHeight   | Number       | no (yes with dynamicElemHeight) | Minimum height of children elements. Necessary for calulating scrolling space.       |
+| minElemHeight     | Number       | no (yes with dynamicElemHeight) | Minimum height of children elements. Necessary for calulating scrolling space.       |
 | customScrollbars  | component    | no                              | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars  |
 
 \*Enabling dynamic element height fundamentally changes how the scrolling works, and requries some more complex logic that is completely separate from the normal virtualization.

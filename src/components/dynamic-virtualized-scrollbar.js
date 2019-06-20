@@ -264,5 +264,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		);
 	}
 }
-DynamicVirtualizedScrollbar.propTypes = {};
+DynamicVirtualizedScrollbar.propTypes = {
+	minElemHeight: PropTypes.number.isRequired
+};
 export default DynamicVirtualizedScrollbar;
