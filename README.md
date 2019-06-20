@@ -110,7 +110,6 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 
 #### Props
 
-
 | **Prop**          | **Type**     | **Required**             | **Description**                                                                      |
 | ----------------- | ------------ | ------------------------ | ------------------------------------------------------------------------------------ |
 | dragAndDropGroup  | string       | yes                      | Unique identifier for the drag and drop group the context uses                       |
@@ -122,10 +121,10 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | listHeaderHeight  | Number       | no (yes with listHeader) | Height of the header element, necessary for calculations.                            |
 | activeHeaderClass | string       | no                       | CSS class added to the header when an active drag is hovering over the list header   |
 | hideList          | boolean      | no                       | hides all droppable elements in the list                                             |
-| dynamicElemHeight  | boolean      | no                       | Flag to indicate differing/dynamicly changing heights of children elements.\*       |
+| dynamicElemHeight | boolean      | no                       | Flag to indicate differing/dynamicly changing heights of children elements.\*        |
 | customScrollbars  | component    | no                       | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars  |
 
-\*Enabling dynamic element height currently disables virtualization, but allows usage of the framework for DnD/Autoscroll purposes. Virtualization for dynamicly sized elements will come in a future update.
+\*This feature is currently in Beta. Enabling dynamic element height fundamentally changes how the scrolling works, and requries some more complex logic.
 
 #### Example Custom Scroll Bar
 
