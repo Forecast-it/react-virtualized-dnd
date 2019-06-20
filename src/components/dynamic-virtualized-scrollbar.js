@@ -41,6 +41,13 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
+		if (prevState.averageItemSize !== this.state.averageItemSize) {
+			this.setState({belowSpacerHeight: (this.props.listLength - this.state.firstRenderedItemIndex + 1) * this.state.averageItemSize});
+		}
+	}
+
 	componentWillUnmount() {
 		this.springSystem.deregisterSpring(this.spring);
 		this.springSystem.removeAllListeners();
@@ -52,6 +59,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	shouldComponentUpdate(nextProps, nextState) {
 		// only render when visible items change -> smooth scroll
 		return (
+			nextState.belowSpacerHeight !== this.state.belowSpacerHeight ||
 			nextState.firstElemBounds !== this.state.firstElemBounds ||
 			nextState.lastElemBounds !== this.state.lastElemBounds ||
 			nextState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex ||
@@ -111,7 +119,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 		// SCROLLING DOWN BEGINS
 		if (scrollingDown) {
-			// If viewPortTop has scrolled past first bottom, move first one down the list
+			// If viewPortTop has scrolled past first bottom, move first elem one down the list
 			if (this.state.firstElemBounds && this.state.firstElemBounds.bottom <= viewPortTop) {
 				const elemSize = Math.abs(this.state.firstElemBounds.bottom - this.state.firstElemBounds.top);
 				// console.log('Unrendering first elem of size', elemSize, this.itemsContainer.firstElementChild);
@@ -124,15 +132,25 @@ class DynamicVirtualizedScrollbar extends Component {
 					};
 				});
 			}
-			// If viewport bottom has crossed last elem bottom, move top one down the list
+			// If viewport bottom has crossed last elem bottom, render one more elem below
 			if (this.state.lastElemBounds && this.state.lastElemBounds.bottom <= viewPortBottom) {
 				const elemSize = Math.abs(this.state.lastElemBounds.bottom - this.state.lastElemBounds.top);
 				// console.log('Rendering additional last elem of size', elemSize, this.itemsContainer.firstElementChild);
-				this.setState(prevState => {
-					return {lastRenderedItemIndex: prevState.lastRenderedItemIndex + 1, belowSpacerHeight: Math.max(prevState.belowSpacerHeight - elemSize, 0), lastElemBounds: null};
-				});
-			}
 
+				// How much bigger is this elem than the min height?
+				const stateUpdate = {
+					lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1,
+					belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0),
+					lastElemBounds: null
+				};
+				// If we're still rendering new things
+				if (this.state.lastRenderedItemIndex < this.props.listLength) {
+					const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
+					// Increase above spacer height by the difference from min, to make sure we have enough space to scroll to
+					stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
+				}
+				this.setState(stateUpdate);
+			}
 			// SCROLLING DOWN ENDS
 		} else {
 			// SCROLLING UP BEGINS
