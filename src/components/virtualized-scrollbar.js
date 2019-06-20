@@ -7,7 +7,6 @@ class VirtualizedScrollBar extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			// Update this when dynamic row height becomes a thing
 			elemHeight: this.props.staticElemHeight ? this.props.staticElemHeight : 50,
 			scrollOffset: 0,
 			elemOverScan: this.props.overScan ? this.props.overScan : 3,
@@ -38,8 +37,8 @@ class VirtualizedScrollBar extends Component {
 		this.scrollBars.scrollTop(val);
 	}
 
-	// If we use static row height, we can optimizie by finding the first element to render, and rendering (containersize + overScan / index * height) elems after the first.
-	getListToRenderStaticOptimization(list) {
+	// Fing the first element to render, and render (containersize + overScan / index * height) elems after the first.
+	getListToRender(list) {
 		let listToRender = [];
 		this.stickyElems = [];
 		const elemHeight = this.state.elemHeight;
@@ -68,7 +67,6 @@ class VirtualizedScrollBar extends Component {
 				}
 			}
 		}
-
 		const start = Math.max(0, (smallestIndexVisible != null ? smallestIndexVisible : 0) - this.state.elemOverScan);
 		// start plus number of visible elements plus overscan
 		const end = smallestIndexVisible + maxVisibleElems + this.state.elemOverScan;
@@ -78,33 +76,6 @@ class VirtualizedScrollBar extends Component {
 		if (this.stickyElems && this.stickyElems.length > 0) {
 			listToRender = listToRender.filter(elem => !this.stickyElems.find(e => e.props.draggableId === elem.props.draggableId));
 		}
-		return listToRender;
-	}
-
-	getListToRender(list) {
-		let listToRender = [];
-		this.stickyElems = [];
-		const elemHeight = this.state.elemHeight;
-		const containerHeight = this.props.containerHeight;
-		const overScan = this.state.elemOverScan * this.state.elemHeight;
-		if (!containerHeight || this.state.scrollOffset == null) {
-			return list;
-		}
-		list.forEach((child, index) => {
-			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
-			if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
-				this.stickyElems.push(child);
-			} else {
-				// Don't render if we're below the current scroll offset, or if we're above the containerHeight + scrollOffset
-				const ySmallerThanList = (index + 1) * elemHeight + overScan < this.state.scrollOffset;
-				const yLargerThanList = (index + 1) * elemHeight - overScan > this.state.scrollOffset + containerHeight;
-
-				if (!ySmallerThanList && !yLargerThanList) {
-					listToRender.push(child);
-				}
-			}
-		});
-
 		return listToRender;
 	}
 
@@ -147,7 +118,7 @@ class VirtualizedScrollBar extends Component {
 
 		const hasScrolled = this.state.scrollOffset > 0;
 
-		const listToRender = this.getListToRenderStaticOptimization(childrenWithProps);
+		const listToRender = this.getListToRender(childrenWithProps);
 
 		const unrenderedBelow = hasScrolled ? (listToRender && listToRender.length > 0 ? listToRender[0].props.originalindex : 0) - (this.stickyElems ? this.stickyElems.length : 0) : 0;
 		const unrenderedAbove = listToRender && listToRender.length > 0 ? childrenWithProps.length - (listToRender[listToRender.length - 1].props.originalindex + 1) : 0;
