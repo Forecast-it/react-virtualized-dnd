@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Scrollbars} from 'react-custom-scrollbars';
+import PropTypes from 'prop-types';
 // import {SpringSystem} from 'rebound';
 import Rebound from 'rebound';
 
