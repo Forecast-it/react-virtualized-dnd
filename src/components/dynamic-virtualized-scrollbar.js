@@ -197,9 +197,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index, ref: node => (this.childRefs[index] = node)}));
 		const listToRender = this.getListToRender(childrenWithProps);
 
-		const viewPortTop = this.state.containerTop;
-		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
-
 		const belowSpacerStyle = {border: this.props.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight};
 		const aboveSpacerStyle = {border: this.props.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: this.state.aboveSpacerHeight};
 
@@ -256,10 +253,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				<div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this.inner = div)}>
 					{this.props.showIndicators ? <div className={'first-indicator'} style={firstIndicatorStyle} /> : null}
 					{this.props.showIndicators ? <div className={'last-indicator'} style={lastIndicatorStyle} /> : null}
-					{this.props.showIndicators ? <div className={'indicator'} style={{background: 'red', width: '350px', position: 'fixed', height: 6, top: viewPortTop ? viewPortTop : 0}} /> : null}
-					{this.props.showIndicators ? (
-						<div className={'indicator'} style={{background: 'red', width: '350px', position: 'fixed', height: 6, top: viewPortBottom ? viewPortBottom - 2 : 0}} />
-					) : null}
+
 					<div style={aboveSpacerStyle} className={'above-spacer'} />
 					<div className={'list-items'} style={listItemsStyle} ref={div => (this.itemsContainer = div)}>
 						{listToRender}
