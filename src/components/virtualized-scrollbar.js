@@ -37,7 +37,7 @@ class VirtualizedScrollBar extends Component {
 		this.scrollBars.scrollTop(val);
 	}
 
-	// Fing the first element to render, and render (containersize + overScan / index * height) elems after the first.
+	// Find the first element to render, and render (containersize + overScan / index * height) elems after the first.
 	getListToRender(list) {
 		let listToRender = [];
 		this.stickyElems = [];
