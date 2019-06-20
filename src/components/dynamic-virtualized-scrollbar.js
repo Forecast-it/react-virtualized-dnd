@@ -149,13 +149,13 @@ class DynamicVirtualizedScrollbar extends Component {
 					belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0),
 					lastElemBounds: null
 				};
-				// If we're still rendering new things
+				// If we're still below the end of the list
 				if (this.state.lastRenderedItemIndex < this.props.listLength) {
 					// Only do it the first time we see the new elem
 					if (!this.seenIdxs.includes(this.state.lastRenderedItemIndex)) {
 						// How much bigger is this elem than the min height?
 						const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
-						// Increase above spacer height by the difference from min, to make sure we have enough space to scroll to
+						// Update the rolling average item size, used for calculating remaining below space (under the list of rendered items)
 						stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
 						this.seenIdxs.push(this.state.lastRenderedItemIndex);
 					}
@@ -180,7 +180,6 @@ class DynamicVirtualizedScrollbar extends Component {
 					return {lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1, belowSpacerHeight: prevState.belowSpacerHeight + elemSize, lastElemBounds: null};
 				});
 			}
-
 			// SCROLLING UP ENDS
 		}
 	}
