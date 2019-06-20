@@ -48,7 +48,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (prevState.averageItemSize !== this.state.averageItemSize) {
 			this.setState({belowSpacerHeight: (this.props.listLength - this.state.firstRenderedItemIndex + 1) * this.state.averageItemSize});
 		}
-		this.seenIdxs.push(prevState.firstRenderedItemIndex);
 	}
 
 	componentWillUnmount() {
