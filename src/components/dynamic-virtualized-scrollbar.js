@@ -122,7 +122,6 @@ class DynamicVirtualizedScrollbar extends Component {
 			// If viewPortTop has scrolled past first bottom, move first elem one down the list
 			if (this.state.firstElemBounds && this.state.firstElemBounds.bottom <= viewPortTop) {
 				const elemSize = Math.abs(this.state.firstElemBounds.bottom - this.state.firstElemBounds.top);
-				// console.log('Unrendering first elem of size', elemSize, this.itemsContainer.firstElementChild);
 				this.setState(prevState => {
 					return {
 						firstRenderedItemIndex: prevState.firstRenderedItemIndex + 1,
@@ -135,9 +134,6 @@ class DynamicVirtualizedScrollbar extends Component {
 			// If viewport bottom has crossed last elem bottom, render one more elem below
 			if (this.state.lastElemBounds && this.state.lastElemBounds.bottom <= viewPortBottom) {
 				const elemSize = Math.abs(this.state.lastElemBounds.bottom - this.state.lastElemBounds.top);
-				// console.log('Rendering additional last elem of size', elemSize, this.itemsContainer.firstElementChild);
-
-				// How much bigger is this elem than the min height?
 				const stateUpdate = {
 					lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1,
 					belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0),
@@ -145,6 +141,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				};
 				// If we're still rendering new things
 				if (this.state.lastRenderedItemIndex < this.props.listLength) {
+					// How much bigger is this elem than the min height?
 					const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
 					// Increase above spacer height by the difference from min, to make sure we have enough space to scroll to
 					stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
@@ -157,7 +154,6 @@ class DynamicVirtualizedScrollbar extends Component {
 			// If viewport is scrolled up above first elements top
 			if (this.state.firstElemBounds && viewPortTop <= this.state.firstElemBounds.top) {
 				const elemSize = Math.abs(this.state.firstElemBounds.bottom - this.state.firstElemBounds.top);
-				console.log('Rendering additional first elem of size', elemSize, this.itemsContainer.firstElementChild);
 				this.setState(prevState => {
 					return {firstRenderedItemIndex: Math.max(prevState.firstRenderedItemIndex - 1, 0), aboveSpacerHeight: Math.max(prevState.aboveSpacerHeight - elemSize, 0), firstElemBounds: null};
 				});
@@ -166,7 +162,6 @@ class DynamicVirtualizedScrollbar extends Component {
 			// If viewport has scrolled up over last top
 			if (this.state.lastElemBounds && viewPortBottom <= this.state.lastElemBounds.top) {
 				const elemSize = Math.abs(this.state.lastElemBounds.bottom - this.state.lastElemBounds.top);
-				console.log('Unrendering last elem of size', elemSize, this.itemsContainer.lastElementChild);
 				this.setState(prevState => {
 					return {lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1, belowSpacerHeight: prevState.belowSpacerHeight + elemSize, lastElemBounds: null};
 				});
