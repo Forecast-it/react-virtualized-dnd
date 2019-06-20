@@ -19,8 +19,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			// Initially guess that all elems are min height
 			belowSpacerHeight: (props.listLength - initialElemsToRender) * props.minElemHeight,
 			firstElemBounds: {},
-			lastElemBounds: {},
-			showIndicators: true
+			lastElemBounds: {}
 		};
 		this.childRefs = [];
 		this.stickyElems = null;
@@ -188,8 +187,8 @@ class DynamicVirtualizedScrollbar extends Component {
 		const viewPortTop = this.state.containerTop;
 		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
 
-		const belowSpacerStyle = {border: this.state.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight};
-		const aboveSpacerStyle = {border: this.state.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: this.state.aboveSpacerHeight};
+		const belowSpacerStyle = {border: this.props.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight};
+		const aboveSpacerStyle = {border: this.props.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: this.state.aboveSpacerHeight};
 
 		if (this.stickyElems && this.stickyElems.length > 0) {
 			listToRender.push(this.stickyElems[0]);
@@ -242,10 +241,10 @@ class DynamicVirtualizedScrollbar extends Component {
 				autoHeightMin={this.props.containerHeight}
 			>
 				<div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this.inner = div)}>
-					{this.state.showIndicators ? <div className={'first-indicator'} style={firstIndicatorStyle} /> : null}
-					{this.state.showIndicators ? <div className={'last-indicator'} style={lastIndicatorStyle} /> : null}
-					{this.state.showIndicators ? <div className={'indicator'} style={{background: 'red', width: '350px', position: 'fixed', height: 6, top: viewPortTop ? viewPortTop : 0}} /> : null}
-					{this.state.showIndicators ? (
+					{this.props.showIndicators ? <div className={'first-indicator'} style={firstIndicatorStyle} /> : null}
+					{this.props.showIndicators ? <div className={'last-indicator'} style={lastIndicatorStyle} /> : null}
+					{this.props.showIndicators ? <div className={'indicator'} style={{background: 'red', width: '350px', position: 'fixed', height: 6, top: viewPortTop ? viewPortTop : 0}} /> : null}
+					{this.props.showIndicators ? (
 						<div className={'indicator'} style={{background: 'red', width: '350px', position: 'fixed', height: 6, top: viewPortBottom ? viewPortBottom - 2 : 0}} />
 					) : null}
 					<div style={aboveSpacerStyle} className={'above-spacer'} />

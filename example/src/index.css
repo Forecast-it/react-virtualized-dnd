@@ -58,6 +58,20 @@ input {
 .row-split-button {
 	margin-right: 0;
 }
+.indicator-button {
+	margin-left: 16px;
+	font-family: 'Roboto';
+	flex-grow: 0;
+	height: 30px;
+	text-transform: uppercase;
+	border: 1px solid #e6e6e6;
+	background: white;
+	color: grey;
+	margin-top: 15px;
+	margin-right: 10px;
+	cursor: pointer;
+	outline: none;
+}
 .first-button {
 	border-right: none;
 }

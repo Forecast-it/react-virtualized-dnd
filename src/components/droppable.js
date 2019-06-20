@@ -232,6 +232,7 @@ class Droppable extends Component {
 							stickyElems={draggedElemId ? [draggedElemId] : []}
 							ref={scrollDiv => (this.scrollBars = scrollDiv)}
 							containerHeight={this.props.containerHeight - listHeaderHeight}
+							showIndicators={this.props.showIndicators}
 						>
 							{isActive ? this.pushPlaceholder(listToRender) : listToRender}
 						</DynamicVirtualizedScrollbar>

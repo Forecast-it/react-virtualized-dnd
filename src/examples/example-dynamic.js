@@ -9,7 +9,8 @@ class DynamicHeightExample extends Component {
 		this.state = {
 			listData: [],
 			numItems: 100,
-			numColumns: 6
+			numColumns: 6,
+			showIndicators: false
 		};
 		this.dragAndDropGroupName = 'exampleboard';
 		this.droppables = [];
@@ -17,6 +18,12 @@ class DynamicHeightExample extends Component {
 
 	componentDidMount() {
 		this.getListData();
+	}
+
+	toggleIndicators() {
+		this.setState(prevState => {
+			return {showIndicators: !prevState.showIndicators};
+		});
 	}
 
 	getListData() {
@@ -161,6 +168,9 @@ class DynamicHeightExample extends Component {
 							<button className={'row-split-button second-button' + (this.state.split ? ' active' : '')} onClick={this.toggleSplit.bind(this)}>
 								Multi Row
 							</button>
+							<button className={'indicator-button' + (this.state.showIndicators ? ' active' : '')} onClick={this.toggleIndicators.bind(this)}>
+								Show Virtualization Indicators
+							</button>
 						</div>
 					</div>
 					<div className={'input-section'}>
@@ -176,6 +186,7 @@ class DynamicHeightExample extends Component {
 							!this.state.split || index < elemsToRender.length / 2 ? (
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
+										showIndicators={this.state.showIndicators}
 										dynamicElemHeight={true}
 										minElemHeight={50}
 										activeHeaderClass={'header-active'}
@@ -199,6 +210,7 @@ class DynamicHeightExample extends Component {
 								index >= elemsToRender.length / 2 ? (
 									<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 										<Droppable
+											showIndicators={this.state.showIndicators}
 											dynamicElemHeight={true}
 											minElemHeight={50}
 											activeHeaderClass={'header-active'}
