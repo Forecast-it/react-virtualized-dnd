@@ -138,16 +138,20 @@ class DynamicVirtualizedScrollbar extends Component {
 		const scrollOffset = this.scrollBars ? this.scrollBars.getScrollTop() : 0;
 		let scrollingDown = true;
 
-		// Check if we're increasing or decreasing scroll
-		if (this.scrollOffset) {
-			if (scrollOffset < this.scrollOffset) {
-				scrollingDown = false;
-			}
+		if (this.scrollOffset === scrollOffset) {
+			// No change
+			return;
 		}
-		this.scrollOffset = scrollOffset;
-		const viewPortTop = this.state.containerTop;
-		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
 		if (this.itemsContainer && this.itemsContainer.lastElementChild && this.itemsContainer.firstElementChild) {
+			// Check if we're increasing or decreasing scroll
+			if (this.scrollOffset) {
+				if (scrollOffset < this.scrollOffset) {
+					scrollingDown = false;
+				}
+			}
+			this.scrollOffset = scrollOffset;
+			const viewPortTop = this.state.containerTop;
+			const viewPortBottom = this.state.containerTop + this.props.containerHeight;
 			if (this.firstElemBounds == null || this.lastElemBounds == null) {
 				this.setElementBounds(scrollOffset);
 				// Update breakpoints when finding new elements
@@ -168,84 +172,84 @@ class DynamicVirtualizedScrollbar extends Component {
 					this.lastElemBounds.bottom -= scrollChange;
 				}
 			}
-		}
 
-		// Remove all spacing at end of list
-		if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
-			this.setState({
-				belowSpacerHeight: 0
-			});
-			return;
-		}
-		// Remove all top spacing at beginning of list
-		else if (this.state.firstRenderedItemIndex === 0 && this.state.aboveSpacerHeight !== 0) {
-			this.setState({aboveSpacerHeight: 0});
-			return;
-		}
-
-		// SCROLLING DOWN BEGINS
-		if (scrollingDown) {
-			// If viewPortTop has scrolled past first bottom, move first elem one down the list
-			if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop) {
-				const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
-				this.setState(
-					prevState => {
-						return {
-							firstRenderedItemIndex: prevState.firstRenderedItemIndex + 1,
-							aboveSpacerHeight: prevState.aboveSpacerHeight + elemSize
-						};
-					},
-					() => this.setElementBounds(scrollOffset)
-				);
+			// Remove all spacing at end of list
+			if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
+				this.setState({
+					belowSpacerHeight: 0
+				});
+				return;
 			}
-			// If viewport bottom has crossed last elem bottom, render one more elem below
-			if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
-				const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
-				const stateUpdate = {
-					lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1
-					//belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
-				};
-				// If we're still below the end of the list
-				if (this.state.lastRenderedItemIndex < this.props.listLength) {
-					// Only do it the first time we see the new elem
-					if (!this.seenIdxs.includes(this.state.lastRenderedItemIndex)) {
-						// How much bigger is this elem than the min height?
-						const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
-						// Update the rolling average item size, used for calculating remaining below space (under the list of rendered items)
-						stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
-						this.seenIdxs.push(this.state.lastRenderedItemIndex);
-					}
+			// Remove all top spacing at beginning of list
+			else if (this.state.firstRenderedItemIndex === 0 && this.state.aboveSpacerHeight !== 0) {
+				this.setState({aboveSpacerHeight: 0});
+				return;
+			}
+
+			// SCROLLING DOWN BEGINS
+			if (scrollingDown) {
+				// If viewPortTop has scrolled past first bottom, move first elem one down the list
+				if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop) {
+					const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
+					this.setState(
+						prevState => {
+							return {
+								firstRenderedItemIndex: prevState.firstRenderedItemIndex + 1,
+								aboveSpacerHeight: prevState.aboveSpacerHeight + elemSize
+							};
+						},
+						() => this.setElementBounds(scrollOffset)
+					);
 				}
-				this.setState(stateUpdate, () => this.setElementBounds(scrollOffset));
-			}
-			// SCROLLING DOWN ENDS
-		} else {
-			// SCROLLING UP BEGINS
-			// If viewport is scrolled up above first elements top
-			if (this.firstElemBounds && viewPortTop <= this.firstElemBounds.top) {
-				const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
-				this.setState(
-					prevState => {
-						return {firstRenderedItemIndex: Math.max(prevState.firstRenderedItemIndex - 1, 0), aboveSpacerHeight: Math.max(prevState.aboveSpacerHeight - elemSize, 0)};
-					},
-					() => this.setElementBounds(scrollOffset)
-				);
-			}
+				// If viewport bottom has crossed last elem bottom, render one more elem below
+				if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
+					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
+					const stateUpdate = {
+						lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1
+						//belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
+					};
+					// If we're still below the end of the list
+					if (this.state.lastRenderedItemIndex < this.props.listLength) {
+						// Only do it the first time we see the new elem
+						if (!this.seenIdxs.includes(this.state.lastRenderedItemIndex)) {
+							// How much bigger is this elem than the min height?
+							const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
+							// Update the rolling average item size, used for calculating remaining below space (under the list of rendered items)
+							stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
+							this.seenIdxs.push(this.state.lastRenderedItemIndex);
+						}
+					}
+					this.setState(stateUpdate, () => this.setElementBounds(scrollOffset));
+				}
+				// SCROLLING DOWN ENDS
+			} else {
+				// SCROLLING UP BEGINS
+				// If viewport is scrolled up above first elements top
+				if (this.firstElemBounds && viewPortTop <= this.firstElemBounds.top) {
+					const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
+					this.setState(
+						prevState => {
+							return {firstRenderedItemIndex: Math.max(prevState.firstRenderedItemIndex - 1, 0), aboveSpacerHeight: Math.max(prevState.aboveSpacerHeight - elemSize, 0)};
+						},
+						() => this.setElementBounds(scrollOffset)
+					);
+				}
 
-			// If viewport has scrolled up over last top
-			if (this.lastElemBounds && viewPortBottom <= this.lastElemBounds.top) {
-				const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
-				this.setState(
-					prevState => {
-						return {
-							lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1
-							// belowSpacerHeight: prevState.belowSpacerHeight + elemSize
-						};
-					},
-					() => this.setElementBounds(scrollOffset)
-				);
+				// If viewport has scrolled up over last top
+				if (this.lastElemBounds && viewPortBottom <= this.lastElemBounds.top) {
+					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
+					this.setState(
+						prevState => {
+							return {
+								lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1
+								// belowSpacerHeight: prevState.belowSpacerHeight + elemSize
+							};
+						},
+						() => this.setElementBounds(scrollOffset)
+					);
+				}
+				// SCROLLING UP ENDS
 			}
-			// SCROLLING UP ENDS
 		}
 	}
 
