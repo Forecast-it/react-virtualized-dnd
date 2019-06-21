@@ -148,8 +148,6 @@ class DynamicVirtualizedScrollbar extends Component {
 			return;
 		}
 
-		console.log(this.state.lastRenderedItemIndex);
-
 		// Remove all spacing at end of list
 		if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
 			this.setState({
