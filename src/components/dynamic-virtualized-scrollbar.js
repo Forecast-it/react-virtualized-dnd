@@ -142,6 +142,20 @@ class DynamicVirtualizedScrollbar extends Component {
 			// No change
 			return;
 		}
+
+		// Remove all spacing at end of list
+		if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
+			this.setState({
+				belowSpacerHeight: 0
+			});
+			return;
+		}
+		// Remove all top spacing at beginning of list
+		else if (this.state.firstRenderedItemIndex === 0 && this.state.aboveSpacerHeight !== 0) {
+			this.setState({aboveSpacerHeight: 0});
+			return;
+		}
+
 		if (this.itemsContainer && this.itemsContainer.lastElementChild && this.itemsContainer.firstElementChild) {
 			// Check if we're increasing or decreasing scroll
 			if (this.scrollOffset) {
@@ -158,32 +172,10 @@ class DynamicVirtualizedScrollbar extends Component {
 				this.lastScrollBreakpoint = scrollOffset;
 			} else {
 				const scrollChange = scrollOffset - this.lastScrollBreakpoint;
-				if (scrollingDown) {
-					// Subtract scrolling difference since last attempt
-					this.firstElemBounds.top -= Math.max(scrollChange, 0);
-					this.firstElemBounds.bottom -= Math.max(scrollChange, 0);
-					this.lastElemBounds.top -= Math.max(scrollChange, 0);
-					this.lastElemBounds.bottom -= Math.max(scrollChange, 0);
-				} else {
-					// Add scrolling difference since last attempt
-					this.firstElemBounds.top -= scrollChange;
-					this.firstElemBounds.bottom -= scrollChange;
-					this.lastElemBounds.top -= scrollChange;
-					this.lastElemBounds.bottom -= scrollChange;
-				}
-			}
-
-			// Remove all spacing at end of list
-			if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
-				this.setState({
-					belowSpacerHeight: 0
-				});
-				return;
-			}
-			// Remove all top spacing at beginning of list
-			else if (this.state.firstRenderedItemIndex === 0 && this.state.aboveSpacerHeight !== 0) {
-				this.setState({aboveSpacerHeight: 0});
-				return;
+				this.firstElemBounds.top -= scrollChange;
+				this.firstElemBounds.bottom -= scrollChange;
+				this.lastElemBounds.top -= scrollChange;
+				this.lastElemBounds.bottom -= scrollChange;
 			}
 
 			// SCROLLING DOWN BEGINS
