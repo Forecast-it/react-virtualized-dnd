@@ -3,7 +3,6 @@ import {Scrollbars} from 'react-custom-scrollbars';
 import PropTypes from 'prop-types';
 // import {SpringSystem} from 'rebound';
 import Rebound from 'rebound';
-import {runInThisContext} from 'vm';
 
 class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
@@ -40,6 +39,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (this.inner) {
 			this.setState({containerTop: this.inner.getBoundingClientRect().top});
 		}
+		// Set initial bounds for first and last rendered elems
 		if (this.itemsContainer) {
 			const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
 			const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
@@ -55,7 +55,6 @@ class DynamicVirtualizedScrollbar extends Component {
 				left: lastElemBounds.left,
 				right: lastElemBounds.right
 			};
-			this.setState({lastElemBounds: this.itemsContainer.lastElementChild.getBoundingClientRect(), firstElemBounds: this.itemsContainer.firstElementChild.getBoundingClientRect()});
 		}
 	}
 
@@ -144,7 +143,6 @@ class DynamicVirtualizedScrollbar extends Component {
 					left: lastElemBounds.left,
 					right: lastElemBounds.right
 				};
-				// this.setState({firstElemBounds: this.firstElemBounds, lastElemBounds: this.lastElemBounds});
 				// Update breakpoints when finding new elements
 				this.lastScrollBreakpoint = scrollOffset;
 			} else {
