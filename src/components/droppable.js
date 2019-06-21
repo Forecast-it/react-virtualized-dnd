@@ -193,23 +193,23 @@ class Droppable extends Component {
 		let calculatedRowMinHeight = 0;
 		const listHeaderHeight = this.props.listHeader != null ? this.props.listHeaderHeight : 0;
 		let outerContainerHeight = this.props.containerHeight;
-		if (!this.props.dynamicElemHeight) {
-			elemHeight = this.props.hideList ? 0 : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
-			rowsTotalHeight = listToRender.length * elemHeight;
-			// Container smaller than calculated height of rows?
-			shouldScroll = this.props.containerHeight < rowsTotalHeight;
+		elemHeight = this.props.hideList ? 0 : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
+		rowsTotalHeight = listToRender.length * elemHeight;
+		// Container smaller than calculated height of rows?
+		shouldScroll = this.props.containerHeight < rowsTotalHeight;
 
-			// Total rows + height of one row (required for DnD to empty lists/dropping below list)
-			calculatedRowMinHeight = rowsTotalHeight + elemHeight;
+		// Total rows + height of one row (required for DnD to empty lists/dropping below list)
+		calculatedRowMinHeight = rowsTotalHeight + elemHeight;
 
-			// The minimum height of the container is the # of elements + 1 (same reason as above), unless a minimum height is specificied that is larger than this.
-			// If the minimum height exceeds the containerHeight, we limit it to containerHeight and enable scroll instead
-			outerContainerHeight = shouldScroll
-				? this.props.containerHeight
-				: this.props.containerMinHeight && this.props.containerMinHeight >= calculatedRowMinHeight
-				? this.props.containerMinHeight
-				: calculatedRowMinHeight + listHeaderHeight;
-		}
+		// The minimum height of the container is the # of elements + 1 (same reason as above), unless a minimum height is specificied that is larger than this.
+		// If the minimum height exceeds the containerHeight, we limit it to containerHeight and enable scroll instead
+		outerContainerHeight = this.props.enforceContainerMinHeight
+			? this.props.containerHeight
+			: shouldScroll
+			? this.props.containerHeight
+			: this.props.containerMinHeight && this.props.containerMinHeight >= calculatedRowMinHeight
+			? this.props.containerMinHeight
+			: calculatedRowMinHeight + listHeaderHeight;
 		const draggedElemId = this.state.currentlyActiveDraggable ? this.state.currentlyActiveDraggable.draggableId : null;
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 		const headerWithProps =

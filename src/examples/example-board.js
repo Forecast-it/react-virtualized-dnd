@@ -172,6 +172,7 @@ class ExampleBoard extends Component {
 							!this.state.split || index < elemsToRender.length / 2 ? (
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
+										//enforceContainerMinHeight={true}
 										activeHeaderClass={'header-active'}
 										listHeader={getListHeader(index)}
 										listHeaderHeight={60}

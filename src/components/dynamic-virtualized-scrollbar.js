@@ -123,6 +123,11 @@ class DynamicVirtualizedScrollbar extends Component {
 			});
 			return;
 		}
+		// Remove all top spacing at beginning of list
+		else if (this.state.firstRenderedItemIndex === 0 && this.state.aboveSpacerHeight !== 0) {
+			this.setState({aboveSpacerHeight: 0});
+			return;
+		}
 
 		const viewPortTop = this.state.containerTop;
 		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
