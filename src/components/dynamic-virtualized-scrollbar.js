@@ -3,6 +3,7 @@ import {Scrollbars} from 'react-custom-scrollbars';
 import PropTypes from 'prop-types';
 // import {SpringSystem} from 'rebound';
 import Rebound from 'rebound';
+import {runInThisContext} from 'vm';
 
 class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
@@ -28,6 +29,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.firstElemBounds = null;
 		this.MAX_RENDERS = 200;
 		this.seenIdxs = [];
+		this.lastScrollBreakpoint = 0;
 	}
 
 	componentDidMount() {
@@ -39,6 +41,20 @@ class DynamicVirtualizedScrollbar extends Component {
 			this.setState({containerTop: this.inner.getBoundingClientRect().top});
 		}
 		if (this.itemsContainer) {
+			const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
+			const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
+			this.firstElemBounds = {
+				top: firstElemBounds.top,
+				bottom: firstElemBounds.bottom,
+				left: firstElemBounds.left,
+				right: firstElemBounds.right
+			};
+			this.lastElemBounds = {
+				top: lastElemBounds.top,
+				bottom: lastElemBounds.bottom,
+				left: lastElemBounds.left,
+				right: lastElemBounds.right
+			};
 			this.setState({lastElemBounds: this.itemsContainer.lastElementChild.getBoundingClientRect(), firstElemBounds: this.itemsContainer.firstElementChild.getBoundingClientRect()});
 		}
 	}
@@ -110,10 +126,43 @@ class DynamicVirtualizedScrollbar extends Component {
 			}
 		}
 		this.scrollOffset = scrollOffset;
-
+		const viewPortTop = this.state.containerTop;
+		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
 		if (this.itemsContainer && this.itemsContainer.lastElementChild && this.itemsContainer.firstElementChild) {
-			this.setState({lastElemBounds: this.itemsContainer.lastElementChild.getBoundingClientRect()});
-			this.setState({firstElemBounds: this.itemsContainer.firstElementChild.getBoundingClientRect()});
+			if (this.firstElemBounds == null || this.lastElemBounds == null) {
+				const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
+				const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
+				this.firstElemBounds = {
+					top: firstElemBounds.top,
+					bottom: firstElemBounds.bottom,
+					left: firstElemBounds.left,
+					right: firstElemBounds.right
+				};
+				this.lastElemBounds = {
+					top: lastElemBounds.top,
+					bottom: lastElemBounds.bottom,
+					left: lastElemBounds.left,
+					right: lastElemBounds.right
+				};
+				// this.setState({firstElemBounds: this.firstElemBounds, lastElemBounds: this.lastElemBounds});
+				// Update breakpoints when finding new elements
+				this.lastScrollBreakpoint = scrollOffset;
+			} else {
+				const scrollChange = Math.max(scrollOffset - this.lastScrollBreakpoint, 0);
+				if (scrollingDown) {
+					// Subtract scrolling difference since last attempt
+					this.firstElemBounds.top -= scrollChange;
+					this.firstElemBounds.bottom -= scrollChange;
+					this.lastElemBounds.top -= scrollChange;
+					this.lastElemBounds.bottom -= scrollChange;
+				} else {
+					// Add scrolling difference since last attempt
+					this.firstElemBounds.top += scrollOffset - this.lastScrollBreakpoint;
+					this.firstElemBounds.bottom += scrollOffset - this.lastScrollBreakpoint;
+					this.lastElemBounds.top += scrollOffset - this.lastScrollBreakpoint;
+					this.lastElemBounds.bottom += scrollOffset - this.lastScrollBreakpoint;
+				}
+			}
 		}
 
 		// Remove all spacing at end of list
@@ -129,30 +178,27 @@ class DynamicVirtualizedScrollbar extends Component {
 			return;
 		}
 
-		const viewPortTop = this.state.containerTop;
-		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
-
 		// SCROLLING DOWN BEGINS
 		if (scrollingDown) {
 			// If viewPortTop has scrolled past first bottom, move first elem one down the list
-			if (this.state.firstElemBounds && this.state.firstElemBounds.bottom <= viewPortTop) {
-				const elemSize = Math.abs(this.state.firstElemBounds.bottom - this.state.firstElemBounds.top);
-				this.setState(prevState => {
-					return {
-						firstRenderedItemIndex: prevState.firstRenderedItemIndex + 1,
-						// averageItemSize: prevState.averageItemSize - (prevState.averageItemSize - elemSize),
-						aboveSpacerHeight: prevState.aboveSpacerHeight + elemSize,
-						firstElemBounds: null
-					};
-				});
+			if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop) {
+				const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
+				this.setState(
+					prevState => {
+						return {
+							firstRenderedItemIndex: prevState.firstRenderedItemIndex + 1,
+							aboveSpacerHeight: prevState.aboveSpacerHeight + elemSize
+						};
+					},
+					() => (this.firstElemBounds = null)
+				);
 			}
 			// If viewport bottom has crossed last elem bottom, render one more elem below
-			if (this.state.lastElemBounds && this.state.lastElemBounds.bottom <= viewPortBottom) {
-				const elemSize = Math.abs(this.state.lastElemBounds.bottom - this.state.lastElemBounds.top);
+			if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
+				const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 				const stateUpdate = {
 					lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1,
-					belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0),
-					lastElemBounds: null
+					belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
 				};
 				// If we're still below the end of the list
 				if (this.state.lastRenderedItemIndex < this.props.listLength) {
@@ -165,25 +211,31 @@ class DynamicVirtualizedScrollbar extends Component {
 						this.seenIdxs.push(this.state.lastRenderedItemIndex);
 					}
 				}
-				this.setState(stateUpdate);
+				this.setState(stateUpdate, () => (this.lastElemBounds = null));
 			}
 			// SCROLLING DOWN ENDS
 		} else {
 			// SCROLLING UP BEGINS
 			// If viewport is scrolled up above first elements top
-			if (this.state.firstElemBounds && viewPortTop <= this.state.firstElemBounds.top) {
-				const elemSize = Math.abs(this.state.firstElemBounds.bottom - this.state.firstElemBounds.top);
-				this.setState(prevState => {
-					return {firstRenderedItemIndex: Math.max(prevState.firstRenderedItemIndex - 1, 0), aboveSpacerHeight: Math.max(prevState.aboveSpacerHeight - elemSize, 0), firstElemBounds: null};
-				});
+			if (this.firstElemBounds && viewPortTop <= this.firstElemBounds.top) {
+				const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
+				this.setState(
+					prevState => {
+						return {firstRenderedItemIndex: Math.max(prevState.firstRenderedItemIndex - 1, 0), aboveSpacerHeight: Math.max(prevState.aboveSpacerHeight - elemSize, 0)};
+					},
+					() => (this.firstElemBounds = null)
+				);
 			}
 
 			// If viewport has scrolled up over last top
-			if (this.state.lastElemBounds && viewPortBottom <= this.state.lastElemBounds.top) {
-				const elemSize = Math.abs(this.state.lastElemBounds.bottom - this.state.lastElemBounds.top);
-				this.setState(prevState => {
-					return {lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1, belowSpacerHeight: prevState.belowSpacerHeight + elemSize, lastElemBounds: null};
-				});
+			if (this.lastElemBounds && viewPortBottom <= this.lastElemBounds.top) {
+				const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
+				this.setState(
+					prevState => {
+						return {lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1, belowSpacerHeight: prevState.belowSpacerHeight + elemSize};
+					},
+					() => (this.lastElemBounds = null)
+				);
 			}
 			// SCROLLING UP ENDS
 		}
