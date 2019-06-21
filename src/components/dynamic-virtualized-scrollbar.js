@@ -3,6 +3,7 @@ import {Scrollbars} from 'react-custom-scrollbars';
 import PropTypes from 'prop-types';
 // import {SpringSystem} from 'rebound';
 import Rebound from 'rebound';
+import {throws} from 'assert';
 
 class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
@@ -60,7 +61,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
-		if (prevState.averageItemSize !== this.state.averageItemSize) {
+		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.averageItemSize !== this.state.averageItemSize) {
 			this.setState({belowSpacerHeight: (this.props.listLength - this.state.firstRenderedItemIndex + 1) * this.state.averageItemSize});
 		}
 	}
@@ -76,6 +77,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	shouldComponentUpdate(nextProps, nextState) {
 		// only render when visible items change -> smooth scroll
 		return (
+			nextState.aboveSpacerHeight !== this.state.aboveSpacerHeight ||
 			nextState.belowSpacerHeight !== this.state.belowSpacerHeight ||
 			nextState.firstElemBounds !== this.state.firstElemBounds ||
 			nextState.lastElemBounds !== this.state.lastElemBounds ||
@@ -106,12 +108,29 @@ class DynamicVirtualizedScrollbar extends Component {
 			}
 		});
 
-		//this.setState({aboveSpacerHeight: remainingSize});
-
 		if (this.stickyElems && this.stickyElems.length > 0) {
 			items = items.filter(elem => !this.stickyElems.find(e => e.props.draggableId === elem.props.draggableId));
 		}
 		return items;
+	}
+
+	setElementBounds(scrollOffset) {
+		const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
+		const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
+		this.firstElemBounds = {
+			top: firstElemBounds.top,
+			bottom: firstElemBounds.bottom,
+			left: firstElemBounds.left,
+			right: firstElemBounds.right
+		};
+		this.lastElemBounds = {
+			top: lastElemBounds.top,
+			bottom: lastElemBounds.bottom,
+			left: lastElemBounds.left,
+			right: lastElemBounds.right
+		};
+		this.lastScrollBreakpoint = scrollOffset;
+		this.forceUpdate();
 	}
 
 	// Save scroll position in state for virtualization
@@ -119,6 +138,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		const scrollOffset = this.scrollBars ? this.scrollBars.getScrollTop() : 0;
 		let scrollingDown = true;
 
+		// Check if we're increasing or decreasing scroll
 		if (this.scrollOffset) {
 			if (scrollOffset < this.scrollOffset) {
 				scrollingDown = false;
@@ -129,36 +149,23 @@ class DynamicVirtualizedScrollbar extends Component {
 		const viewPortBottom = this.state.containerTop + this.props.containerHeight;
 		if (this.itemsContainer && this.itemsContainer.lastElementChild && this.itemsContainer.firstElementChild) {
 			if (this.firstElemBounds == null || this.lastElemBounds == null) {
-				const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
-				const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
-				this.firstElemBounds = {
-					top: firstElemBounds.top,
-					bottom: firstElemBounds.bottom,
-					left: firstElemBounds.left,
-					right: firstElemBounds.right
-				};
-				this.lastElemBounds = {
-					top: lastElemBounds.top,
-					bottom: lastElemBounds.bottom,
-					left: lastElemBounds.left,
-					right: lastElemBounds.right
-				};
+				this.setElementBounds(scrollOffset);
 				// Update breakpoints when finding new elements
 				this.lastScrollBreakpoint = scrollOffset;
 			} else {
-				const scrollChange = Math.max(scrollOffset - this.lastScrollBreakpoint, 0);
+				const scrollChange = scrollOffset - this.lastScrollBreakpoint;
 				if (scrollingDown) {
 					// Subtract scrolling difference since last attempt
+					this.firstElemBounds.top -= Math.max(scrollChange, 0);
+					this.firstElemBounds.bottom -= Math.max(scrollChange, 0);
+					this.lastElemBounds.top -= Math.max(scrollChange, 0);
+					this.lastElemBounds.bottom -= Math.max(scrollChange, 0);
+				} else {
+					// Add scrolling difference since last attempt
 					this.firstElemBounds.top -= scrollChange;
 					this.firstElemBounds.bottom -= scrollChange;
 					this.lastElemBounds.top -= scrollChange;
 					this.lastElemBounds.bottom -= scrollChange;
-				} else {
-					// Add scrolling difference since last attempt
-					this.firstElemBounds.top += scrollOffset - this.lastScrollBreakpoint;
-					this.firstElemBounds.bottom += scrollOffset - this.lastScrollBreakpoint;
-					this.lastElemBounds.top += scrollOffset - this.lastScrollBreakpoint;
-					this.lastElemBounds.bottom += scrollOffset - this.lastScrollBreakpoint;
 				}
 			}
 		}
@@ -188,15 +195,15 @@ class DynamicVirtualizedScrollbar extends Component {
 							aboveSpacerHeight: prevState.aboveSpacerHeight + elemSize
 						};
 					},
-					() => (this.firstElemBounds = null)
+					() => this.setElementBounds(scrollOffset)
 				);
 			}
 			// If viewport bottom has crossed last elem bottom, render one more elem below
 			if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
 				const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 				const stateUpdate = {
-					lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1,
-					belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
+					lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1
+					//belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
 				};
 				// If we're still below the end of the list
 				if (this.state.lastRenderedItemIndex < this.props.listLength) {
@@ -209,7 +216,7 @@ class DynamicVirtualizedScrollbar extends Component {
 						this.seenIdxs.push(this.state.lastRenderedItemIndex);
 					}
 				}
-				this.setState(stateUpdate, () => (this.lastElemBounds = null));
+				this.setState(stateUpdate, () => this.setElementBounds(scrollOffset));
 			}
 			// SCROLLING DOWN ENDS
 		} else {
@@ -221,7 +228,7 @@ class DynamicVirtualizedScrollbar extends Component {
 					prevState => {
 						return {firstRenderedItemIndex: Math.max(prevState.firstRenderedItemIndex - 1, 0), aboveSpacerHeight: Math.max(prevState.aboveSpacerHeight - elemSize, 0)};
 					},
-					() => (this.firstElemBounds = null)
+					() => this.setElementBounds(scrollOffset)
 				);
 			}
 
@@ -230,9 +237,12 @@ class DynamicVirtualizedScrollbar extends Component {
 				const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 				this.setState(
 					prevState => {
-						return {lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1, belowSpacerHeight: prevState.belowSpacerHeight + elemSize};
+						return {
+							lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1
+							// belowSpacerHeight: prevState.belowSpacerHeight + elemSize
+						};
 					},
-					() => (this.lastElemBounds = null)
+					() => this.setElementBounds(scrollOffset)
 				);
 			}
 			// SCROLLING UP ENDS
@@ -290,22 +300,22 @@ class DynamicVirtualizedScrollbar extends Component {
 
 		let firstIndicatorStyle;
 		let lastIndicatorStyle;
-		if (this.state.firstElemBounds && this.state.lastElemBounds) {
+		if (this.firstElemBounds && this.lastElemBounds) {
 			firstIndicatorStyle = {
-				top: this.state.firstElemBounds.top,
-				left: this.state.firstElemBounds.left,
-				width: this.state.firstElemBounds.right - this.state.firstElemBounds.left - 6,
-				height: this.state.firstElemBounds.bottom - this.state.firstElemBounds.top - 6,
+				top: this.firstElemBounds.top,
+				left: this.firstElemBounds.left,
+				width: this.firstElemBounds.right - this.firstElemBounds.left - 6,
+				height: this.firstElemBounds.bottom - this.firstElemBounds.top - 6,
 				boxSizing: 'border-box',
 				background: 'transparent',
 				border: 'solid 3px green',
 				position: 'fixed'
 			};
 			lastIndicatorStyle = {
-				top: this.state.lastElemBounds.top,
-				left: this.state.lastElemBounds.left,
-				width: this.state.lastElemBounds.right - this.state.lastElemBounds.left - 6,
-				height: this.state.lastElemBounds.bottom - this.state.lastElemBounds.top - 6,
+				top: this.lastElemBounds.top,
+				left: this.lastElemBounds.left,
+				width: this.lastElemBounds.right - this.lastElemBounds.left - 6,
+				height: this.lastElemBounds.bottom - this.lastElemBounds.top - 6,
 				boxSizing: 'border-box',
 				background: 'transparent',
 				border: 'solid 3px blue',
