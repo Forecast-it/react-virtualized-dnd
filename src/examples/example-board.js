@@ -68,7 +68,9 @@ class ExampleBoard extends Component {
 			alert('Please, calm down.');
 			return;
 		}
-		this.setState({numItems: Number(e.target.value)});
+		if (e.target.value !== this.state.numItems && e.target.value) {
+			this.setState({numItems: Number(e.target.value)});
+		}
 	}
 
 	handleColumnInputChange(e) {
@@ -76,7 +78,9 @@ class ExampleBoard extends Component {
 			alert('Please, calm down.');
 			return;
 		}
-		this.setState({numColumns: Number(e.target.value)});
+		if (e.target.value !== this.state.numColumns && e.target.value) {
+			this.setState({numColumns: Number(e.target.value)});
+		}
 	}
 
 	scroll(ref) {
@@ -161,11 +165,22 @@ class ExampleBoard extends Component {
 					</div>
 					<div className={'input-section'}>
 						<p>Items per column</p>
-						<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numItems} onChange={this.handleInputChange.bind(this)} />
+						<input
+							style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}}
+							placeholder={100}
+							onKeyDown={e => (e.key === 'Enter' ? this.handleInputChange(e) : void 0)}
+							onBlur={this.handleInputChange.bind(this)}
+						/>
 					</div>
 					<div className={'input-section'}>
 						<p>Number of columns</p>
-						<input style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}} value={this.state.numColumns} onChange={this.handleColumnInputChange.bind(this)} />
+
+						<input
+							style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}}
+							placeholder={6}
+							onKeyDown={e => (e.key === 'Enter' ? this.handleColumnInputChange(e) : void 0)}
+							onBlur={this.handleColumnInputChange.bind(this)}
+						/>
 					</div>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) =>
