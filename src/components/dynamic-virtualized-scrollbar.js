@@ -30,6 +30,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.MAX_RENDERS = 200;
 		this.seenIdxs = [];
 		this.lastScrollBreakpoint = 0;
+		this.updateSpacing = this.updateSpacing.bind(this);
 	}
 
 	componentDidMount() {
@@ -62,7 +63,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	componentDidUpdate(prevProps, prevState) {
 		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
 		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.averageItemSize !== this.state.averageItemSize) {
-			this.setState({belowSpacerHeight: (this.props.listLength - this.state.firstRenderedItemIndex + 1) * this.state.averageItemSize});
+			requestAnimationFrame(this.updateSpacing);
 		}
 	}
 
@@ -85,6 +86,10 @@ class DynamicVirtualizedScrollbar extends Component {
 			nextState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex ||
 			nextProps !== this.props
 		);
+	}
+
+	updateSpacing() {
+		this.setState({belowSpacerHeight: (this.props.listLength - this.state.firstRenderedItemIndex + 1) * this.state.averageItemSize});
 	}
 
 	handleSpringUpdate(spring) {
@@ -129,8 +134,8 @@ class DynamicVirtualizedScrollbar extends Component {
 			left: lastElemBounds.left,
 			right: lastElemBounds.right
 		};
+		// Update scroll breakpoint when finding new elements
 		this.lastScrollBreakpoint = scrollOffset;
-		this.forceUpdate();
 	}
 
 	// Save scroll position in state for virtualization
@@ -142,6 +147,8 @@ class DynamicVirtualizedScrollbar extends Component {
 			// No change
 			return;
 		}
+
+		console.log(this.state.lastRenderedItemIndex);
 
 		// Remove all spacing at end of list
 		if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
@@ -168,8 +175,6 @@ class DynamicVirtualizedScrollbar extends Component {
 			const viewPortBottom = this.state.containerTop + this.props.containerHeight;
 			if (this.firstElemBounds == null || this.lastElemBounds == null) {
 				this.setElementBounds(scrollOffset);
-				// Update breakpoints when finding new elements
-				this.lastScrollBreakpoint = scrollOffset;
 			} else {
 				const scrollChange = scrollOffset - this.lastScrollBreakpoint;
 				this.firstElemBounds.top -= scrollChange;
@@ -186,7 +191,7 @@ class DynamicVirtualizedScrollbar extends Component {
 					this.setState(
 						prevState => {
 							return {
-								firstRenderedItemIndex: prevState.firstRenderedItemIndex + 1,
+								firstRenderedItemIndex: Math.min(prevState.firstRenderedItemIndex + 1, this.props.listLength - 1),
 								aboveSpacerHeight: prevState.aboveSpacerHeight + elemSize
 							};
 						},
@@ -197,7 +202,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
 					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 					const stateUpdate = {
-						lastRenderedItemIndex: this.state.lastRenderedItemIndex + 1
+						lastRenderedItemIndex: Math.min(this.state.lastRenderedItemIndex + 1, this.props.listLength - 1)
 						//belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
 					};
 					// If we're still below the end of the list
@@ -233,7 +238,7 @@ class DynamicVirtualizedScrollbar extends Component {
 					this.setState(
 						prevState => {
 							return {
-								lastRenderedItemIndex: prevState.lastRenderedItemIndex - 1
+								lastRenderedItemIndex: Math.max(prevState.lastRenderedItemIndex - 1, 0)
 								// belowSpacerHeight: prevState.belowSpacerHeight + elemSize
 							};
 						},
