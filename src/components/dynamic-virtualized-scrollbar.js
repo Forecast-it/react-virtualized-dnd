@@ -16,12 +16,13 @@ class DynamicVirtualizedScrollbar extends Component {
 			scrollOffset: 0,
 			firstRenderedItemIndex: 0,
 			lastRenderedItemIndex: initialElemsToRender,
-			averageItemSize: this.props.minElemHeight,
 			aboveSpacerHeight: 0,
 			// Initially guess that all elems are min height
 			belowSpacerHeight: (props.listLength - initialElemsToRender) * props.minElemHeight,
 			firstElemBounds: {},
-			lastElemBounds: {}
+			lastElemBounds: {},
+			numElemsSized: 0,
+			totalElemsSizedSize: 0
 		};
 		this.elemOverScan = 5;
 		this.childRefs = [];
@@ -32,6 +33,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.seenIdxs = [];
 		this.lastScrollBreakpoint = 0;
 		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
+		this.handleScroll = this.handleScroll.bind(this);
 	}
 
 	componentDidMount() {
@@ -63,8 +65,8 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
-		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.averageItemSize !== this.state.averageItemSize) {
-			requestAnimationFrame(this.updateRemainingSpace);
+		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.numElemsSized !== this.state.numElemsSized) {
+			this.updateRemainingSpace();
 		}
 	}
 
@@ -90,8 +92,13 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
 	updateRemainingSpace() {
-		const remainingElemsBelow = this.props.listLength - this.state.firstRenderedItemIndex - 1;
-		this.setState({belowSpacerHeight: remainingElemsBelow * this.state.averageItemSize});
+		const remainingElemsBelow = this.props.listLength - (this.state.lastRenderedItemIndex + 1);
+		const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
+		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
+		console.log(averageItemSize, remainingElemsBelow);
+		if (belowSpacerHeight !== this.state.belowSpacerHeight) {
+			this.setState({belowSpacerHeight: belowSpacerHeight});
+		}
 	}
 
 	handleSpringUpdate(spring) {
@@ -106,10 +113,10 @@ class DynamicVirtualizedScrollbar extends Component {
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
 
 		const start = Math.max(firstRenderedItemIndex, 0);
-		const end = Math.min(lastRenderedItemIndex + 1, this.props.listLength);
+		const end = Math.min(lastRenderedItemIndex, this.props.listLength - 1);
 
-		// render only visible items plus overscan
-		let items = list.slice(start, end);
+		// render only visible items plus overscan (+1 because slice isn't inclusive)
+		let items = list.slice(start, end + 1);
 
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
@@ -143,8 +150,12 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastScrollBreakpoint = scrollOffset;
 	}
 
+	requestScroll() {
+		requestAnimationFrame(this.handleScroll);
+	}
+
 	// Save scroll position in state for virtualization
-	handleScroll(e) {
+	handleScroll() {
 		const scrollOffset = this.scrollBars ? this.scrollBars.getScrollTop() : 0;
 		let scrollingDown = true;
 
@@ -154,16 +165,18 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 
 		// Remove all spacing at end of list
-		if (this.state.lastRenderedItemIndex === this.props.listLength - 1 && this.state.belowSpacerHeight !== 0) {
-			this.setState({
-				belowSpacerHeight: 0
-			});
-			return;
+		if (this.state.lastRenderedItemIndex === this.props.listLength - 1) {
+			if (this.state.belowSpacerHeight !== 0) {
+				this.setState({
+					belowSpacerHeight: 0
+				});
+			}
 		}
 		// Remove all top spacing at beginning of list
-		else if (this.state.firstRenderedItemIndex === 0 && this.state.aboveSpacerHeight !== 0) {
-			this.setState({aboveSpacerHeight: 0});
-			return;
+		else if (this.state.firstRenderedItemIndex === 0) {
+			if (this.state.aboveSpacerHeight !== 0) {
+				this.setState({aboveSpacerHeight: 0});
+			}
 		}
 
 		if (this.itemsContainer && this.itemsContainer.lastElementChild && this.itemsContainer.firstElementChild) {
@@ -206,16 +219,17 @@ class DynamicVirtualizedScrollbar extends Component {
 					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 					const stateUpdate = {
 						lastRenderedItemIndex: Math.min(this.state.lastRenderedItemIndex + 1, this.props.listLength - 1)
-						//belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
+						// belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
 					};
 					// If we're still below the end of the list
 					if (this.state.lastRenderedItemIndex < this.props.listLength) {
 						// Only do it the first time we see the new elem
 						if (!this.seenIdxs.includes(this.state.lastRenderedItemIndex)) {
 							// How much bigger is this elem than the min height?
-							const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
+							// const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
 							// Update the rolling average item size, used for calculating remaining below space (under the list of rendered items)
-							stateUpdate.averageItemSize = (this.state.averageItemSize + elemSizeDiffFromMin) / 2;
+							stateUpdate.totalElemsSizedSize = this.state.totalElemsSizedSize + elemSize;
+							stateUpdate.numElemsSized = this.state.numElemsSized + 1;
 							this.seenIdxs.push(this.state.lastRenderedItemIndex);
 						}
 					}
@@ -328,7 +342,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 		return (
 			<Scrollbars
-				onScroll={this.handleScroll.bind(this)}
+				onScroll={this.requestScroll.bind(this)}
 				ref={div => (this.scrollBars = div)}
 				autoHeight={true}
 				autoHeightMax={this.props.containerHeight}
