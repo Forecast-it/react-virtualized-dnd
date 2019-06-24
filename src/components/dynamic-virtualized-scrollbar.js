@@ -34,6 +34,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastScrollBreakpoint = 0;
 		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
 		this.handleScroll = this.handleScroll.bind(this);
+		this.aboveSpacerMap = new Map();
 	}
 
 	componentDidMount() {
@@ -107,23 +108,24 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	validateSpacing() {
+		let shouldCalc = false;
 		if (this.belowSpacer) {
 			const belowSpacerBounds = this.belowSpacer.getBoundingClientRect();
 			const aboveSpacerBounds = this.aboveSpacer.getBoundingClientRect();
 			// Below spacer is in viewport
 			if (this.state.containerTop + this.props.containerHeight > belowSpacerBounds.top) {
-				if (this.autoCalcTimeout) {
-					clearTimeout(this.autoCalcTimeout);
-				}
-				this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
+				shouldCalc = true;
 			}
 			// Above spacer is in viewport
 			if (this.state.containerTop < aboveSpacerBounds.bottom) {
-				if (this.autoCalcTimeout) {
-					clearTimeout(this.autoCalcTimeout);
-				}
-				this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
+				shouldCalc = true;
 			}
+		}
+		if (shouldCalc) {
+			if (this.autoCalcTimeout) {
+				clearTimeout(this.autoCalcTimeout);
+			}
+			this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
 		}
 	}
 
@@ -232,13 +234,19 @@ class DynamicVirtualizedScrollbar extends Component {
 				this.lastElemBounds.bottom -= scrollChange;
 			}
 
+			if (this.props.showIndicators) {
+				this.forceUpdate();
+			}
+
 			// SCROLLING DOWN BEGINS
 			if (scrollingDown) {
 				// If viewPortTop has scrolled past first bottom, move first elem one down the list
-				if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop) {
+				if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop && !this.aboveSpacerMap.get(this.state.firstRenderedItemIndex)) {
 					const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
 					stateUpdate.firstRenderedItemIndex = Math.min(this.state.firstRenderedItemIndex + 1, this.props.listLength - 1);
 					stateUpdate.aboveSpacerHeight = this.state.aboveSpacerHeight + elemSize;
+					// add index to map, so we only update sizing once per item
+					this.aboveSpacerMap.set(this.state.firstRenderedItemIndex, true);
 				}
 				// If viewport bottom has crossed last elem bottom, render one more elem below
 				if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
@@ -266,6 +274,8 @@ class DynamicVirtualizedScrollbar extends Component {
 					const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
 					stateUpdate.firstRenderedItemIndex = Math.max(this.state.firstRenderedItemIndex - 1, 0);
 					stateUpdate.aboveSpacerHeight = Math.max(this.state.aboveSpacerHeight - elemSize, 0);
+					// Update map to no longer account for index in above spacer
+					this.aboveSpacerMap.set(this.state.firstRenderedItemIndex, false);
 				}
 				// If viewport has scrolled up over last top
 				if (this.lastElemBounds && viewPortBottom <= this.lastElemBounds.top) {
