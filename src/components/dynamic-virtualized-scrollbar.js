@@ -95,10 +95,43 @@ class DynamicVirtualizedScrollbar extends Component {
 		const remainingElemsBelow = this.props.listLength - (this.state.lastRenderedItemIndex + 1);
 		const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
 		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
-		console.log(averageItemSize, remainingElemsBelow);
 		if (belowSpacerHeight !== this.state.belowSpacerHeight) {
-			this.setState({belowSpacerHeight: belowSpacerHeight});
+			this.setState({belowSpacerHeight: belowSpacerHeight}, () => this.validateSpacing());
 		}
+	}
+
+	validateSpacing() {
+		if (this.belowSpacer) {
+			const belowSpacerBounds = this.belowSpacer.getBoundingClientRect();
+			const aboveSpacerBounds = this.aboveSpacer.getBoundingClientRect();
+			// Below spacer is in viewport
+			if (this.state.containerTop + this.props.containerHeight > belowSpacerBounds.top) {
+				if (this.autoCalcTimeout) {
+					clearTimeout(this.autoCalcTimeout);
+				}
+				this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
+			}
+			// Above spacer is in viewport
+			if (this.state.containerTop < aboveSpacerBounds.bottom) {
+				if (this.autoCalcTimeout) {
+					clearTimeout(this.autoCalcTimeout);
+				}
+				this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
+			}
+		}
+	}
+
+	autoCalculateSpacing() {
+		const scrollOffset = this.scrollBars.getScrollTop();
+		const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
+		const elemsAbove = Math.round(scrollOffset / averageItemSize);
+		const elemsToRender = Math.round(this.props.containerHeight / averageItemSize);
+		this.setState({
+			aboveSpacerHeight: elemsAbove * averageItemSize,
+			belowSpacerHeight: (this.props.listLength - (elemsAbove + elemsToRender)) * averageItemSize,
+			firstRenderedItemIndex: elemsAbove,
+			lastRenderedItemIndex: elemsAbove + elemsToRender
+		});
 	}
 
 	handleSpringUpdate(spring) {
@@ -148,10 +181,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		};
 		// Update scroll breakpoint when finding new elements
 		this.lastScrollBreakpoint = scrollOffset;
-	}
-
-	requestScroll() {
-		requestAnimationFrame(this.handleScroll);
 	}
 
 	// Save scroll position in state for virtualization
@@ -251,7 +280,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 				// If viewport has scrolled up over last top
 				if (this.lastElemBounds && viewPortBottom <= this.lastElemBounds.top) {
-					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
+					// const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 					this.setState(
 						prevState => {
 							return {
@@ -342,7 +371,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 		return (
 			<Scrollbars
-				onScroll={this.requestScroll.bind(this)}
+				onScroll={this.handleScroll.bind(this)}
 				ref={div => (this.scrollBars = div)}
 				autoHeight={true}
 				autoHeightMax={this.props.containerHeight}
@@ -352,11 +381,11 @@ class DynamicVirtualizedScrollbar extends Component {
 				{this.props.showIndicators ? <div className={'last-indicator'} style={lastIndicatorStyle} /> : null}
 
 				<div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this.inner = div)}>
-					<div style={aboveSpacerStyle} className={'above-spacer'} />
+					<div ref={div => (this.aboveSpacer = div)} style={aboveSpacerStyle} className={'above-spacer'} />
 					<div className={'list-items'} style={listItemsStyle} ref={div => (this.itemsContainer = div)}>
 						{listToRender}
 					</div>
-					<div style={belowSpacerStyle} className={'below-spacer'} />
+					<div ref={div => (this.belowSpacer = div)} style={belowSpacerStyle} className={'below-spacer'} />
 				</div>
 			</Scrollbars>
 		);
