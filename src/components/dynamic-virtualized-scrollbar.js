@@ -3,7 +3,6 @@ import {Scrollbars} from 'react-custom-scrollbars';
 import PropTypes from 'prop-types';
 // import {SpringSystem} from 'rebound';
 import Rebound from 'rebound';
-import {throws} from 'assert';
 
 class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
