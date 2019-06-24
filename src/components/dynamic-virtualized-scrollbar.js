@@ -154,8 +154,13 @@ class DynamicVirtualizedScrollbar extends Component {
 		const start = Math.max(firstRenderedItemIndex, 0);
 		const end = Math.min(lastRenderedItemIndex, this.props.listLength - 1);
 
-		// render only visible items plus overscan (+1 because slice isn't inclusive)
-		let items = list.slice(start, end + 1);
+		// render only visible, non-sticky items
+		let items = [];
+		for (let i = start; i <= end; i++) {
+			if (!this.stickyElems.find(e => e.props.draggableId === elem.props.draggableId)) {
+				items.push(list[i]);
+			}
+		}
 
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
@@ -164,14 +169,10 @@ class DynamicVirtualizedScrollbar extends Component {
 			}
 		});
 
-		if (this.stickyElems && this.stickyElems.length > 0) {
-			items = items.filter(elem => !this.stickyElems.find(e => e.props.draggableId === elem.props.draggableId));
-		}
 		return items;
 	}
 
 	setElementBounds(scrollOffset, first, second) {
-		console.log('Getting bounding rects');
 		if (first) {
 			const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
 			this.firstElemBounds = {
@@ -183,7 +184,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 		if (second) {
 			const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
-
 			this.lastElemBounds = {
 				top: lastElemBounds.top,
 				bottom: lastElemBounds.bottom,
