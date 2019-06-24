@@ -30,10 +30,10 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastElemBounds = null;
 		this.firstElemBounds = null;
 		this.MAX_RENDERS = 200;
-		this.seenIdxs = [];
 		this.lastScrollBreakpoint = 0;
 		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
 		this.handleScroll = this.handleScroll.bind(this);
+		this.belowSpacerMap = new Map();
 		this.aboveSpacerMap = new Map();
 	}
 
@@ -121,10 +121,10 @@ class DynamicVirtualizedScrollbar extends Component {
 				shouldCalc = true;
 			}
 		}
+		if (this.autoCalcTimeout) {
+			clearTimeout(this.autoCalcTimeout);
+		}
 		if (shouldCalc) {
-			if (this.autoCalcTimeout) {
-				clearTimeout(this.autoCalcTimeout);
-			}
 			this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
 		}
 	}
@@ -256,13 +256,13 @@ class DynamicVirtualizedScrollbar extends Component {
 					// If we're still below the end of the list
 					if (this.state.lastRenderedItemIndex < this.props.listLength) {
 						// Only do it the first time we see the new elem
-						if (!this.seenIdxs.includes(this.state.lastRenderedItemIndex)) {
+						if (!this.belowSpacerMap.get(this.state.lastRenderedItemIndex)) {
 							// How much bigger is this elem than the min height?
 							// const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
 							// Update the rolling average item size, used for calculating remaining below space (under the list of rendered items)
 							stateUpdate.totalElemsSizedSize = this.state.totalElemsSizedSize + elemSize;
 							stateUpdate.numElemsSized = this.state.numElemsSized + 1;
-							this.seenIdxs.push(this.state.lastRenderedItemIndex);
+							this.belowSpacerMap.set(this.state.lastRenderedItemIndex, true);
 						}
 					}
 				}
