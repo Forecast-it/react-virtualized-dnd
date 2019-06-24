@@ -147,7 +147,6 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	getListToRender(list) {
-		// let listToRender = [];
 		this.stickyElems = [];
 		const lastRenderedItemIndex = this.state.lastRenderedItemIndex;
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
@@ -156,18 +155,21 @@ class DynamicVirtualizedScrollbar extends Component {
 		const end = Math.min(lastRenderedItemIndex, this.props.listLength - 1);
 
 		// render only visible, non-sticky items
-		let items = list.slice(start, end + 1);
+		// let items = list.slice(start, end + 1);
+		let items = [];
 
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
 			if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
 				this.stickyElems.push(child);
+			} else if (index >= start && index <= end) {
+				items.push(child);
 			}
 		});
 
-		if (this.stickyElems && this.stickyElems.length > 0) {
+		/*if (this.stickyElems && this.stickyElems.length > 0) {
 			items = items.filter(elem => !this.stickyElems.find(e => e.props.draggableId === elem.props.draggableId));
-		}
+		}*/
 		return items;
 	}
 
