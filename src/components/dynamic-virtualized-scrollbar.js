@@ -103,13 +103,20 @@ class DynamicVirtualizedScrollbar extends Component {
 		const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
 		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
 		if (belowSpacerHeight !== this.state.belowSpacerHeight) {
-			this.setState({belowSpacerHeight: belowSpacerHeight}, () => this.validateSpacing());
+			this.setState({belowSpacerHeight: belowSpacerHeight}, () => this.setSpacingValidationTimer());
 		}
 	}
 
-	validateSpacing() {
+	setSpacingValidationTimer() {
+		if (this.autoCalcTimeout) {
+			clearTimeout(this.autoCalcTimeout);
+		}
+		this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
+	}
+
+	autoCalculateSpacing() {
 		let shouldCalc = false;
-		if (this.belowSpacer) {
+		if (this.belowSpacer && this.aboveSpacer) {
 			const belowSpacerBounds = this.belowSpacer.getBoundingClientRect();
 			const aboveSpacerBounds = this.aboveSpacer.getBoundingClientRect();
 			// Below spacer is in viewport
@@ -121,25 +128,18 @@ class DynamicVirtualizedScrollbar extends Component {
 				shouldCalc = true;
 			}
 		}
-		if (this.autoCalcTimeout) {
-			clearTimeout(this.autoCalcTimeout);
-		}
 		if (shouldCalc) {
-			this.autoCalcTimeout = setTimeout(() => this.autoCalculateSpacing(), 500);
+			const scrollOffset = this.scrollBars.getScrollTop();
+			const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
+			const elemsAbove = Math.round(scrollOffset / averageItemSize);
+			const elemsToRender = Math.round(this.props.containerHeight / averageItemSize);
+			this.setState({
+				aboveSpacerHeight: elemsAbove * averageItemSize,
+				belowSpacerHeight: (this.props.listLength - (elemsAbove + elemsToRender)) * averageItemSize,
+				firstRenderedItemIndex: elemsAbove,
+				lastRenderedItemIndex: elemsAbove + elemsToRender
+			});
 		}
-	}
-
-	autoCalculateSpacing() {
-		const scrollOffset = this.scrollBars.getScrollTop();
-		const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
-		const elemsAbove = Math.round(scrollOffset / averageItemSize);
-		const elemsToRender = Math.round(this.props.containerHeight / averageItemSize);
-		this.setState({
-			aboveSpacerHeight: elemsAbove * averageItemSize,
-			belowSpacerHeight: (this.props.listLength - (elemsAbove + elemsToRender)) * averageItemSize,
-			firstRenderedItemIndex: elemsAbove,
-			lastRenderedItemIndex: elemsAbove + elemsToRender
-		});
 	}
 
 	handleSpringUpdate(spring) {
