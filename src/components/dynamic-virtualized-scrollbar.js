@@ -31,7 +31,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.MAX_RENDERS = 200;
 		this.seenIdxs = [];
 		this.lastScrollBreakpoint = 0;
-		this.updateSpacing = this.updateRemainingSpace.bind(this);
+		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
 	}
 
 	componentDidMount() {
@@ -91,8 +91,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
 	updateRemainingSpace() {
 		const remainingElemsBelow = this.props.listLength - this.state.firstRenderedItemIndex - 1;
-		const includeOverScan = this.state.lastRenderedItemIndex + this.elemOverScan < this.props.listLength;
-		this.setState({belowSpacerHeight: (remainingElemsBelow - (includeOverScan ? this.elemOverScan : 0)) * this.state.averageItemSize - });
+		this.setState({belowSpacerHeight: remainingElemsBelow * this.state.averageItemSize});
 	}
 
 	handleSpringUpdate(spring) {
@@ -106,8 +105,8 @@ class DynamicVirtualizedScrollbar extends Component {
 		const lastRenderedItemIndex = this.state.lastRenderedItemIndex;
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
 
-		const start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
-		const end = Math.min(lastRenderedItemIndex + 1 + this.elemOverScan, this.props.listLength);
+		const start = Math.max(firstRenderedItemIndex, 0);
+		const end = Math.min(lastRenderedItemIndex + 1, this.props.listLength);
 
 		// render only visible items plus overscan
 		let items = list.slice(start, end);
