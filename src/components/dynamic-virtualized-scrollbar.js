@@ -23,6 +23,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			firstElemBounds: {},
 			lastElemBounds: {}
 		};
+		this.elemOverScan = 5;
 		this.childRefs = [];
 		this.stickyElems = null;
 		this.lastElemBounds = null;
@@ -30,7 +31,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.MAX_RENDERS = 200;
 		this.seenIdxs = [];
 		this.lastScrollBreakpoint = 0;
-		this.updateSpacing = this.updateSpacing.bind(this);
+		this.updateSpacing = this.updateRemainingSpace.bind(this);
 	}
 
 	componentDidMount() {
@@ -63,7 +64,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	componentDidUpdate(prevProps, prevState) {
 		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
 		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.averageItemSize !== this.state.averageItemSize) {
-			requestAnimationFrame(this.updateSpacing);
+			requestAnimationFrame(this.updateRemainingSpace);
 		}
 	}
 
@@ -87,9 +88,11 @@ class DynamicVirtualizedScrollbar extends Component {
 			nextProps !== this.props
 		);
 	}
-
-	updateSpacing() {
-		this.setState({belowSpacerHeight: (this.props.listLength - this.state.firstRenderedItemIndex + 1) * this.state.averageItemSize});
+	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
+	updateRemainingSpace() {
+		const remainingElemsBelow = this.props.listLength - this.state.firstRenderedItemIndex - 1;
+		const includeOverScan = this.state.lastRenderedItemIndex + this.elemOverScan < this.props.listLength;
+		this.setState({belowSpacerHeight: (remainingElemsBelow - (includeOverScan ? this.elemOverScan : 0)) * this.state.averageItemSize - });
 	}
 
 	handleSpringUpdate(spring) {
@@ -103,8 +106,11 @@ class DynamicVirtualizedScrollbar extends Component {
 		const lastRenderedItemIndex = this.state.lastRenderedItemIndex;
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
 
-		// render only visible items
-		let items = list.slice(firstRenderedItemIndex, lastRenderedItemIndex + 1);
+		const start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
+		const end = Math.min(lastRenderedItemIndex + 1 + this.elemOverScan, this.props.listLength);
+
+		// render only visible items plus overscan
+		let items = list.slice(start, end);
 
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
