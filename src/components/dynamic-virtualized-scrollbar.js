@@ -147,7 +147,6 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	getListToRender(list) {
-		console.log('Regetting list');
 		this.stickyElems = [];
 		const lastRenderedItemIndex = this.state.lastRenderedItemIndex;
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
