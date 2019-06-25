@@ -115,15 +115,17 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	autoCalculateSpacing() {
 		let shouldCalc = false;
+		// Only re-calculate if we're more than 5 pixels past triggers
+		const triggerOffset = 5;
 		if (this.belowSpacer && this.aboveSpacer) {
 			const belowSpacerBounds = this.belowSpacer.getBoundingClientRect();
 			const aboveSpacerBounds = this.aboveSpacer.getBoundingClientRect();
 			// Below spacer is in viewport
-			if (this.state.containerTop + this.props.containerHeight > belowSpacerBounds.top) {
+			if (this.state.containerTop + this.props.containerHeight - triggerOffset > belowSpacerBounds.top) {
 				shouldCalc = true;
 			}
 			// Above spacer is in viewport
-			if (this.state.containerTop < aboveSpacerBounds.bottom) {
+			if (this.state.containerTop < aboveSpacerBounds.bottom - triggerOffset) {
 				shouldCalc = true;
 			}
 		}
@@ -192,16 +194,12 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastScrollBreakpoint = scrollOffset;
 	}
 
-	requestScroll() {
-		requestAnimationFrame(this.handleScroll);
-	}
-
 	// Save scroll position in state for virtualization
 	handleScroll(e) {
 		const scrollOffset = e.scrollTop;
 		let scrollingDown = true;
-		if (this.scrollOffset === scrollOffset) {
-			// No change
+		if (Math.abs(this.scrollOffset - scrollOffset) < 2) {
+			// Minimal change, do nothing
 			return;
 		}
 		const stateUpdate = {};
