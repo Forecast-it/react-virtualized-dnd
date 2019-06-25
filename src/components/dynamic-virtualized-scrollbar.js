@@ -197,8 +197,8 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	// Save scroll position in state for virtualization
-	handleScroll() {
-		const scrollOffset = this.scrollBars ? this.scrollBars.getScrollTop() : 0;
+	handleScroll(e) {
+		const scrollOffset = e.scrollTop;
 		let scrollingDown = true;
 		if (this.scrollOffset === scrollOffset) {
 			// No change
@@ -247,14 +247,11 @@ class DynamicVirtualizedScrollbar extends Component {
 				if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
 					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 					stateUpdate.lastRenderedItemIndex = Math.min(this.state.lastRenderedItemIndex + 1, this.props.listLength - 1);
-					// belowSpacerHeight: Math.max(this.state.belowSpacerHeight - elemSize, 0)
-					// If we're still below the end of the list
+					// If we're still not at the end of the list
 					if (this.state.lastRenderedItemIndex < this.props.listLength) {
 						// Only do it the first time we see the new elem
 						if (!this.belowSpacerMap.get(this.state.lastRenderedItemIndex)) {
-							// How much bigger is this elem than the min height?
-							// const elemSizeDiffFromMin = elemSize - this.props.minElemHeight;
-							// Update the rolling average item size, used for calculating remaining below space (under the list of rendered items)
+							// Update the numbers for calulating rolling average of item size, used for calculating remaining below space (under the list of rendered items)
 							stateUpdate.totalElemsSizedSize = this.state.totalElemsSizedSize + elemSize;
 							stateUpdate.numElemsSized = this.state.numElemsSized + 1;
 							this.belowSpacerMap.set(this.state.lastRenderedItemIndex, true);
@@ -369,8 +366,9 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 		return (
 			<Scrollbars
-				onScroll={this.requestScroll.bind(this)}
+				onScrollFrame={this.handleScroll.bind(this)}
 				ref={div => (this.scrollBars = div)}
+				autoHide
 				autoHeight={true}
 				autoHeightMax={this.props.containerHeight}
 				autoHeightMin={this.props.containerHeight}
