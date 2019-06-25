@@ -6,6 +6,19 @@ body {
 .test-container {
 	margin-bottom: 10px;
 }
+
+.dropGlow {
+	animation-duration: 1s;
+	animation-name: dropGlow;
+}
+@keyframes dropGlow {
+	from {
+		background: rgba(23, 23, 230, 0.2);
+	}
+	to {
+		background: white;
+	}
+}
 .tabs {
 	z-index: 9;
 	position: fixed;

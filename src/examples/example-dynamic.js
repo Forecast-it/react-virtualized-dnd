@@ -53,7 +53,7 @@ class DynamicHeightExample extends Component {
 					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
 						<div
 							onClick={() => alert('A click is not a drag')}
-							className={'draggable-test'}
+							className={'draggable-test' + (this.state.recentlyMovedItem === item.id ? ' dropGlow' : '')}
 							style={{border: 'solid 1px black', height: item.height, backgroundColor: 'white', flexGrow: 1, marginBottom: '2.5px', marginTop: '2.5px'}}
 						>
 							<p style={{marginLeft: '5px'}} className={'item-name'}>
@@ -100,6 +100,10 @@ class DynamicHeightExample extends Component {
 		this.dragDropContext.sideScroll(this.dragDropContext.getSideScroll() + val);
 	}
 
+	onDragCancel() {
+		this.setState({recentlyMovedItem: null});
+	}
+
 	onDragEnd(source, destinationId, placeholderId) {
 		const listToRemoveFrom = this.state.listData.find(list => list.name.includes(source.droppableId));
 		const listToAddTo = this.state.listData.find(list => list.name.includes(destinationId));
@@ -123,7 +127,7 @@ class DynamicHeightExample extends Component {
 		const newData = this.state.listData;
 		newData[listToRemoveFrom.index] = listToRemoveFrom;
 		newData[listToAddTo.index] = listToAddTo;
-		this.setState({testData: newData});
+		this.setState({testData: newData, recentlyMovedItem: source.draggableId});
 	}
 
 	toggleSplit() {
@@ -151,6 +155,7 @@ class DynamicHeightExample extends Component {
 					scrollContainerHeight={window.innerHeight - 10}
 					dragAndDropGroup={this.dragAndDropGroupName}
 					onDragEnd={this.onDragEnd.bind(this)}
+					onDragCancel={this.onDragCancel.bind(this)}
 					outerScrollBar={true}
 				>
 					<div className={'title-and-controls'}>

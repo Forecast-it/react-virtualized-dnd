@@ -87,13 +87,11 @@ class DynamicVirtualizedScrollbar extends Component {
 	shouldComponentUpdate(nextProps, nextState) {
 		// only render when visible items change -> smooth scroll
 		return (
+			this.props.stickyElems.length > 0 ||
 			nextState.aboveSpacerHeight !== this.state.aboveSpacerHeight ||
 			nextState.belowSpacerHeight !== this.state.belowSpacerHeight ||
-			nextState.firstElemBounds !== this.state.firstElemBounds ||
-			nextState.lastElemBounds !== this.state.lastElemBounds ||
 			nextState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex ||
-			nextState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex ||
-			nextProps !== this.props
+			nextState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex
 		);
 	}
 	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
@@ -115,8 +113,8 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	autoCalculateSpacing() {
 		let shouldCalc = false;
-		// Only re-calculate if we're more than 5 pixels past triggers
-		const triggerOffset = 5;
+		// Only re-calculate if we're more than 10 pixels past triggers
+		const triggerOffset = 10;
 		if (this.belowSpacer && this.aboveSpacer) {
 			const belowSpacerBounds = this.belowSpacer.getBoundingClientRect();
 			const aboveSpacerBounds = this.aboveSpacer.getBoundingClientRect();
@@ -149,6 +147,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	getListToRender(list) {
+		console.log('Regetting list');
 		this.stickyElems = [];
 		const lastRenderedItemIndex = this.state.lastRenderedItemIndex;
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
