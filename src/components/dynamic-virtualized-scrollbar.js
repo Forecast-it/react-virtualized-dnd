@@ -87,13 +87,20 @@ class DynamicVirtualizedScrollbar extends Component {
 	shouldComponentUpdate(nextProps, nextState) {
 		// only render when visible items change -> smooth scroll
 		return (
-			this.props.stickyElems.length > 0 ||
+			this.propsDidChange(this.props, nextProps) ||
+			(this.props.stickyElems && this.props.stickyElems.length > 0) ||
 			nextState.aboveSpacerHeight !== this.state.aboveSpacerHeight ||
 			nextState.belowSpacerHeight !== this.state.belowSpacerHeight ||
 			nextState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex ||
 			nextState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex
 		);
 	}
+
+	propsDidChange(props, nextProps) {
+		const newProps = Object.entries(nextProps);
+		return newProps.filter(([key, val]) => props[key] !== val).length > 0;
+	}
+
 	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
 	updateRemainingSpace() {
 		const remainingElemsBelow = this.props.listLength - (this.state.lastRenderedItemIndex + 1);
