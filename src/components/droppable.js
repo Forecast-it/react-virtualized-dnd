@@ -193,7 +193,7 @@ class Droppable extends Component {
 		let calculatedRowMinHeight = 0;
 		const listHeaderHeight = this.props.listHeader != null ? this.props.listHeaderHeight : 0;
 		let outerContainerHeight = this.props.containerHeight;
-		elemHeight = this.props.hideList ? 0 : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
+		elemHeight = this.props.hideList ? 0 : this.props.dynamicElemHeight ? this.props.minElemHeight : this.props.elemHeight;
 		rowsTotalHeight = listToRender.length * elemHeight;
 		// Container smaller than calculated height of rows?
 		shouldScroll = this.props.containerHeight < rowsTotalHeight;
