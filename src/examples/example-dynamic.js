@@ -147,6 +147,11 @@ class DynamicHeightExample extends Component {
 			</div>
 		);
 
+		const scrollProps = {
+			autoHide: true,
+			hideTracksWhenNotNeeded: true
+		};
+
 		return (
 			<div className="example-board">
 				<DragDropContext
@@ -202,6 +207,7 @@ class DynamicHeightExample extends Component {
 							!this.state.split || index < elemsToRender.length / 2 ? (
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
+										scrollProps={scrollProps}
 										showIndicators={this.state.showIndicators}
 										dynamicElemHeight={true}
 										minElemHeight={50}

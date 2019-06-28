@@ -370,6 +370,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		return (
 			<Scrollbars
 				onScrollFrame={this.handleScroll.bind(this)}
+				ref={div => (this.scrollBars = div)}
 				{...this.props.scrollProps}
 				autoHeight={true}
 				autoHeightMax={this.props.containerHeight}
