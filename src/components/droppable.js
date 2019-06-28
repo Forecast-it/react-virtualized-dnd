@@ -234,6 +234,7 @@ class Droppable extends Component {
 							ref={scrollDiv => (this.scrollBars = scrollDiv)}
 							containerHeight={this.props.containerHeight - listHeaderHeight}
 							showIndicators={this.props.showIndicators}
+							scrollProps={this.props.scrollProps}
 						>
 							{isActive ? this.pushPlaceholder(listToRender) : listToRender}
 						</DynamicVirtualizedScrollbar>
