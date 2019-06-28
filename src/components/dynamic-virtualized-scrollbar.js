@@ -9,7 +9,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		super(props);
 
 		const initialElemsToRender = this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(8, props.listLength);
-
 		this.state = {
 			// Update this when dynamic row height becomes a thing
 			scrollOffset: 0,
@@ -74,6 +73,9 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex) {
 			this.lastElemBounds = null;
 		}
+		if (this.props.listLength !== prevProps.listLength) {
+			this.updateRemainingSpace();
+		}
 	}
 
 	componentWillUnmount() {
@@ -103,7 +105,8 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
 	updateRemainingSpace() {
-		const remainingElemsBelow = this.props.listLength - (this.state.lastRenderedItemIndex + 1);
+		const lastRenderedItemIndex = Math.min(this.props.listLength, this.state.lastRenderedItemIndex);
+		const remainingElemsBelow = Math.max(this.props.listLength - (lastRenderedItemIndex + 1), 0);
 		const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
 		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
 		if (belowSpacerHeight !== this.state.belowSpacerHeight) {
