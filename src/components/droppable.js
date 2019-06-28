@@ -196,7 +196,7 @@ class Droppable extends Component {
 		elemHeight = this.props.hideList ? 0 : this.props.dynamicElemHeight ? this.props.minElemHeight : this.props.elemHeight;
 		rowsTotalHeight = listToRender.length * elemHeight;
 		// Container smaller than calculated height of rows?
-		shouldScroll = this.props.containerHeight < rowsTotalHeight;
+		shouldScroll = this.props.dynamicElemHeight || this.props.containerHeight < rowsTotalHeight;
 
 		// Total rows + height of one row (required for DnD to empty lists/dropping below list)
 		calculatedRowMinHeight = rowsTotalHeight + elemHeight;
@@ -209,7 +209,8 @@ class Droppable extends Component {
 			? this.props.containerHeight
 			: this.props.containerMinHeight && this.props.containerMinHeight >= calculatedRowMinHeight
 			? this.props.containerMinHeight
-			: calculatedRowMinHeight + listHeaderHeight;
+			: Math.min(calculatedRowMinHeight + listHeaderHeight, this.props.containerHeight);
+
 		const draggedElemId = this.state.currentlyActiveDraggable ? this.state.currentlyActiveDraggable.draggableId : null;
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 		const headerWithProps =

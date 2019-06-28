@@ -8,7 +8,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
 		super(props);
 
-		const initialElemsToRender = this.props.initialElemsToRender != null ? this.props.initialElemsToRender : 8;
+		const initialElemsToRender = this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(8, props.listLength);
 
 		this.state = {
 			// Update this when dynamic row height becomes a thing
@@ -198,6 +198,8 @@ class DynamicVirtualizedScrollbar extends Component {
 		// Update scroll breakpoint when finding new elements
 		this.lastScrollBreakpoint = scrollOffset;
 	}
+
+	scrollPossible() {}
 
 	// Save scroll position in state for virtualization
 	handleScroll(e) {
