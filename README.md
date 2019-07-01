@@ -115,6 +115,7 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | dragAndDropGroup          | string       | yes                             | Unique identifier for the drag and drop group the context uses                       |
 | droppableId               | string       | yes                             | Unique identifier for the droppable                                                  |
 | containerHeight           | Number       | yes                             | Height of the virtualizing scroll container                                          |
+| placeholderStyle          | Object       | no                              | CSS style object to style the placeholder during drag                                |
 | enforceContainerMinHeight | boolean      | no                              | Force height of the droppable to always minimally match the containerHeight          |
 | rowHeight                 | Number       | no                              | Height of each row _with_ borders. Default is 50px.                                  |
 | disableScroll             | boolean      | no                              | Flag to disable scrollbars. This disables virtualization as well                     |
