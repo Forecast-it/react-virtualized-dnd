@@ -88,7 +88,7 @@ class Draggable extends Component {
 		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
 			//e.preventDefault();
 			//e.stopPropagation();
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.section};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 			if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
 				this.droppableDraggedOver = null;
@@ -172,7 +172,7 @@ class Draggable extends Component {
 			this.setState({didMoveMinDistanceDuringDrag: true});
 		}
 		if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 			hasDispatched = true;
 			return;
@@ -182,7 +182,12 @@ class Draggable extends Component {
 		}
 		const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
 		if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, height: this.draggable ? this.draggable.clientHeight : null, section: this.props.section};
+			const sourceObject = {
+				draggableId: this.props.draggableId,
+				droppableId: this.props.droppableId,
+				height: this.draggable ? this.draggable.clientHeight : null,
+				sectionId: this.props.sectionId
+			};
 			dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
 			hasDispatched = true;
 		}
@@ -190,7 +195,7 @@ class Draggable extends Component {
 		if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
 			if (draggableHoveringOver.getAttribute('sectionid') != null) {
 				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('sectionid')) {
-					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
+					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, null, x, y);
 					hasDispatched = true;
 					this.droppableDraggedOver = droppableDraggedOver;
@@ -198,7 +203,7 @@ class Draggable extends Component {
 				}
 			} else if (!draggableHoveringOver.getAttribute('draggableid').includes('placeholder')) {
 				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('draggableid')) {
-					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
+					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, draggableHoveringOver.getAttribute('draggableid'), x, y);
 					hasDispatched = true;
 					this.droppableDraggedOver = droppableDraggedOver;
@@ -209,7 +214,7 @@ class Draggable extends Component {
 			// We're hovering over a droppable, but no draggable
 			this.droppableDraggedOver = droppableDraggedOver;
 			this.draggableHoveringOver = null;
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, null, x, y);
 			hasDispatched = true;
 		}
