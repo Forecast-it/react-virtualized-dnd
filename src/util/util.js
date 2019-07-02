@@ -30,7 +30,7 @@ export default class Util {
 		let maxTries = 10;
 		let draggableParentElem = null;
 		while (element && element.parentNode && !draggableParentElem && element.tagName !== 'body' && count <= maxTries) {
-			if (element.getAttribute('draggableid') || element.getAttribute('sectionid')) {
+			if (element.getAttribute('draggableid')) {
 				draggableParentElem = element;
 				break;
 			}
