@@ -88,7 +88,7 @@ class Draggable extends Component {
 		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
 			//e.preventDefault();
 			//e.stopPropagation();
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 			if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
 				this.droppableDraggedOver = null;
@@ -172,7 +172,7 @@ class Draggable extends Component {
 			this.setState({didMoveMinDistanceDuringDrag: true});
 		}
 		if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 			hasDispatched = true;
 			return;
@@ -182,15 +182,23 @@ class Draggable extends Component {
 		}
 		const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
 		if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, height: this.draggable ? this.draggable.clientHeight : null};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, height: this.draggable ? this.draggable.clientHeight : null, section: this.props.section};
 			dispatch(this.dragAndDropGroup.startEvent, sourceObject, x, y);
 			hasDispatched = true;
 		}
 		// We're hovering over a droppable and a draggable
 		if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
-			if (!draggableHoveringOver.getAttribute('draggableid').includes('placeholder')) {
+			if (draggableHoveringOver.getAttribute('sectionid') != null) {
+				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('sectionid')) {
+					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
+					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, null, x, y);
+					hasDispatched = true;
+					this.droppableDraggedOver = droppableDraggedOver;
+					this.draggableHoveringOver = draggableHoveringOver.getAttribute('sectionid');
+				}
+			} else if (!draggableHoveringOver.getAttribute('draggableid').includes('placeholder')) {
 				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver.getAttribute('draggableid')) {
-					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, draggableHoveringOver.getAttribute('draggableid'), x, y);
 					hasDispatched = true;
 					this.droppableDraggedOver = droppableDraggedOver;
@@ -201,7 +209,7 @@ class Draggable extends Component {
 			// We're hovering over a droppable, but no draggable
 			this.droppableDraggedOver = droppableDraggedOver;
 			this.draggableHoveringOver = null;
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, section: this.props.section};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, null, x, y);
 			hasDispatched = true;
 		}
@@ -299,9 +307,10 @@ class Draggable extends Component {
 		const propsObject = {
 			'data-cy': 'draggable-' + this.props.draggableId,
 			className: 'draggable' + (active ? this.props.dragActiveClass : ''),
-			style: active ? {...draggingStyle} : {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.state.wasClicked ? 'move' : 'grab'},
+			style: active ? {...draggingStyle} : {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.props.disabled ? 'arrow' : this.state.wasClicked ? 'move' : 'grab'},
 			key: this.props.draggableId,
 			draggableid: this.props.draggableId,
+			sectionid: this.props.sectionId,
 			index: this.props.innerIndex,
 			tabIndex: '0',
 			ref: div => (this.draggable = div),
@@ -329,7 +338,8 @@ Draggable.propTypes = {
 	dragAndDropGroup: PropTypes.string.isRequired,
 	draggableId: PropTypes.string.isRequired,
 	dragDisabled: PropTypes.bool,
-	usePointerEvents: PropTypes.bool
+	usePointerEvents: PropTypes.bool,
+	section: PropTypes.string
 };
 
 export default Draggable;

@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Droppable from '../components/droppable';
 import Draggable from '../components/draggable';
 import DragDropContext from '../components/drag_drop_context';
+import DragSection from './../components/drag_section';
 
 class DynamicHeightExample extends Component {
 	constructor(props) {
@@ -38,19 +39,37 @@ class DynamicHeightExample extends Component {
 	generateTestList(num, numItems) {
 		let entry = {name: 'droppable' + num + 'Items', items: [], index: num};
 		const randomSize = () => 50 + Math.floor(Math.random() * Math.floor(50));
+		let sectionId = 0;
 		for (let i = 0; i < numItems; i++) {
-			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i, height: randomSize()});
+			if (i % 3 === 0) {
+				sectionId = i;
+			}
+			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i, height: randomSize(), sectionId: 'Person ' + sectionId / 3});
 		}
 		return entry;
 	}
 
 	getElemsToRender(list) {
 		let dataToRender = [];
+		const seenSections = [];
 		list.forEach((entry, index) => {
 			const list = [];
 			entry.items.forEach(item => {
+				if (!seenSections.includes(entry.index + '-' + item.sectionId)) {
+					list.push(
+						<DragSection sectionId={item.sectionId} dragAndDropGroup={this.dragAndDropGroupName} disabled={true} key={item.sectionId + '#' + item.id}>
+							<div className={'draggable-test section'} style={{height: 50, outline: 'none', backgroundColor: 'white', flexGrow: 1, marginBottom: '2.5px', marginTop: '2.5px'}}>
+								<div style={{marginLeft: '5px'}} className={'item-name row'}>
+									<div className={'person-image'} />
+									{item.sectionId}
+								</div>
+							</div>
+						</DragSection>
+					);
+					seenSections.push(entry.index + '-' + item.sectionId);
+				}
 				list.push(
-					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
+					<Draggable sectionId={item.sectionId} dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
 						<div
 							onClick={() => alert('A click is not a drag')}
 							className={'draggable-test' + (this.state.recentlyMovedItem === item.id ? ' dropGlow' : '')}
@@ -194,7 +213,6 @@ class DynamicHeightExample extends Component {
 					</div>
 					<div className={'input-section'}>
 						<p>Number of columns</p>
-
 						<input
 							style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}}
 							placeholder={6}

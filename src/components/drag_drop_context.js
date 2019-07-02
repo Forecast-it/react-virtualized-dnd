@@ -184,9 +184,11 @@ class DragDropContext extends Component {
 
 	onDragMove(draggable, droppable, draggableHoveredOverId, x, y) {
 		if (draggable && droppable) {
+			const draggableId = draggableHoveredOverId != null ? draggableHoveredOverId : draggable.sectionId != null ? draggable.sectionId : null;
+			console.log(draggable, draggableHoveredOverId);
 			const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
 			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppable : droppable != null;
-			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
+			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableId : draggableId != null;
 			// Update if field is currently not set, and it is in nextstate, or if the two IDs differ.
 			if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder) {
 				this.setState({
