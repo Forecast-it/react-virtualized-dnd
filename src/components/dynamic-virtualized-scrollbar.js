@@ -7,8 +7,10 @@ import Rebound from 'rebound';
 class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
 		super(props);
-
-		const initialElemsToRender = this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(8, props.listLength);
+		// Set initial elements to render - either specific amount, or the amount that can be in the viewPort + some optimistic amount to account for number of elements that deviate from min
+		const optimisticCount = this.props.initialElemsToRender ? 0 : 5;
+		const initialElemsToRender =
+			this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(Math.round(props.minElemHeight / props.containerHeight) + optimisticCount, props.listLength);
 		this.state = {
 			// Update this when dynamic row height becomes a thing
 			scrollOffset: 0,
