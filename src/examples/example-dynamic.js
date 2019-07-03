@@ -57,14 +57,14 @@ class DynamicHeightExample extends Component {
 			entry.items.forEach(item => {
 				if (!seenSections.includes(entry.index + '-' + item.sectionId)) {
 					list.push(
-						<DragSection sectionId={item.sectionId} dragAndDropGroup={this.dragAndDropGroupName} disabled={true} key={item.sectionId + '#' + item.id}>
+						<Draggable sectionId={item.sectionId} draggableId={item.sectionId} dragAndDropGroup={this.dragAndDropGroupName} disabled={true} key={item.sectionId + '#' + item.id}>
 							<div className={'draggable-test section'} style={{height: 50, outline: 'none', backgroundColor: 'white', flexGrow: 1, marginBottom: '2.5px', marginTop: '2.5px'}}>
 								<div style={{marginLeft: '5px'}} className={'item-name row'}>
 									<div className={'person-image'} />
 									{item.sectionId}
 								</div>
 							</div>
-						</DragSection>
+						</Draggable>
 					);
 					seenSections.push(entry.index + '-' + item.sectionId);
 				}

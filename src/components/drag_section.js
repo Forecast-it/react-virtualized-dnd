@@ -4,8 +4,9 @@ class DragSection extends Component {
 	render() {
 		const propsObject = {
 			'data-cy': 'drag-section-' + this.props.sectionId,
+			className: 'draggable',
 			key: this.props.sectionId,
-			sectionid: this.props.sectionId,
+			draggableid: this.props.sectionId,
 			tabIndex: '0',
 			'aria-grabbed': true,
 			'aria-dropeffect': 'move'
