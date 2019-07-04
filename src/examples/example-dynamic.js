@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Droppable from '../components/droppable';
 import Draggable from '../components/draggable';
 import DragDropContext from '../components/drag_drop_context';
+import VirtualizedScrollBar from './../components/virtualized-scrollbar';
 
 class DynamicHeightExample extends Component {
 	constructor(props) {
@@ -10,7 +11,8 @@ class DynamicHeightExample extends Component {
 			listData: [],
 			numItems: 100,
 			numColumns: 6,
-			showIndicators: false
+			showIndicators: false,
+			useDragScrollbar: false
 		};
 		this.dragAndDropGroupName = 'exampleboard';
 		this.droppables = [];
@@ -23,6 +25,12 @@ class DynamicHeightExample extends Component {
 	toggleIndicators() {
 		this.setState(prevState => {
 			return {showIndicators: !prevState.showIndicators};
+		});
+	}
+
+	toggleDragScrollbar() {
+		this.setState(prevState => {
+			return {useDragScrollbar: !prevState.useDragScrollbar};
 		});
 	}
 
@@ -152,6 +160,8 @@ class DynamicHeightExample extends Component {
 			hideTracksWhenNotNeeded: true
 		};
 
+		const useDragScrollbar = this.state.useDragScrollbar;
+
 		return (
 			<div className="example-board">
 				<DragDropContext
@@ -181,6 +191,9 @@ class DynamicHeightExample extends Component {
 							<button className={'indicator-button' + (this.state.showIndicators ? ' active' : '')} onClick={this.toggleIndicators.bind(this)}>
 								Show Virtualization Indicators
 							</button>
+							<button className={'indicator-button' + (this.state.useDragScrollbar ? ' active' : '')} onClick={this.toggleDragScrollbar.bind(this)}>
+								Single Scroll Container
+							</button>
 						</div>
 					</div>
 					<div className={'input-section'}>
@@ -194,7 +207,6 @@ class DynamicHeightExample extends Component {
 					</div>
 					<div className={'input-section'}>
 						<p>Number of columns</p>
-
 						<input
 							style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}}
 							placeholder={6}
@@ -202,30 +214,61 @@ class DynamicHeightExample extends Component {
 							onBlur={this.handleColumnInputChange.bind(this)}
 						/>
 					</div>
-					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
-						{elemsToRender.map((elem, index) =>
-							!this.state.split || index < elemsToRender.length / 2 ? (
-								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
-									<Droppable
-										scrollProps={scrollProps}
-										showIndicators={this.state.showIndicators}
-										dynamicElemHeight={true}
-										minElemHeight={50}
-										activeHeaderClass={'header-active'}
-										listHeader={getListHeader(index)}
-										listHeaderHeight={60}
-										ref={div => this.droppables.push(div)}
-										containerHeight={620}
-										dragAndDropGroup={this.dragAndDropGroupName}
-										droppableId={elem.droppableId}
-										key={elem.droppableId}
-									>
-										{elem.items}
-									</Droppable>
-								</div>
-							) : null
-						)}
-					</div>
+					{useDragScrollbar ? (
+						<DragDropContext outerVirtualScrollBar={true} scrollYSpeed={25} scrollContainerHeight={700} dragAndDropGroup={this.dragAndDropGroupName}>
+							<div className={'test-container'} style={{display: 'flex', flexDirection: 'column', position: 'relative', margin: '24px'}}>
+								{elemsToRender.map((elem, index) =>
+									!this.state.split || index < elemsToRender.length / 2 ? (
+										<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
+											<Droppable
+												disableScroll={true}
+												scrollProps={scrollProps}
+												showIndicators={this.state.showIndicators}
+												dynamicElemHeight={true}
+												minElemHeight={50}
+												activeHeaderClass={'header-active'}
+												listHeader={getListHeader(index)}
+												listHeaderHeight={60}
+												ref={div => this.droppables.push(div)}
+												containerHeight={620}
+												dragAndDropGroup={this.dragAndDropGroupName}
+												droppableId={elem.droppableId}
+												key={elem.droppableId}
+											>
+												{elem.items}
+											</Droppable>
+										</div>
+									) : null
+								)}
+							</div>
+						</DragDropContext>
+					) : (
+						<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
+							{elemsToRender.map((elem, index) =>
+								!this.state.split || index < elemsToRender.length / 2 ? (
+									<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
+										<Droppable
+											scrollProps={scrollProps}
+											showIndicators={this.state.showIndicators}
+											dynamicElemHeight={true}
+											minElemHeight={50}
+											activeHeaderClass={'header-active'}
+											listHeader={getListHeader(index)}
+											listHeaderHeight={60}
+											ref={div => this.droppables.push(div)}
+											containerHeight={620}
+											dragAndDropGroup={this.dragAndDropGroupName}
+											droppableId={elem.droppableId}
+											key={elem.droppableId}
+										>
+											{elem.items}
+										</Droppable>
+									</div>
+								) : null
+							)}
+						</div>
+					)}
+
 					{this.state.split ? (
 						<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 							{elemsToRender.map((elem, index) =>

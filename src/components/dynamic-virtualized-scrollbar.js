@@ -171,7 +171,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		// Add sticky (dragged) elems and render other visible items
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
-			if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
+			if (this.props.stickyElems && this.props.stickyElems.find(id => id === child.props.draggableId)) {
 				this.stickyElems.push(child);
 			} else if (index >= start && index <= end) {
 				items.push(child);

@@ -1,5 +1,8 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import {Scrollbars} from 'react-custom-scrollbars';
+import {dispatch, subscribe, unsubscribe} from '../util/event_manager';
+
 //import {SpringSystem} from 'rebound';
 import Rebound from 'rebound';
 
@@ -49,13 +52,13 @@ class VirtualizedScrollBar extends Component {
 		}
 
 		let smallestIndexVisible = null;
-		if (this.state.scrollOffset === 0 && this.props.stickyElems.length === 0) {
+		if (this.state.scrollOffset === 0 && this.props.stickyElems && this.props.stickyElems.length === 0) {
 			smallestIndexVisible = 0;
 		} else {
 			for (let index = 0; index < list.length; index++) {
 				const child = list[index];
 				// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
-				if (this.props.stickyElems.find(id => id === child.props.draggableId)) {
+				if (this.props.stickyElems && this.props.stickyElems.find(id => id === child.props.draggableId)) {
 					this.stickyElems.push(child);
 				} else {
 					const ySmallerThanList = (index + 1) * elemHeight < this.state.scrollOffset;
@@ -160,5 +163,8 @@ class VirtualizedScrollBar extends Component {
 		);
 	}
 }
-VirtualizedScrollBar.propTypes = {};
+VirtualizedScrollBar.propTypes = {
+	containerHeight: PropTypes.number.isRequired,
+	scrollWithDrag: PropTypes.bool
+};
 export default VirtualizedScrollBar;

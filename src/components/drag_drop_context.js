@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {dispatch, subscribe, unsubscribe} from '../util/event_manager';
 import {Scrollbars} from 'react-custom-scrollbars';
 import Util from './../util/util';
+import DynamicVirtualizedScrollbar from './dynamic-virtualized-scrollbar';
+import VirtualizedScrollBar from './virtualized-scrollbar';
 
 class DragDropContext extends Component {
 	constructor(props) {
@@ -287,6 +289,17 @@ class DragDropContext extends Component {
 				>
 					{this.props.children}
 				</Scrollbars>
+			</div>
+		) : this.props.outerVirtualScrollBar ? (
+			<div ref={div => (this.container = div)} className={'drag-drop-context'} style={{display: 'flex', flexDirection: 'column'}}>
+				<VirtualizedScrollBar
+					onScroll={this.handleScroll.bind(this)}
+					ref={scrollDiv => (this.outerScrollBar = scrollDiv)}
+					containerMinHeight={this.props.scrollContainerMinHeight != null ? this.props.scrollContainerMinHeight : 1}
+					containerHeight={this.props.scrollContainerHeight}
+				>
+					{this.props.children}
+				</VirtualizedScrollBar>
 			</div>
 		) : (
 			<div ref={div => (this.container = div)} className={'drag-drop-context'}>

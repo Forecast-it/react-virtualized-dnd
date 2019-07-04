@@ -203,7 +203,9 @@ class Droppable extends Component {
 
 		// The minimum height of the container is the # of elements + 1 (same reason as above), unless a minimum height is specificied that is larger than this.
 		// If the minimum height exceeds the containerHeight, we limit it to containerHeight and enable scroll instead
-		outerContainerHeight = this.props.enforceContainerMinHeight
+		outerContainerHeight = this.props.disableScroll
+			? 'auto'
+			: this.props.enforceContainerMinHeight
 			? this.props.containerHeight
 			: shouldScroll
 			? this.props.containerHeight
