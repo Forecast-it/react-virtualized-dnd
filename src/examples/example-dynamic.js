@@ -153,6 +153,11 @@ class DynamicHeightExample extends Component {
 				: sectionId != null
 				? listToAddTo.items.findIndex(item => item.sectionId === sectionId) // Add at the first occurence of the section when dropping on top of a section
 				: -1;
+		const targetElem = listToAddTo.items[indexToInsert - 1];
+		const isSameSection = targetElem.sectionId && source.sectionId && targetElem.sectionId === source.sectionId;
+		if (!isSameSection) {
+			//indexToInsert += 1; // move into next section //TODO NOPE
+		}
 		// Re-arrange within the same list
 		if (listToRemoveFrom.name === listToAddTo.name) {
 			if (indexToRemove === indexToInsert) {
