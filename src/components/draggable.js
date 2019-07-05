@@ -164,6 +164,7 @@ class Draggable extends Component {
 		let hasDispatched = false;
 		let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
 		let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
+		console.log(draggableHoveringOver);
 
 		const newLeft = x - this.state.xClickOffset;
 		const newTop = y - this.state.yClickOffset;
@@ -321,7 +322,8 @@ class Draggable extends Component {
 			tabIndex: '0',
 			ref: div => (this.draggable = div),
 			'aria-grabbed': true,
-			'aria-dropeffect': 'move'
+			'aria-dropeffect': 'move',
+			'ignore-placeholder': this.props.ignorePlaceHolder + ''
 		};
 		if (this.usePointerEvents) {
 			propsObject.onPointerDown = e => this.onPointerDown(e);

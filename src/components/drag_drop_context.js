@@ -184,7 +184,6 @@ class DragDropContext extends Component {
 
 	onDragMove(draggable, droppable, draggableHoveredOverId, x, y) {
 		if (draggable && droppable) {
-			console.log(draggableHoveredOverId);
 			const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
 			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppable : droppable != null;
 			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
