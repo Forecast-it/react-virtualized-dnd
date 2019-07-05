@@ -74,7 +74,7 @@ class Draggable extends Component {
 	}
 
 	onPointerDown(e) {
-		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disabled) {
+		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disabled || this.props.isSectionHeader) {
 			return;
 		}
 		if (e) {
@@ -118,7 +118,7 @@ class Draggable extends Component {
 	onPointerUp(e) {
 		e.preventDefault();
 		e.stopPropagation();
-		if (this.props.disabled) {
+		if (this.props.disabled || this.props.isSectionHeader) {
 			return;
 		}
 		if (this.usePointerEvents && this.state.pointerId) {
@@ -164,7 +164,6 @@ class Draggable extends Component {
 		let hasDispatched = false;
 		let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
 		let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
-		console.log(draggableHoveringOver);
 
 		const newLeft = x - this.state.xClickOffset;
 		const newTop = y - this.state.yClickOffset;
@@ -195,8 +194,12 @@ class Draggable extends Component {
 		// We're hovering over a droppable and a draggable
 		if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
 			const sectionId = draggableHoveringOver.getAttribute('sectionid');
-			if (sectionId != null && draggableHoveringOver.getAttribute('draggableid') == null) {
-				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== sectionId) {
+			const draggableId = draggableHoveringOver.getAttribute('draggableid');
+			if (sectionId != null && draggableId.includes('SECTION_HEADER')) {
+				if (draggableId.includes('DISABLE_MOVE')) {
+					hasDispatched = true;
+				}
+				if (!hasDispatched && (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== sectionId)) {
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, sectionId, x, y);
 					hasDispatched = true;
@@ -235,7 +238,7 @@ class Draggable extends Component {
 	}
 
 	onPointerMove(e) {
-		if (this.props.disabled || !this.state.wasClicked) {
+		if (this.props.disabled || !this.state.wasClicked || this.props.isSectionHeader) {
 			return;
 		}
 		const x = e.clientX;
@@ -314,16 +317,17 @@ class Draggable extends Component {
 		const propsObject = {
 			'data-cy': 'draggable-' + this.props.draggableId,
 			className: 'draggable' + (active ? this.props.dragActiveClass : ''),
-			style: active ? {...draggingStyle} : {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.props.disabled ? 'arrow' : this.state.wasClicked ? 'move' : 'grab'},
+			style: active
+				? {...draggingStyle}
+				: {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.props.disabled || this.props.isSectionHeader ? 'arrow' : this.state.wasClicked ? 'move' : 'grab'},
 			key: this.props.draggableId,
-			draggableid: this.props.draggableId,
+			draggableid: this.props.isSectionHeader ? 'SECTION_HEADER_' + this.props.draggableId + (this.props.disableMove ? '_DISABLE_MOVE' : '') : this.props.draggableId,
 			sectionid: this.props.sectionId,
 			index: this.props.innerIndex,
 			tabIndex: '0',
 			ref: div => (this.draggable = div),
 			'aria-grabbed': true,
-			'aria-dropeffect': 'move',
-			'ignore-placeholder': this.props.ignorePlaceHolder + ''
+			'aria-dropeffect': 'move'
 		};
 		if (this.usePointerEvents) {
 			propsObject.onPointerDown = e => this.onPointerDown(e);

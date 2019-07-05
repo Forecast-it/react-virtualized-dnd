@@ -54,7 +54,7 @@ class DynamicHeightExample extends Component {
 		const seenSections = [];
 		list.forEach((entry, index) => {
 			const list = [];
-			entry.items.forEach(item => {
+			entry.items.forEach((item, idx) => {
 				if (!seenSections.includes(entry.index + '-' + item.sectionId)) {
 					list.push(
 						<Draggable
@@ -62,11 +62,12 @@ class DynamicHeightExample extends Component {
 							ignorePlaceHolder={index === 0}
 							draggableId={item.sectionId}
 							dragAndDropGroup={this.dragAndDropGroupName}
-							disabled={true}
+							isSectionHeader={true}
+							disableMove={idx === 0}
 							key={item.sectionId + '#' + item.id}
 						>
-							<div className={'draggable-test section'} style={{height: 50, outline: 'none', backgroundColor: 'white', flexGrow: 1, marginBottom: '2.5px', marginTop: '2.5px'}}>
-								<div style={{marginLeft: '5px'}} className={'item-name row'}>
+							<div className={'draggable-test section'} style={{height: 50, outline: 'none', backgroundColor: '#dbdbdb', flexGrow: 1}}>
+								<div style={{marginLeft: '5px', paddingTop: '8px'}} className={'item-name row'}>
 									<div className={'person-image'} />
 									{item.sectionId}
 								</div>
