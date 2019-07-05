@@ -201,7 +201,7 @@ class Draggable extends Component {
 				}
 				if (!hasDispatched && (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== sectionId)) {
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
-					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, sectionId, x, y);
+					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, sectionId, x, y, sectionId);
 					hasDispatched = true;
 					this.droppableDraggedOver = droppableDraggedOver;
 					this.draggableHoveringOver = draggableHoveringOver.getAttribute('sectionid');
