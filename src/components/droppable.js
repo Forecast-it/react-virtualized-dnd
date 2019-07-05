@@ -196,7 +196,7 @@ class Droppable extends Component {
 		elemHeight = this.props.hideList ? 0 : this.props.dynamicElemHeight ? this.props.minElemHeight : this.props.elemHeight;
 		rowsTotalHeight = listToRender.length * elemHeight;
 		// Container smaller than calculated height of rows?
-		shouldScroll = this.props.dynamicElemHeight || this.props.containerHeight < rowsTotalHeight;
+		shouldScroll = this.props.dynamicElemHeight || this.props.containerHeight < rowsTotalHeight + listHeaderHeight;
 
 		// Total rows + height of one row (required for DnD to empty lists/dropping below list)
 		calculatedRowMinHeight = rowsTotalHeight + elemHeight;
