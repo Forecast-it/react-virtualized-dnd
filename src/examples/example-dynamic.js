@@ -229,9 +229,9 @@ class DynamicHeightExample extends Component {
 							<button className={'indicator-button' + (this.state.showIndicators ? ' active' : '')} onClick={this.toggleIndicators.bind(this)}>
 								Show Virtualization Indicators
 							</button>
-							<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
+							{/*<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
 								Use Sections
-							</button>
+              </button>*/}
 						</div>
 					</div>
 					<div className={'input-section'}>
