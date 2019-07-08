@@ -12,7 +12,7 @@ class DragDropContext extends Component {
 			dragActive: false,
 			draggedElem: null,
 			droppableActive: null,
-			placeholderSection: null,
+			targetSection: null,
 			dragAndDropGroup: Util.getDragEvents(this.props.dragAndDropGroup)
 		};
 		this.onDragMove = this.onDragMove.bind(this);
@@ -64,11 +64,11 @@ class DragDropContext extends Component {
 		if (this.state.draggedElem && this.state.droppableActive) {
 			let placeholder = this.state.placeholder != null ? this.state.placeholder : 'END_OF_LIST';
 			if (this.props.onDragEnd) {
-        if (this.state.draggedElem.sectionId && this.state.draggedElem.sectionId === placeholder) {
+        if (this.state.targetSection && this.state.targetSection === placeholder) {
 					// Send null and placeholderSection, not both
 					placeholder = null;
-				}
-        this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder, this.state.draggedElem.sectionId);
+        }
+        this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder, this.state.targetSection);
 			}
 		} else {
 			if (this.props.onDragCancel) {
@@ -187,17 +187,19 @@ class DragDropContext extends Component {
 		}
 	}
 
-	onDragMove(draggable, droppable, draggableHoveredOverId, x, y) {
+  onDragMove(draggable, droppable, draggableHoveredOverId, x, y, sectionId) {
 		if (draggable && droppable) {
 			const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
 			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppable : droppable != null;
-			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
+      const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
+      const shouldUpdateSectionId = this.state.targetSection != null ? this.state.targetSection !== sectionId : sectionId != null;
 			// Update if field is currently not set, and it is in nextstate, or if the two IDs differ.
-			if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder || shouldUpdatePlaceholderSection) {
+      if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder || shouldUpdatePlaceholderSection || shouldUpdateSectionId) {
 				this.setState({
 					draggedElem: draggable,
 					droppableActive: droppable.getAttribute('droppableid'),
-					placeholder: draggableHoveredOverId
+          placeholder: draggableHoveredOverId,
+          targetSection: sectionId
 				});
 			}
 		}

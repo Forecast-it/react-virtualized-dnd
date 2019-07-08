@@ -154,7 +154,7 @@ class DynamicHeightExample extends Component {
 				? listToAddTo.items.findIndex(item => item.sectionId === sectionId) // Add at the first occurence of the section when dropping on top of a section
 				: -1;
 		const targetElem = listToAddTo.items[indexToInsert - 1];
-		const isSameSection = targetElem.sectionId && source.sectionId && targetElem.sectionId === source.sectionId;
+		const isSameSection = targetElem && targetElem.sectionId && source.sectionId && targetElem.sectionId === source.sectionId;
 		if (!isSameSection) {
 			//indexToInsert += 1; // move into next section //TODO NOPE
 		}
@@ -229,9 +229,9 @@ class DynamicHeightExample extends Component {
 							<button className={'indicator-button' + (this.state.showIndicators ? ' active' : '')} onClick={this.toggleIndicators.bind(this)}>
 								Show Virtualization Indicators
 							</button>
-							{/*<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
+							{<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
 								Use Sections
-              </button>*/}
+              </button>}
 						</div>
 					</div>
 					<div className={'input-section'}>
