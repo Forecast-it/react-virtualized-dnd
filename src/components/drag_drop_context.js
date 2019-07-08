@@ -64,11 +64,11 @@ class DragDropContext extends Component {
 		if (this.state.draggedElem && this.state.droppableActive) {
 			let placeholder = this.state.placeholder != null ? this.state.placeholder : 'END_OF_LIST';
 			if (this.props.onDragEnd) {
-				if (this.state.placeholderSection && this.state.placeholderSection === placeholder) {
+        if (this.state.draggedElem.sectionId && this.state.draggedElem.sectionId === placeholder) {
 					// Send null and placeholderSection, not both
 					placeholder = null;
 				}
-				this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder, this.state.placeholderSection);
+        this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder, this.state.draggedElem.sectionId);
 			}
 		} else {
 			if (this.props.onDragCancel) {
@@ -187,19 +187,17 @@ class DragDropContext extends Component {
 		}
 	}
 
-	onDragMove(draggable, droppable, draggableHoveredOverId, x, y, sectionId) {
+	onDragMove(draggable, droppable, draggableHoveredOverId, x, y) {
 		if (draggable && droppable) {
 			const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
 			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppable : droppable != null;
 			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
-			const shouldUpdatePlaceholderSection = this.state.placeholderSection != null ? this.state.placeholderSection !== sectionId : sectionId != null;
 			// Update if field is currently not set, and it is in nextstate, or if the two IDs differ.
 			if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder || shouldUpdatePlaceholderSection) {
 				this.setState({
 					draggedElem: draggable,
 					droppableActive: droppable.getAttribute('droppableid'),
-					placeholder: draggableHoveredOverId,
-					placeholderSection: sectionId
+					placeholder: draggableHoveredOverId
 				});
 			}
 		}
