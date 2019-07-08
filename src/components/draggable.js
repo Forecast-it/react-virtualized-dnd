@@ -88,7 +88,7 @@ class Draggable extends Component {
 		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
 			//e.preventDefault();
 			//e.stopPropagation();
-			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.section};
+			const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
 			dispatch(this.dragAndDropGroup.moveEvent, sourceObject, null, null, null, null);
 			if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
 				this.droppableDraggedOver = null;
