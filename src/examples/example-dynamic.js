@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Droppable from '../components/droppable';
 import Draggable from '../components/draggable';
 import DragDropContext from '../components/drag_drop_context';
+import DragSection from './../components/drag_section';
 
 class DynamicHeightExample extends Component {
 	constructor(props) {
@@ -10,7 +11,8 @@ class DynamicHeightExample extends Component {
 			listData: [],
 			numItems: 100,
 			numColumns: 6,
-			showIndicators: false
+			showIndicators: false,
+			useSections: false
 		};
 		this.dragAndDropGroupName = 'exampleboard';
 		this.droppables = [];
@@ -26,6 +28,12 @@ class DynamicHeightExample extends Component {
 		});
 	}
 
+	toggleUseSections() {
+		this.setState(prevState => {
+			return {useSections: !prevState.useSections};
+		});
+	}
+
 	getListData() {
 		const numLists = this.state.numColumns;
 		const newItemLists = [];
@@ -38,19 +46,45 @@ class DynamicHeightExample extends Component {
 	generateTestList(num, numItems) {
 		let entry = {name: 'droppable' + num + 'Items', items: [], index: num};
 		const randomSize = () => 50 + Math.floor(Math.random() * Math.floor(50));
+		let sectionId = 0;
 		for (let i = 0; i < numItems; i++) {
-			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i, height: randomSize()});
+			if (i % 3 === 0) {
+				sectionId = i;
+			}
+			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i, height: randomSize(), sectionId: 'Person ' + sectionId / 3});
 		}
 		return entry;
 	}
 
 	getElemsToRender(list) {
 		let dataToRender = [];
+		const seenSections = [];
 		list.forEach((entry, index) => {
 			const list = [];
-			entry.items.forEach(item => {
+			entry.items.forEach((item, idx) => {
+				if (this.state.useSections && !seenSections.includes(entry.index + '-' + item.sectionId)) {
+					list.push(
+						<Draggable
+							sectionId={item.sectionId}
+							ignorePlaceHolder={index === 0}
+							draggableId={item.sectionId}
+							dragAndDropGroup={this.dragAndDropGroupName}
+							isSectionHeader={true}
+							disableMove={idx === 0}
+							key={item.sectionId + '#' + item.id}
+						>
+							<div className={'draggable-test section'} style={{height: 50, outline: 'none', backgroundColor: '#dbdbdb', flexGrow: 1}}>
+								<div style={{marginLeft: '5px', paddingTop: '8px'}} className={'item-name row'}>
+									<div className={'person-image'} />
+									{item.sectionId}
+								</div>
+							</div>
+						</Draggable>
+					);
+					seenSections.push(entry.index + '-' + item.sectionId);
+				}
 				list.push(
-					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
+					<Draggable sectionId={item.sectionId} dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
 						<div
 							onClick={() => alert('A click is not a drag')}
 							className={'draggable-test' + (this.state.recentlyMovedItem === item.id ? ' dropGlow' : '')}
@@ -104,12 +138,26 @@ class DynamicHeightExample extends Component {
 		this.setState({recentlyMovedItem: null});
 	}
 
-	onDragEnd(source, destinationId, placeholderId) {
+	onDragEnd(source, destinationId, placeholderId, sectionId) {
 		const listToRemoveFrom = this.state.listData.find(list => list.name.includes(source.droppableId));
 		const listToAddTo = this.state.listData.find(list => list.name.includes(destinationId));
 		const elemToAdd = listToRemoveFrom.items.find(entry => entry.id === source.draggableId);
 		let indexToRemove = listToRemoveFrom.items.findIndex(item => item.id === source.draggableId);
-		let indexToInsert = placeholderId === 'END_OF_LIST' ? listToAddTo.items.length - 1 : placeholderId.includes('header') ? 0 : listToAddTo.items.findIndex(item => item.id === placeholderId);
+		let indexToInsert =
+			placeholderId != null
+				? placeholderId === 'END_OF_LIST'
+					? listToAddTo.items.length - 1
+					: placeholderId.includes('header')
+					? 0
+					: listToAddTo.items.findIndex(item => item.id === placeholderId)
+				: sectionId != null
+				? listToAddTo.items.findIndex(item => item.sectionId === sectionId) // Add at the first occurence of the section when dropping on top of a section
+				: -1;
+		const targetElem = listToAddTo.items[indexToInsert - 1];
+		const isSameSection = targetElem.sectionId && source.sectionId && targetElem.sectionId === source.sectionId;
+		if (!isSameSection) {
+			//indexToInsert += 1; // move into next section //TODO NOPE
+		}
 		// Re-arrange within the same list
 		if (listToRemoveFrom.name === listToAddTo.name) {
 			if (indexToRemove === indexToInsert) {
@@ -181,6 +229,9 @@ class DynamicHeightExample extends Component {
 							<button className={'indicator-button' + (this.state.showIndicators ? ' active' : '')} onClick={this.toggleIndicators.bind(this)}>
 								Show Virtualization Indicators
 							</button>
+							<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
+								Use Sections
+							</button>
 						</div>
 					</div>
 					<div className={'input-section'}>
@@ -194,7 +245,6 @@ class DynamicHeightExample extends Component {
 					</div>
 					<div className={'input-section'}>
 						<p>Number of columns</p>
-
 						<input
 							style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}}
 							placeholder={6}

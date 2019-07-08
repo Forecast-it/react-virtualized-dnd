@@ -132,6 +132,19 @@ input {
 .input-section {
 	display: flex;
 }
+.row {
+	display: flex;
+	flex-direction: row;
+}
+.person-image {
+	margin-right: 18px;
+	width: 28px;
+	height: 28px;
+	background: url('images/profile_m_0.png');
+	background-size: 26px;
+	background-position: center;
+	background-repeat: no-repeat;
+}
 .list-header {
 	display: flex;
 	flex-direction: row;
