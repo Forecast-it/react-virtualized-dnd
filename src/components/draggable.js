@@ -235,7 +235,6 @@ class Draggable extends Component {
 			left: newLeft,
 			top: newTop
 		});
-		console.log(this.draggableHoveringOver);
 	}
 
 	onPointerMove(e) {

@@ -167,7 +167,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		// Render elemOverscan amount of elements above and below the indices
 		const start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
 		const end = Math.min(lastRenderedItemIndex + this.elemOverScan, this.props.listLength - 1);
-		console.log(start, end);
 
 		let items = [];
 
@@ -185,8 +184,12 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	setElementBounds(scrollOffset, first, second) {
-		if (first) {
-			const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
+		// Get the first visible element after overscan
+		const firstChild = this.itemsContainer.children[this.elemOverScan];
+		// Get the last visible element before overscan
+		const lastChild = this.itemsContainer.children[this.itemsContainer.children.length - 1 - this.elemOverScan];
+		if (first && firstChild != null) {
+			const firstElemBounds = firstChild.getBoundingClientRect();
 			this.firstElemBounds = {
 				top: firstElemBounds.top,
 				bottom: firstElemBounds.bottom,
@@ -194,8 +197,8 @@ class DynamicVirtualizedScrollbar extends Component {
 				right: firstElemBounds.right
 			};
 		}
-		if (second) {
-			const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
+		if (second && lastChild != null) {
+			const lastElemBounds = lastChild.getBoundingClientRect();
 			this.lastElemBounds = {
 				top: lastElemBounds.top,
 				bottom: lastElemBounds.bottom,
@@ -325,12 +328,20 @@ class DynamicVirtualizedScrollbar extends Component {
 		return this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
 	}
 
+	getOverScanUsed() {
+		const overscan = {
+			above: this.state.firstRenderedItemIndex > this.elemOverScan ? Math.min(this.elemOverScan, this.state.firstRenderedItemIndex - this.elemOverScan) : 0,
+			below: this.state.lastRenderedItemIndex + this.elemOverScan <= this.props.listLength - 1 ? Math.min(this.elemOverScan, this.props.listLength - 1 - this.state.lastRenderedItemIndex) : 0
+		};
+		return overscan;
+	}
+
 	render() {
 		const {children} = this.props;
-
+		const overscanUsed = this.getOverScanUsed();
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index, ref: node => (this.childRefs[index] = node)}));
-		const overScanHeightBelow = this.state.lastRenderedItemIndex + this.elemOverScan <= this.props.listLength - 1 ? this.elemOverScan * this.getElemSizeAvg() : 0;
-		const overScanHeightAbove = this.state.firstRenderedItemIndex > this.elemOverScan ? this.elemOverScan * this.getElemSizeAvg() : 0;
+		const overScanHeightBelow = overscanUsed.below * this.getElemSizeAvg();
+		const overScanHeightAbove = overscanUsed.above * this.getElemSizeAvg();
 
 		const listToRender = this.getListToRender(childrenWithProps);
 		// Always add one empty space below
