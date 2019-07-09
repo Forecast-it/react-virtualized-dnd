@@ -64,11 +64,11 @@ class DragDropContext extends Component {
 		if (this.state.draggedElem && this.state.droppableActive) {
 			let placeholder = this.state.placeholder != null ? this.state.placeholder : 'END_OF_LIST';
 			if (this.props.onDragEnd) {
-        if (this.state.targetSection && this.state.targetSection === placeholder) {
+				if (this.state.targetSection && this.state.targetSection === placeholder) {
 					// Send null and placeholderSection, not both
 					placeholder = null;
-        }
-        this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder, this.state.targetSection);
+				}
+				this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder, this.state.targetSection);
 			}
 		} else {
 			if (this.props.onDragCancel) {
@@ -187,20 +187,33 @@ class DragDropContext extends Component {
 		}
 	}
 
-  onDragMove(draggable, droppable, draggableHoveredOverId, x, y, sectionId) {
+	onDragMove(draggable, droppable, draggableHoveredOverId, x, y, sectionId) {
 		if (draggable && droppable) {
 			const shouldUpdateDraggable = this.state.draggedElem != null ? this.state.draggedElem.id !== draggable.id : draggable != null;
 			const shouldUpdateDroppable = this.state.droppableActive != null ? this.state.droppableActive !== droppable : droppable != null;
-      const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
-      const shouldUpdateSectionId = this.state.targetSection != null ? this.state.targetSection !== sectionId : sectionId != null;
+			const shouldUpdatePlaceholder = this.state.placeholder != null ? this.state.placeholder !== draggableHoveredOverId : draggableHoveredOverId != null;
+			const shouldUpdateSectionId = this.state.targetSection != null ? this.state.targetSection !== sectionId : sectionId != null;
+			const mutationObject = {};
+			let shouldUpdate = false;
 			// Update if field is currently not set, and it is in nextstate, or if the two IDs differ.
-      if (shouldUpdateDraggable || shouldUpdateDroppable || shouldUpdatePlaceholder || shouldUpdatePlaceholderSection || shouldUpdateSectionId) {
-				this.setState({
-					draggedElem: draggable,
-					droppableActive: droppable.getAttribute('droppableid'),
-          placeholder: draggableHoveredOverId,
-          targetSection: sectionId
-				});
+			if (shouldUpdateDraggable) {
+				mutationObject.draggedElem = draggable;
+				shouldUpdate = true;
+			}
+			if (shouldUpdateDroppable) {
+				mutationObject.droppableActive = droppable.getAttribute('droppableid');
+				shouldUpdate = true;
+			}
+			if (shouldUpdatePlaceholder) {
+				mutationObject.placeholder = draggableHoveredOverId;
+				shouldUpdate = true;
+			}
+			if (shouldUpdateSectionId) {
+				mutationObject.targetSection = sectionId;
+				shouldUpdate = true;
+			}
+			if (shouldUpdate) {
+				this.setState(mutationObject);
 			}
 		}
 		// Register move no matter what (even if draggable/droppably wasnt updated here)

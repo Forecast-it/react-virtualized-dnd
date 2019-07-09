@@ -109,7 +109,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	updateRemainingSpace() {
 		const lastRenderedItemIndex = Math.min(this.props.listLength, this.state.lastRenderedItemIndex);
 		const remainingElemsBelow = Math.max(this.props.listLength - (lastRenderedItemIndex + 1), 0);
-		const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
+		const averageItemSize = this.getElemSizeAvg();
 		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
 		if (belowSpacerHeight !== this.state.belowSpacerHeight) {
 			this.setState({belowSpacerHeight: belowSpacerHeight}, () => this.setSpacingValidationTimer());
@@ -141,7 +141,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 		if (shouldCalc) {
 			const scrollOffset = this.scrollBars.getScrollTop();
-			const averageItemSize = this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
+			const averageItemSize = this.getElemSizeAvg();
 			const elemsAbove = Math.round(scrollOffset / averageItemSize);
 			const elemsToRender = Math.round(this.props.containerHeight / averageItemSize);
 			this.setState({
@@ -203,8 +203,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		// Update scroll breakpoint when finding new elements
 		this.lastScrollBreakpoint = scrollOffset;
 	}
-
-	scrollPossible() {}
 
 	// Save scroll position in state for virtualization
 	handleScroll(e) {
@@ -321,13 +319,17 @@ class DynamicVirtualizedScrollbar extends Component {
 		return this.scrollBars.getScrollTop();
 	}
 
+	getElemSizeAvg() {
+		return this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
+	}
+
 	render() {
 		const {children} = this.props;
 
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index, ref: node => (this.childRefs[index] = node)}));
 		const listToRender = this.getListToRender(childrenWithProps);
-
-		const belowSpacerStyle = {border: this.props.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight};
+		// Always add one empty space below
+		const belowSpacerStyle = {border: this.props.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight + this.getElemSizeAvg()};
 		const aboveSpacerStyle = {border: this.props.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: this.state.aboveSpacerHeight};
 
 		if (this.stickyElems && this.stickyElems.length > 0) {

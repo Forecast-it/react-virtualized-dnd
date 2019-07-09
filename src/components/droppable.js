@@ -121,6 +121,7 @@ class Droppable extends Component {
 		const listToRender = [...children];
 		const placeholderHeight = this.props.dynamicElemHeight ? this.getDraggedElemHeight() : this.props.elemHeight ? this.props.elemHeight : this.defaultElemHeight;
 		let style;
+		console.log(this.state.placeholder);
 
 		if (this.props.placeholderStyle) {
 			style = {...this.props.placeholderStyle};

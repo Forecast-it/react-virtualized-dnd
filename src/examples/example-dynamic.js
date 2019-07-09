@@ -146,7 +146,7 @@ class DynamicHeightExample extends Component {
 		let indexToInsert =
 			placeholderId != null
 				? placeholderId === 'END_OF_LIST'
-					? listToAddTo.items.length - 1
+					? listToAddTo.items.length
 					: placeholderId.includes('header')
 					? 0
 					: listToAddTo.items.findIndex(item => item.id === placeholderId)
@@ -229,9 +229,11 @@ class DynamicHeightExample extends Component {
 							<button className={'indicator-button' + (this.state.showIndicators ? ' active' : '')} onClick={this.toggleIndicators.bind(this)}>
 								Show Virtualization Indicators
 							</button>
-							{<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
-								Use Sections
-              </button>}
+							{
+								<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
+									Use Sections
+								</button>
+							}
 						</div>
 					</div>
 					<div className={'input-section'}>
