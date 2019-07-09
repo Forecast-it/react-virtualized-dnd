@@ -9,7 +9,7 @@ class DynamicHeightExample extends Component {
 		super(props);
 		this.state = {
 			listData: [],
-			numItems: 100,
+			numItems: 25,
 			numColumns: 6,
 			showIndicators: false,
 			useSections: false
@@ -240,7 +240,7 @@ class DynamicHeightExample extends Component {
 						<p>Items per column</p>
 						<input
 							style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}}
-							placeholder={100}
+							placeholder={this.state.numItems}
 							onKeyDown={e => (e.key === 'Enter' ? this.handleInputChange(e) : void 0)}
 							onBlur={this.handleInputChange.bind(this)}
 						/>
@@ -249,7 +249,7 @@ class DynamicHeightExample extends Component {
 						<p>Number of columns</p>
 						<input
 							style={{marginLeft: 20, marginTop: 8, marginBottom: 8, padding: 2}}
-							placeholder={6}
+							placeholder={this.state.numColumns}
 							onKeyDown={e => (e.key === 'Enter' ? this.handleColumnInputChange(e) : void 0)}
 							onBlur={this.handleColumnInputChange.bind(this)}
 						/>

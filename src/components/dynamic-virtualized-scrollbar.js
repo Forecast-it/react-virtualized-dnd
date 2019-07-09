@@ -163,12 +163,19 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.stickyElems = [];
 		const lastRenderedItemIndex = this.state.lastRenderedItemIndex;
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
+		let start = 0;
+		let end = list.length - 1;
 
-		// Render elemOverscan amount of elements above and below the indices
-		const start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
-		const end = Math.min(lastRenderedItemIndex + this.elemOverScan, this.props.listLength - 1);
+		// only virtualize if we have more elements than our combined overscan
+		if (list.length > this.elemOverScan * 2) {
+			// Render elemOverscan amount of elements above and below the indices
+			start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
+			end = Math.min(lastRenderedItemIndex + this.elemOverScan, this.props.listLength - 1);
+		}
+
+		console.log(start);
+
 		let items = [];
-
 		// Add sticky (dragged) elems and render other visible items
 		list.forEach((child, index) => {
 			// Maintain elements that have the alwaysRender flag set. This is used to keep a dragged element rendered, even if its scroll parent would normally unmount it.
@@ -212,6 +219,10 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	// Save scroll position in state for virtualization
 	handleScroll(e) {
+		if (this.props.listLength <= this.elemOverScan * 2) {
+			// Do nothing unless we have more elems than our combined overScan
+			return;
+		}
 		const scrollOffset = e.scrollTop;
 		let scrollingDown = true;
 		if (Math.abs(this.scrollOffset - scrollOffset) < 2) {
