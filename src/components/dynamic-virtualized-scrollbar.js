@@ -24,7 +24,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			numElemsSized: 0,
 			totalElemsSizedSize: 0
 		};
-		this.elemOverScan = 5;
+		this.elemOverScan = 6;
 		this.childRefs = [];
 		this.stickyElems = null;
 		this.lastElemBounds = null;
@@ -78,6 +78,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (this.props.listLength !== prevProps.listLength) {
 			this.updateRemainingSpace();
 		}
+		this.aboveSpacerMap = new Map();
 	}
 
 	componentWillUnmount() {
@@ -107,7 +108,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
 	updateRemainingSpace() {
-		const lastRenderedItemIndex = Math.min(this.props.listLength, this.state.lastRenderedItemIndex);
+		const lastRenderedItemIndex = Math.min(this.props.listLength, this.state.lastRenderedItemIndex + this.elemOverScan);
 		const remainingElemsBelow = Math.max(this.props.listLength - (lastRenderedItemIndex + 1), 0);
 		const averageItemSize = this.getElemSizeAvg();
 		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
@@ -163,8 +164,10 @@ class DynamicVirtualizedScrollbar extends Component {
 		const lastRenderedItemIndex = this.state.lastRenderedItemIndex;
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
 
-		const start = Math.max(firstRenderedItemIndex, 0);
-		const end = Math.min(lastRenderedItemIndex, this.props.listLength - 1);
+		// Render elemOverscan amount of elements above and below the indices
+		const start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
+		const end = Math.min(lastRenderedItemIndex + this.elemOverScan, this.props.listLength - 1);
+		console.log(start, end);
 
 		let items = [];
 
@@ -227,8 +230,8 @@ class DynamicVirtualizedScrollbar extends Component {
 			if (this.firstElemBounds == null) {
 				this.setElementBounds(scrollOffset, true, false);
 			} else {
-				this.firstElemBounds.top -= scrollChange;
-				this.firstElemBounds.bottom -= scrollChange;
+				this.firstElemBounds.top = this.firstElemBounds.top - scrollChange > 0 ? this.firstElemBounds.top - scrollChange : 0;
+				this.firstElemBounds.bottom = this.firstElemBounds.bottom - scrollChange > 0 ? this.firstElemBounds.bottom - scrollChange : 0;
 			}
 			if (this.lastElemBounds == null) {
 				this.setElementBounds(scrollOffset, false, true);
@@ -236,7 +239,6 @@ class DynamicVirtualizedScrollbar extends Component {
 				this.lastElemBounds.top -= scrollChange;
 				this.lastElemBounds.bottom -= scrollChange;
 			}
-
 			if (this.props.showIndicators) {
 				this.forceUpdate();
 			}
@@ -327,10 +329,13 @@ class DynamicVirtualizedScrollbar extends Component {
 		const {children} = this.props;
 
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index, ref: node => (this.childRefs[index] = node)}));
+		const overScanHeightBelow = this.state.lastRenderedItemIndex + this.elemOverScan <= this.props.listLength - 1 ? this.elemOverScan * this.getElemSizeAvg() : 0;
+		const overScanHeightAbove = this.state.firstRenderedItemIndex > this.elemOverScan ? this.elemOverScan * this.getElemSizeAvg() : 0;
+
 		const listToRender = this.getListToRender(childrenWithProps);
 		// Always add one empty space below
-		const belowSpacerStyle = {border: this.props.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight + this.getElemSizeAvg()};
-		const aboveSpacerStyle = {border: this.props.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: this.state.aboveSpacerHeight};
+		const belowSpacerStyle = {border: this.props.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight + this.getElemSizeAvg() - overScanHeightBelow};
+		const aboveSpacerStyle = {border: this.props.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: Math.max(this.state.aboveSpacerHeight - overScanHeightAbove, 0)};
 
 		if (this.stickyElems && this.stickyElems.length > 0) {
 			listToRender.push(this.stickyElems[0]);
