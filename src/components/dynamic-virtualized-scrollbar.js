@@ -167,7 +167,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		// Render elemOverscan amount of elements above and below the indices
 		const start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
 		const end = Math.min(lastRenderedItemIndex + this.elemOverScan, this.props.listLength - 1);
-
 		let items = [];
 
 		// Add sticky (dragged) elems and render other visible items
@@ -184,10 +183,11 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	setElementBounds(scrollOffset, first, second) {
+		const overScanUsed = this.getOverScanUsed();
 		// Get the first visible element after overscan
-		const firstChild = this.itemsContainer.children[this.elemOverScan];
+		const firstChild = this.itemsContainer.children[overScanUsed.above];
 		// Get the last visible element before overscan
-		const lastChild = this.itemsContainer.children[this.itemsContainer.children.length - 1 - this.elemOverScan];
+		const lastChild = this.itemsContainer.children[this.itemsContainer.children.length - 1 - overScanUsed.below];
 		if (first && firstChild != null) {
 			const firstElemBounds = firstChild.getBoundingClientRect();
 			this.firstElemBounds = {
@@ -331,7 +331,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	getOverScanUsed() {
 		const overscan = {
 			above: this.state.firstRenderedItemIndex > this.elemOverScan ? Math.min(this.elemOverScan, this.state.firstRenderedItemIndex - this.elemOverScan) : 0,
-			below: this.state.lastRenderedItemIndex + this.elemOverScan <= this.props.listLength - 1 ? Math.min(this.elemOverScan, this.props.listLength - 1 - this.state.lastRenderedItemIndex) : 0
+			below: Math.min(this.elemOverScan, this.props.listLength - 1 - this.state.lastRenderedItemIndex)
 		};
 		return overscan;
 	}
