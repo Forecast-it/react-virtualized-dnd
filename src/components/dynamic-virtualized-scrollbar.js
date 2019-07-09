@@ -217,6 +217,95 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastScrollBreakpoint = scrollOffset;
 	}
 
+	handleScroll2(e) {
+		if (this.props.listLength <= this.elemOverScan * 2) {
+			// Do nothing unless we have more elems than our combined overScan
+			return;
+		}
+		const scrollOffset = e.scrollTop;
+		let scrollingDown = true;
+		if (Math.abs(this.scrollOffset - scrollOffset) < 2) {
+			// Minimal change, do nothing
+			return;
+		}
+		const stateUpdate = {};
+		if (this.itemsContainer && this.itemsContainer.lastElementChild && this.itemsContainer.firstElementChild) {
+			// Check if we're increasing or decreasing scroll
+			if (this.scrollOffset) {
+				if (scrollOffset < this.scrollOffset) {
+					scrollingDown = false;
+				}
+			}
+			this.scrollOffset = scrollOffset;
+			const viewPortTop = this.state.containerTop;
+			const viewPortBottom = this.state.containerTop + this.props.containerHeight;
+			const scrollChange = scrollOffset - this.lastScrollBreakpoint;
+			if (this.firstElemBounds == null) {
+				this.setElementBounds(scrollOffset, true, false);
+			} else {
+				this.firstElemBounds.top = this.firstElemBounds.top - scrollChange > 0 ? this.firstElemBounds.top - scrollChange : 0;
+				this.firstElemBounds.bottom = this.firstElemBounds.bottom - scrollChange > 0 ? this.firstElemBounds.bottom - scrollChange : 0;
+			}
+			if (this.lastElemBounds == null) {
+				this.setElementBounds(scrollOffset, false, true);
+			} else {
+				this.lastElemBounds.top -= scrollChange;
+				this.lastElemBounds.bottom -= scrollChange;
+			}
+			if (this.props.showIndicators) {
+				this.forceUpdate();
+			}
+
+			// SCROLLING DOWN BEGINS
+			if (scrollingDown) {
+				// If viewPortTop has scrolled past first bottom, move first elem one down the list
+				if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop && !this.aboveSpacerMap.get(this.state.firstRenderedItemIndex)) {
+					// TODO: Implement
+					console.log('Move first element one down');
+					this.lastScrollBreakpoint = scrollOffset;
+				}
+				// If viewport bottom has crossed last elem bottom, render one more elem below
+				if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
+					// If we're still not at the end of the list
+					if (this.state.lastRenderedItemIndex < this.props.listLength) {
+						// TODO: Implement
+						console.log('Move last element one down');
+						this.lastScrollBreakpoint = scrollOffset;
+					}
+				}
+				// SCROLLING DOWN ENDS
+			} else {
+				// SCROLLING UP BEGINS
+				// If viewport is scrolled up above first elements top
+				if (this.firstElemBounds && viewPortTop <= this.firstElemBounds.top) {
+					// TODO: Implement
+					console.log('Move first element one up');
+					this.lastScrollBreakpoint = scrollOffset;
+				}
+				// If viewport has scrolled up over last element's top
+				if (this.lastElemBounds && viewPortBottom <= this.lastElemBounds.top) {
+					// TODO: Implement
+					console.log('Move last element one up');
+					this.lastScrollBreakpoint = scrollOffset;
+				}
+				// SCROLLING UP ENDS
+			}
+			// Remove all spacing at end of list
+			if (Math.min(this.state.lastRenderedItemIndex + this.elemOverScan, this.props.listLength - 1) === this.props.listLength - 1) {
+				if (this.state.belowSpacerHeight !== 0) {
+					stateUpdate.belowSpacerHeight = 0;
+				}
+			}
+			// Remove all top spacing at beginning of list
+			else if (Math.max(this.state.firstRenderedItemIndex - this.elemOverScan, 0) === 0) {
+				if (this.state.aboveSpacerHeight !== 0) {
+					stateUpdate.aboveSpacerHeight = 0;
+				}
+			}
+			this.setState(stateUpdate);
+		}
+	}
+
 	// Save scroll position in state for virtualization
 	handleScroll(e) {
 		if (this.props.listLength <= this.elemOverScan * 2) {
@@ -405,7 +494,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 		return (
 			<Scrollbars
-				onScrollFrame={this.handleScroll.bind(this)}
+				onScrollFrame={this.handleScroll2.bind(this)}
 				ref={div => (this.scrollBars = div)}
 				{...this.props.scrollProps}
 				autoHeight={true}
