@@ -8,14 +8,14 @@ class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
 		super(props);
 		// Set initial elements to render - either specific amount, or the amount that can be in the viewPort + some optimistic amount to account for number of elements that deviate from min
-		const optimisticCount = 5;
+		this.optimisticCount = 10;
 		const initialElemsToRender =
-			this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(Math.round(props.containerHeight / props.minElemHeight) + optimisticCount, props.listLength);
+			this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(Math.round(props.containerHeight / props.minElemHeight) + this.optimisticCount, props.listLength);
 		this.state = {
 			// Update this when dynamic row height becomes a thing
 			scrollOffset: 0,
 			firstRenderedItemIndex: 0,
-			lastRenderedItemIndex: this.props.simplified ? props.listLength / 4 - 1 : initialElemsToRender,
+			lastRenderedItemIndex: props.simplified ? this.getInitialRenderAmount(props) : initialElemsToRender,
 			aboveSpacerHeight: 0,
 			// Initially guess that all elems are min height
 			belowSpacerHeight: this.props.simplified ? (Math.floor(props.listLength * 0.75) - 1) * props.minElemHeight : (props.listLength - initialElemsToRender) * props.minElemHeight,
@@ -85,7 +85,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			this.lastElemBounds = null;
 		}
 		if (this.props.listLength !== prevProps.listLength) {
-			if (!this.props.simplified) this.updateRemainingSpace();
+			this.updateRemainingSpace();
 			if (this.scrollBars) {
 				this.scrollHeight = this.scrollBars.getScrollHeight();
 			}
@@ -113,6 +113,15 @@ class DynamicVirtualizedScrollbar extends Component {
 			nextState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex ||
 			this.propsDidChange(this.props, nextProps)
 		);
+	}
+
+	getInitialRenderAmount(props) {
+		// Return full list if list is small, else return first quarter
+		if (props.listLength <= this.optimisticCount * 2) {
+			console.log('FULL');
+			return props.listLength - 1;
+		}
+		return Math.floor((props.listLength - 1) / 4);
 	}
 
 	propsDidChange(props, nextProps) {
@@ -234,9 +243,8 @@ class DynamicVirtualizedScrollbar extends Component {
 	handleScrollSimplified(e) {
 		const scrollOffset = e.scrollTop;
 		const scrollHeight = this.scrollHeight;
-		let optimisticCount = 10;
 		// If list contains fewer elements than our optimism, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
-		if (this.props.listLength <= optimisticCount * 2 || Math.floor(scrollHeight / this.props.containerHeight) < 2) {
+		if (this.props.listLength <= this.optimisticCount * 2 || Math.floor(scrollHeight / this.props.containerHeight) < 2) {
 			const stateUpdate = {};
 			if (this.state.firstRenderedItemIndex !== 0) {
 				stateUpdate.firstRenderedItemIndex = 0;
@@ -252,7 +260,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			return;
 		} else {
 			const elemsToRender = Math.floor(this.props.listLength / 4);
-			optimisticCount = Math.min(Math.floor(elemsToRender / 2), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
+			this.optimisticCount = Math.min(Math.floor(elemsToRender * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
 			if (scrollOffset < scrollHeight * 0.25) {
 				// RENDER FIRST QUARTER
 				// console.log('Q1');
@@ -261,9 +269,9 @@ class DynamicVirtualizedScrollbar extends Component {
 						{
 							renderPart: 0,
 							aboveSpacerHeight: 0,
-							belowSpacerHeight: (this.props.listLength - elemsToRender - optimisticCount) * this.getElemSizeAvg(),
+							belowSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
 							firstRenderedItemIndex: 0,
-							lastRenderedItemIndex: elemsToRender + optimisticCount
+							lastRenderedItemIndex: elemsToRender + this.optimisticCount
 						},
 						() => this.updateAverageSizing()
 					);
@@ -275,10 +283,10 @@ class DynamicVirtualizedScrollbar extends Component {
 					this.setState(
 						{
 							renderPart: 1,
-							aboveSpacerHeight: (elemsToRender - optimisticCount - 1) * this.getElemSizeAvg(),
-							belowSpacerHeight: (this.props.listLength - 2 * elemsToRender - optimisticCount) * this.getElemSizeAvg(),
-							firstRenderedItemIndex: elemsToRender - optimisticCount,
-							lastRenderedItemIndex: elemsToRender * 2 + optimisticCount
+							aboveSpacerHeight: (elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
+							belowSpacerHeight: (this.props.listLength - 2 * elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
+							firstRenderedItemIndex: elemsToRender - this.optimisticCount,
+							lastRenderedItemIndex: elemsToRender * 2 + this.optimisticCount
 						},
 						() => this.updateAverageSizing()
 					);
@@ -290,10 +298,10 @@ class DynamicVirtualizedScrollbar extends Component {
 					this.setState(
 						{
 							renderPart: 2,
-							aboveSpacerHeight: (2 * elemsToRender - optimisticCount - 1) * this.getElemSizeAvg(),
-							belowSpacerHeight: (elemsToRender - optimisticCount) * this.getElemSizeAvg(),
-							firstRenderedItemIndex: 2 * elemsToRender - optimisticCount,
-							lastRenderedItemIndex: 3 * elemsToRender + optimisticCount
+							aboveSpacerHeight: (2 * elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
+							belowSpacerHeight: (elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
+							firstRenderedItemIndex: 2 * elemsToRender - this.optimisticCount,
+							lastRenderedItemIndex: 3 * elemsToRender + this.optimisticCount
 						},
 						() => this.updateAverageSizing()
 					);
@@ -305,9 +313,9 @@ class DynamicVirtualizedScrollbar extends Component {
 					this.setState(
 						{
 							renderPart: 3,
-							aboveSpacerHeight: (this.props.listLength - elemsToRender - optimisticCount - 1) * this.getElemSizeAvg(),
+							aboveSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
 							belowSpacerHeight: 0,
-							firstRenderedItemIndex: this.props.listLength - elemsToRender - optimisticCount,
+							firstRenderedItemIndex: this.props.listLength - elemsToRender - this.optimisticCount,
 							lastRenderedItemIndex: this.props.listLength - 1
 						},
 						() => this.updateAverageSizing()
