@@ -68,10 +68,15 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.updateAverageSizing();
 	}
 
+	logUpdateReason(props, state, prevProps, prevState) {
+		Object.entries(props).forEach(([key, val]) => prevProps[key] !== val && console.log(`Prop '${key}' changed`));
+		Object.entries(state).forEach(([key, val]) => prevState[key] !== val && console.log(`State '${key}' changed`));
+	}
+
 	componentDidUpdate(prevProps, prevState) {
 		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
 		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.numElemsSized !== this.state.numElemsSized) {
-			this.updateRemainingSpace();
+			if (!this.props.simplified) this.updateRemainingSpace();
 		}
 		if (prevState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex) {
 			this.firstElemBounds = null;
@@ -80,12 +85,13 @@ class DynamicVirtualizedScrollbar extends Component {
 			this.lastElemBounds = null;
 		}
 		if (this.props.listLength !== prevProps.listLength) {
-			this.updateRemainingSpace();
+			if (!this.props.simplified) this.updateRemainingSpace();
 			if (this.scrollBars) {
 				this.scrollHeight = this.scrollBars.getScrollHeight();
 			}
 		}
 		this.aboveSpacerMap = new Map();
+		// this.logUpdateReason(this.props, this.state, prevProps, prevState);
 	}
 
 	componentWillUnmount() {
@@ -148,7 +154,6 @@ class DynamicVirtualizedScrollbar extends Component {
 				shouldCalc = true;
 			}
 		}
-		console.log(shouldCalc);
 		if (shouldCalc) {
 			const scrollOffset = this.scrollBars.getScrollTop();
 			const averageItemSize = this.getElemSizeAvg();
@@ -230,18 +235,21 @@ class DynamicVirtualizedScrollbar extends Component {
 		const scrollOffset = e.scrollTop;
 		const scrollHeight = this.scrollHeight;
 		const optimisticCount = 10;
-		// Only optimize lists that are longer than our optimistic bounds
-		if (this.props.listLength <= optimisticCount * 2) {
+		// If list contains fewer elements than our optimism, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
+		if (this.props.listLength <= optimisticCount * 2 || Math.floor(scrollHeight / this.props.containerHeight) < 2) {
 			const stateUpdate = {};
 			if (this.state.firstRenderedItemIndex !== 0) {
 				stateUpdate.firstRenderedItemIndex = 0;
+				stateUpdate.aboveSpacerHeight = 0;
 			}
 			if (this.state.lastRenderedItemIndex !== this.props.listLength - 1) {
 				stateUpdate.lastRenderedItemIndex = this.props.listLength - 1;
+				stateUpdate.belowSpacerHeight = 0;
 			}
 			if (Object.entries(stateUpdate).length > 0) {
 				this.setState(stateUpdate);
 			}
+			return;
 		} else {
 			const elemsToRender = Math.floor(this.props.listLength / 4);
 			if (scrollOffset < scrollHeight * 0.25) {
@@ -291,7 +299,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				}
 			} else if (scrollOffset >= scrollHeight * 0.75) {
 				// RENDER FOURTH QUARTER
-				// console.log('Q4', this.state.renderPart);
+				// console.log('Q4');
 				if (this.state.renderPart !== 3) {
 					this.setState(
 						{
@@ -466,8 +474,8 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (this.scrollStopTimer) {
 			clearTimeout(this.scrollStopTimer);
 		}
-		// Don't allow scroll updates more than once every 50ms
-		this.scrollStopTimer = setTimeout(() => (this.shouldScroll = true), 50);
+		// Don't allow scroll updates more than once every 5ms
+		this.scrollStopTimer = setTimeout(() => (this.shouldScroll = true), 5);
 	}
 
 	render() {
