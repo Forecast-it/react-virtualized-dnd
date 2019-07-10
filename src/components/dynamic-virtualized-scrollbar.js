@@ -19,17 +19,14 @@ class DynamicVirtualizedScrollbar extends Component {
 			aboveSpacerHeight: 0,
 			// Initially guess that all elems are min height
 			belowSpacerHeight: (props.listLength - initialElemsToRender) * props.minElemHeight,
-			firstElemBounds: {},
-			lastElemBounds: {},
 			numElemsSized: 0,
 			totalElemsSizedSize: 0
 		};
-		this.elemOverScan = this.props.elemOverScan != null ? this.props.elemOverScan : 0;
+		this.elemOverScan = this.props.elemOverScan != null ? this.props.elemOverScan : 10;
 		this.childRefs = [];
 		this.stickyElems = null;
 		this.lastElemBounds = null;
 		this.firstElemBounds = null;
-		this.MAX_RENDERS = 200;
 		this.lastScrollBreakpoint = 0;
 		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
 		this.handleScroll = this.handleScroll.bind(this);
