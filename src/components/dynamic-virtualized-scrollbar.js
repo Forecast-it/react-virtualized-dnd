@@ -11,14 +11,19 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.optimisticCount = 10;
 		const initialElemsToRender =
 			this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(Math.round(props.containerHeight / props.minElemHeight) + this.optimisticCount, props.listLength);
+		const simplifiedInitialElemsRender = this.getInitialRenderAmount(props);
 		this.state = {
 			// Update this when dynamic row height becomes a thing
 			scrollOffset: 0,
 			firstRenderedItemIndex: 0,
-			lastRenderedItemIndex: props.simplified ? this.getInitialRenderAmount(props) : initialElemsToRender,
+			lastRenderedItemIndex: props.simplified ? simplifiedInitialElemsRender : initialElemsToRender,
 			aboveSpacerHeight: 0,
 			// Initially guess that all elems are min height
-			belowSpacerHeight: this.props.simplified ? (Math.floor(props.listLength * 0.75) - 1) * props.minElemHeight : (props.listLength - initialElemsToRender) * props.minElemHeight,
+			belowSpacerHeight: this.props.simplified
+				? simplifiedInitialElemsRender === this.props.listLength - 1
+					? 0
+					: (Math.floor(props.listLength * 0.75) - 1) * props.minElemHeight
+				: (props.listLength - initialElemsToRender) * props.minElemHeight,
 			numElemsSized: 0,
 			totalElemsSizedSize: 0,
 			renderPart: null
@@ -118,7 +123,6 @@ class DynamicVirtualizedScrollbar extends Component {
 	getInitialRenderAmount(props) {
 		// Return full list if list is small, else return first quarter
 		if (props.listLength <= this.optimisticCount * 2) {
-			console.log('FULL');
 			return props.listLength - 1;
 		}
 		return Math.floor((props.listLength - 1) / 4);
