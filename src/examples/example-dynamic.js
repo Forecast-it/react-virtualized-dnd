@@ -8,7 +8,7 @@ class DynamicHeightExample extends Component {
 		super(props);
 		this.state = {
 			listData: [],
-			numItems: 25,
+			numItems: 150,
 			numColumns: 6,
 			showIndicators: false,
 			useSections: false
@@ -258,6 +258,7 @@ class DynamicHeightExample extends Component {
 							!this.state.split || index < elemsToRender.length / 2 ? (
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
+										simplified={true}
 										scrollProps={scrollProps}
 										showIndicators={this.state.showIndicators}
 										dynamicElemHeight={true}
@@ -283,6 +284,7 @@ class DynamicHeightExample extends Component {
 								index >= elemsToRender.length / 2 ? (
 									<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 										<Droppable
+											simplified={true}
 											showIndicators={this.state.showIndicators}
 											dynamicElemHeight={true}
 											minElemHeight={50}
