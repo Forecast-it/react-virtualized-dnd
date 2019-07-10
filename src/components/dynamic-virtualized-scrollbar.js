@@ -108,7 +108,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	// Calculate remaining space below list, given the current rendering (first to last + overscan below and above)
 	updateRemainingSpace() {
-		const lastRenderedItemIndex = Math.min(this.props.listLength, this.state.lastRenderedItemIndex + this.elemOverScan);
+		const lastRenderedItemIndex = Math.min(this.props.listLength - 1, this.state.lastRenderedItemIndex + this.elemOverScan);
 		const remainingElemsBelow = Math.max(this.props.listLength - (lastRenderedItemIndex + 1), 0);
 		const averageItemSize = this.getElemSizeAvg();
 		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
@@ -368,8 +368,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		let childrenWithProps = React.Children.map(children, (child, index) => React.cloneElement(child, {originalindex: index, ref: node => (this.childRefs[index] = node)}));
 		const overScanHeightBelow = overscanUsed.below * this.getElemSizeAvg();
 		const overScanHeightAbove = overscanUsed.above * this.getElemSizeAvg();
-
-		console.log(overscanUsed, this.state.lastRenderedItemIndex);
 
 		const listToRender = this.getListToRender(childrenWithProps);
 		// Always add one empty space below
