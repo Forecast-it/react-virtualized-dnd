@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import Droppable from '../components/droppable';
 import Draggable from '../components/draggable';
 import DragDropContext from '../components/drag_drop_context';
-import DragSection from './../components/drag_section';
 
 class DynamicHeightExample extends Component {
 	constructor(props) {

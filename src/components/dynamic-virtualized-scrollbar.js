@@ -24,7 +24,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			numElemsSized: 0,
 			totalElemsSizedSize: 0
 		};
-		this.elemOverScan = 0;
+		this.elemOverScan = this.props.elemOverScan != null ? this.props.elemOverScan : 0;
 		this.childRefs = [];
 		this.stickyElems = null;
 		this.lastElemBounds = null;
@@ -228,7 +228,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		// If at end, do nothing to last elem
 		const scrollOffset = e.scrollTop;
 		let scrollingDown = true;
-		if (Math.abs(this.scrollOffset - scrollOffset) < 2) {
+		if (Math.abs(this.scrollOffset - scrollOffset) < this.props.minElemHeight / 2) {
 			// Minimal change, do nothing
 			return;
 		}
@@ -275,7 +275,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 			// SCROLLING DOWN BEGINS
 			if (scrollingDown) {
-				// If viewport bottom has crossed last elem bottom, render one more elem below
+				// If viewport bottom has crossed last (currently rendered) elem bottom, render one more elem below
 				if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
 					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
 					stateUpdate.lastRenderedItemIndex = Math.min(this.state.lastRenderedItemIndex + 1, this.props.listLength - 1);
@@ -290,7 +290,6 @@ class DynamicVirtualizedScrollbar extends Component {
 						}
 					}
 				}
-
 				// If viewPortTop has scrolled past first bottom, move first elem one down the list
 				if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop && !this.aboveSpacerMap.get(this.state.firstRenderedItemIndex)) {
 					const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
@@ -316,18 +315,6 @@ class DynamicVirtualizedScrollbar extends Component {
 					stateUpdate.lastRenderedItemIndex = Math.max(this.state.lastRenderedItemIndex - 1, 0);
 				}
 				// SCROLLING UP ENDS
-			}
-			/*// Remove all spacing at end of list
-			if (this.state.lastRenderedItemIndex === this.props.listLength - 1) {
-				if (this.state.belowSpacerHeight !== 0) {
-					stateUpdate.belowSpacerHeight = 0;
-				}
-			}*/
-			// Remove all top spacing at beginning of list
-			if (this.state.firstRenderedItemIndex === 0) {
-				if (this.state.aboveSpacerHeight !== 0) {
-					stateUpdate.aboveSpacerHeight = 0;
-				}
 			}
 			this.setState(stateUpdate);
 		}

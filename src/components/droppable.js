@@ -228,6 +228,7 @@ class Droppable extends Component {
 				{this.props.hideList ? null : shouldScroll && !this.props.disableScroll ? (
 					this.props.dynamicElemHeight ? (
 						<DynamicVirtualizedScrollbar
+							elemOverScan={this.props.elemOverScan}
 							initialElemsToRender={this.props.initialElemsToRender}
 							disableVirtualization={this.props.disableVirtualization}
 							listLength={listToRender.length}
