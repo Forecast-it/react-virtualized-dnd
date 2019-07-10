@@ -508,7 +508,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 		let firstIndicatorStyle;
 		let lastIndicatorStyle;
-		if (this.firstElemBounds && this.lastElemBounds) {
+		if (this.firstElemBounds && this.lastElemBounds && !this.props.simplified) {
 			firstIndicatorStyle = {
 				top: this.firstElemBounds.top,
 				left: this.firstElemBounds.left,
