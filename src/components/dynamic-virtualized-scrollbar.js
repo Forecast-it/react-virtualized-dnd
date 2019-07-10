@@ -98,6 +98,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		// only render when visible items change -> smooth scroll
 		return (
 			(this.props.stickyElems && this.props.stickyElems.length > 0) ||
+			this.props.listLength !== nextProps.listLength ||
 			nextState.aboveSpacerHeight !== this.state.aboveSpacerHeight ||
 			nextState.belowSpacerHeight !== this.state.belowSpacerHeight ||
 			nextState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex ||
@@ -118,7 +119,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		const averageItemSize = this.getElemSizeAvg();
 		const belowSpacerHeight = remainingElemsBelow * averageItemSize;
 		if (belowSpacerHeight !== this.state.belowSpacerHeight) {
-			this.setState({belowSpacerHeight: belowSpacerHeight}, () => this.setSpacingValidationTimer());
+			this.setState({belowSpacerHeight: belowSpacerHeight, renderPart: null}, () => this.setSpacingValidationTimer());
 		}
 	}
 
@@ -170,8 +171,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		const firstRenderedItemIndex = this.state.firstRenderedItemIndex;
 		let start = 0;
 		let end = list.length - 1;
-
-		// only virtualize if we have more elements than our combined overscan
+		// Only virtualize if we have more elements than our combined overscan
 		if (list.length > this.elemOverScan * 2) {
 			// Render elemOverscan amount of elements above and below the indices
 			start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
@@ -246,6 +246,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			const elemsToRender = Math.floor(this.props.listLength / 4);
 			if (scrollOffset < scrollHeight * 0.25) {
 				// RENDER FIRST QUARTER
+				// console.log('Q1');
 				if (this.state.renderPart !== 0) {
 					this.setState(
 						{
@@ -260,6 +261,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				}
 			} else if (scrollOffset >= scrollHeight * 0.25 && scrollOffset < scrollHeight * 0.5) {
 				// RENDER SECOND QUARTER
+				// console.log('Q2');
 				if (this.state.renderPart !== 1) {
 					this.setState(
 						{
@@ -274,6 +276,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				}
 			} else if (scrollOffset >= scrollHeight * 0.5 && scrollOffset < scrollHeight * 0.75) {
 				// RENDER THIRD QUARTER
+				// console.log('Q3');
 				if (this.state.renderPart !== 2) {
 					this.setState(
 						{
@@ -288,6 +291,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				}
 			} else if (scrollOffset >= scrollHeight * 0.75) {
 				// RENDER FOURTH QUARTER
+				// console.log('Q4', this.state.renderPart);
 				if (this.state.renderPart !== 3) {
 					this.setState(
 						{
