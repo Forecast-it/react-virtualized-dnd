@@ -374,7 +374,11 @@ class DynamicVirtualizedScrollbar extends Component {
 
 		const listToRender = this.getListToRender(childrenWithProps);
 		// Always add one empty space below
-		const belowSpacerStyle = {border: this.props.showIndicators ? 'solid 3px yellow' : 'none', width: '100%', height: this.state.belowSpacerHeight + this.getElemSizeAvg() - overScanHeightBelow};
+		const belowSpacerStyle = {
+			border: this.props.showIndicators ? 'solid 3px yellow' : 'none',
+			width: '100%',
+			height: this.state.belowSpacerHeight + (this.props.stickyElems && this.props.stickyElems.length > 0 ? this.props.stickyElems.length * this.getElemSizeAvg() : 0) - overScanHeightBelow
+		};
 		const aboveSpacerStyle = {border: this.props.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: Math.max(this.state.aboveSpacerHeight - overScanHeightAbove, 0)};
 
 		if (this.stickyElems && this.stickyElems.length > 0) {
