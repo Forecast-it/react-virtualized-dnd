@@ -15,15 +15,15 @@ class DynamicVirtualizedScrollbar extends Component {
 			// Update this when dynamic row height becomes a thing
 			scrollOffset: 0,
 			firstRenderedItemIndex: 0,
-			lastRenderedItemIndex: this.props.simplified ? props.listLength / 2 - 1 : initialElemsToRender,
+			lastRenderedItemIndex: this.props.simplified ? props.listLength / 4 - 1 : initialElemsToRender,
 			aboveSpacerHeight: 0,
 			// Initially guess that all elems are min height
-			belowSpacerHeight: this.props.simplified ? (props.listLength / 2 - 1) * props.minElemHeight : (props.listLength - initialElemsToRender) * props.minElemHeight,
+			belowSpacerHeight: this.props.simplified ? (Math.floor(props.listLength * 0.75) - 1) * props.minElemHeight : (props.listLength - initialElemsToRender) * props.minElemHeight,
 			numElemsSized: 0,
 			totalElemsSizedSize: 0,
 			renderPart: null
 		};
-		this.elemOverScan = this.props.elemOverScan != null ? this.props.elemOverScan : 10;
+		this.elemOverScan = this.props.elemOverScan != null ? this.props.elemOverScan : this.props.simplified ? 0 : 10;
 		this.childRefs = [];
 		this.stickyElems = null;
 		this.lastElemBounds = null;
@@ -63,6 +63,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (this.scrollBars) {
 			this.scrollHeight = this.scrollBars.getScrollHeight();
 		}
+		this.updateAverageSizing();
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -225,7 +226,6 @@ class DynamicVirtualizedScrollbar extends Component {
 	handleScrollSimplified(e) {
 		const scrollOffset = e.scrollTop;
 		const scrollHeight = this.scrollHeight;
-		const listHalf = this.props.listLength / 2;
 		const optimisticCount = 10;
 		// Only optimize lists that are longer than our optimistic bounds
 		if (this.props.listLength <= optimisticCount * 2) {
@@ -243,31 +243,92 @@ class DynamicVirtualizedScrollbar extends Component {
 			if (!this.shouldScroll) {
 				return;
 			}
-			if (scrollOffset > scrollHeight / 2) {
-				if (this.state.renderPart !== 'last') {
+			const elemsToRender = Math.floor(this.props.listLength / 4);
+			if (scrollOffset < scrollHeight * 0.25) {
+				// console.log('RENDER FIRST QUARTER');
+				if (this.state.renderPart !== 0) {
 					this.setState(
 						{
-							renderPart: 'last',
-							aboveSpacerHeight: (listHalf - optimisticCount) * this.getElemSizeAvg(),
+							renderPart: 0,
+							aboveSpacerHeight: 0,
+							belowSpacerHeight: (this.props.listLength - elemsToRender - optimisticCount) * this.getElemSizeAvg(),
+							firstRenderedItemIndex: 0,
+							lastRenderedItemIndex: elemsToRender + optimisticCount
+						},
+						() => this.updateAverageSizing()
+					);
+				}
+			} else if (scrollOffset >= scrollHeight * 0.25 && scrollOffset < scrollHeight * 0.5) {
+				// console.log('RENDER SECOND QUARTER');
+				if (this.state.renderPart !== 1) {
+					this.setState(
+						{
+							renderPart: 1,
+							aboveSpacerHeight: (elemsToRender - optimisticCount - 1) * this.getElemSizeAvg(),
+							belowSpacerHeight: (this.props.listLength - 2 * elemsToRender - optimisticCount) * this.getElemSizeAvg(),
+							firstRenderedItemIndex: elemsToRender - optimisticCount,
+							lastRenderedItemIndex: elemsToRender * 2 + optimisticCount
+						},
+						() => this.updateAverageSizing()
+					);
+				}
+			} else if (scrollOffset >= scrollHeight * 0.5 && scrollOffset < scrollHeight * 0.75) {
+				// console.log('RENDER THIRD QUARTER');
+				if (this.state.renderPart !== 2) {
+					this.setState(
+						{
+							renderPart: 2,
+							aboveSpacerHeight: (2 * elemsToRender - optimisticCount - 1) * this.getElemSizeAvg(),
+							belowSpacerHeight: (elemsToRender - optimisticCount) * this.getElemSizeAvg(),
+							firstRenderedItemIndex: 2 * elemsToRender - optimisticCount,
+							lastRenderedItemIndex: 3 * elemsToRender + optimisticCount
+						},
+						() => this.updateAverageSizing()
+					);
+				}
+			} else if (scrollOffset >= scrollHeight * 0.75) {
+				// console.log('RENDER FOURTH QUARTER');
+				if (this.state.renderPart !== 3) {
+					this.setState(
+						{
+							renderPart: 3,
+							aboveSpacerHeight: (this.props.listLength - elemsToRender - optimisticCount - 1) * this.getElemSizeAvg(),
 							belowSpacerHeight: 0,
-							firstRenderedItemIndex: Math.max(listHalf - 1 - optimisticCount, 0),
+							firstRenderedItemIndex: this.props.listLength - elemsToRender - optimisticCount,
+							lastRenderedItemIndex: this.props.listLength - 1
+						},
+						() => this.updateAverageSizing()
+					);
+				}
+			}
+
+			/*if (scrollOffset > scrollHeight / 2) {
+				// Render last half of list
+				if (this.state.renderPart !== 2) {
+					this.setState(
+						{
+							renderPart: 2,
+							aboveSpacerHeight: (getListPart(2) - optimisticCount) * this.getElemSizeAvg(),
+							belowSpacerHeight: 0,
+							firstRenderedItemIndex: Math.max(getListPart(2) - 1 - optimisticCount, 0),
 							lastRenderedItemIndex: this.props.listLength - 1
 						},
 						() => this.updateAverageSizing()
 					);
 				}
 			} else {
-				if (this.state.renderPart !== 'first') {
+				// Render first Half of list
+				if (this.state.renderPart !== 1) {
 					this.setState({
-						renderPart: 'first',
+						renderPart: 1,
 						aboveSpacerHeight: 0,
-						belowSpacerHeight: this.getElemSizeAvg() * (listHalf - optimisticCount),
+						belowSpacerHeight: this.getElemSizeAvg() * (getListPart(2) - optimisticCount),
 						firstRenderedItemIndex: 0,
-						lastRenderedItemIndex: listHalf - 1 + optimisticCount
+						lastRenderedItemIndex: getListPart(2) - 1 + optimisticCount
 					}),
 						() => this.updateAverageSizing();
 				}
-			}
+			}*/
 		}
 	}
 	updateAverageSizing() {
@@ -280,6 +341,8 @@ class DynamicVirtualizedScrollbar extends Component {
 			}
 		}
 		if (numSized !== this.state.numElemsSized) {
+			const scrollHeight = this.scrollBars.getScrollHeight();
+			this.scrollHeight = scrollHeight;
 			this.setState({numElemsSized: numSized, totalElemsSizedSize: totalSize});
 		}
 	}
@@ -428,7 +491,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			clearTimeout(this.scrollStopTimer);
 		}
 		// Don't allow scroll updates more than once every 50ms
-		this.scrollStopTimer = setTimeout(() => (this.shouldScroll = true), 250);
+		this.scrollStopTimer = setTimeout(() => (this.shouldScroll = true), 50);
 	}
 
 	render() {
