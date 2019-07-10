@@ -245,7 +245,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			}
 			const elemsToRender = Math.floor(this.props.listLength / 4);
 			if (scrollOffset < scrollHeight * 0.25) {
-				// console.log('RENDER FIRST QUARTER');
+				// RENDER FIRST QUARTER
 				if (this.state.renderPart !== 0) {
 					this.setState(
 						{
@@ -259,7 +259,7 @@ class DynamicVirtualizedScrollbar extends Component {
 					);
 				}
 			} else if (scrollOffset >= scrollHeight * 0.25 && scrollOffset < scrollHeight * 0.5) {
-				// console.log('RENDER SECOND QUARTER');
+				// RENDER SECOND QUARTER
 				if (this.state.renderPart !== 1) {
 					this.setState(
 						{
@@ -273,7 +273,7 @@ class DynamicVirtualizedScrollbar extends Component {
 					);
 				}
 			} else if (scrollOffset >= scrollHeight * 0.5 && scrollOffset < scrollHeight * 0.75) {
-				// console.log('RENDER THIRD QUARTER');
+				// RENDER THIRD QUARTER
 				if (this.state.renderPart !== 2) {
 					this.setState(
 						{
@@ -287,7 +287,7 @@ class DynamicVirtualizedScrollbar extends Component {
 					);
 				}
 			} else if (scrollOffset >= scrollHeight * 0.75) {
-				// console.log('RENDER FOURTH QUARTER');
+				// RENDER FOURTH QUARTER
 				if (this.state.renderPart !== 3) {
 					this.setState(
 						{
@@ -301,34 +301,6 @@ class DynamicVirtualizedScrollbar extends Component {
 					);
 				}
 			}
-
-			/*if (scrollOffset > scrollHeight / 2) {
-				// Render last half of list
-				if (this.state.renderPart !== 2) {
-					this.setState(
-						{
-							renderPart: 2,
-							aboveSpacerHeight: (getListPart(2) - optimisticCount) * this.getElemSizeAvg(),
-							belowSpacerHeight: 0,
-							firstRenderedItemIndex: Math.max(getListPart(2) - 1 - optimisticCount, 0),
-							lastRenderedItemIndex: this.props.listLength - 1
-						},
-						() => this.updateAverageSizing()
-					);
-				}
-			} else {
-				// Render first Half of list
-				if (this.state.renderPart !== 1) {
-					this.setState({
-						renderPart: 1,
-						aboveSpacerHeight: 0,
-						belowSpacerHeight: this.getElemSizeAvg() * (getListPart(2) - optimisticCount),
-						firstRenderedItemIndex: 0,
-						lastRenderedItemIndex: getListPart(2) - 1 + optimisticCount
-					}),
-						() => this.updateAverageSizing();
-				}
-			}*/
 		}
 	}
 	updateAverageSizing() {
