@@ -234,7 +234,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	handleScrollSimplified(e) {
 		const scrollOffset = e.scrollTop;
 		const scrollHeight = this.scrollHeight;
-		const optimisticCount = 10;
+		let optimisticCount = 10;
 		// If list contains fewer elements than our optimism, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
 		if (this.props.listLength <= optimisticCount * 2 || Math.floor(scrollHeight / this.props.containerHeight) < 2) {
 			const stateUpdate = {};
@@ -252,6 +252,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			return;
 		} else {
 			const elemsToRender = Math.floor(this.props.listLength / 4);
+			optimisticCount = Math.min(Math.floor(elemsToRender / 2), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
 			if (scrollOffset < scrollHeight * 0.25) {
 				// RENDER FIRST QUARTER
 				// console.log('Q1');
