@@ -40,13 +40,15 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.spring = this.springSystem.createSpring();
 		this.spring.setOvershootClampingEnabled(true);
 		this.spring.addListener({onSpringUpdate: this.handleSpringUpdate.bind(this)});
-		if (this.inner) {
+		if (this.inner != null) {
 			this.setState({containerTop: this.inner.getBoundingClientRect().top});
 		}
 		// Set initial bounds for first and last rendered elems
-		if (this.itemsContainer) {
-			const lastElemBounds = this.itemsContainer.lastElementChild.getBoundingClientRect();
-			const firstElemBounds = this.itemsContainer.firstElementChild.getBoundingClientRect();
+		if (this.itemsContainer && this.itemsContainer.children && !this.props.simplified) {
+			const lastElem = this.itemsContainer.lastElementChild;
+			const firstElem = this.itemsContainer.firstElementChild;
+			const lastElemBounds = lastElem ? lastElem.firstElementChildgetBoundingClientRect() : {};
+			const firstElemBounds = firstElem ? firstElem.getBoundingClientRect() : {};
 			this.firstElemBounds = {
 				top: firstElemBounds.top,
 				bottom: firstElemBounds.bottom,
@@ -315,7 +317,7 @@ class DynamicVirtualizedScrollbar extends Component {
 			}
 		}
 		if (numSized !== this.state.numElemsSized) {
-			const scrollHeight = this.scrollBars.getScrollHeight();
+			const scrollHeight = this.scrollBars ? this.scrollBars.getScrollHeight() : window.innerHeight;
 			this.scrollHeight = scrollHeight;
 			this.setState({numElemsSized: numSized, totalElemsSizedSize: totalSize});
 		}
