@@ -171,6 +171,9 @@ class DynamicVirtualizedScrollbar extends Component {
 			// Render elemOverscan amount of elements above and below the indices
 			start = Math.max(firstRenderedItemIndex - this.elemOverScan, 0);
 			end = Math.min(lastRenderedItemIndex + this.elemOverScan, this.props.listLength - 1);
+			if (this.props.stickyElems) {
+				end += this.props.stickyElems.length;
+			}
 		}
 
 		let items = [];
