@@ -146,6 +146,7 @@ class DynamicVirtualizedScrollbar extends Component {
 				shouldCalc = true;
 			}
 		}
+		console.log(shouldCalc);
 		if (shouldCalc) {
 			const scrollOffset = this.scrollBars.getScrollTop();
 			const averageItemSize = this.getElemSizeAvg();
@@ -240,9 +241,6 @@ class DynamicVirtualizedScrollbar extends Component {
 				this.setState(stateUpdate);
 			}
 		} else {
-			if (!this.shouldScroll) {
-				return;
-			}
 			const elemsToRender = Math.floor(this.props.listLength / 4);
 			if (scrollOffset < scrollHeight * 0.25) {
 				// RENDER FIRST QUARTER
@@ -532,7 +530,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		}
 		return (
 			<Scrollbars
-				onScrollStop={this.onScrollStop.bind(this)}
+				// onScrollStop={this.onScrollStop.bind(this)}
 				onScrollFrame={this.props.simplified ? this.handleScrollSimplified.bind(this) : this.handleScroll.bind(this)}
 				ref={div => (this.scrollBars = div)}
 				{...this.props.scrollProps}
