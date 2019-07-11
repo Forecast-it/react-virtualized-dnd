@@ -9,6 +9,8 @@ class DynamicVirtualizedScrollbar extends Component {
 		super(props);
 		// Set initial elements to render - either specific amount, or the amount that can be in the viewPort + some optimistic amount to account for number of elements that deviate from min
 		this.optimisticCount = 10;
+		// Threshold at which to start virtualizing. Virtualizing small lists with the simplified approach can produce some problems
+		this.virtualizationThreshold = props.virtualizationThreshold != null ? props.virtualizationThreshold : 40;
 		const initialElemsToRender =
 			this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(Math.round(props.containerHeight / props.minElemHeight) + this.optimisticCount, props.listLength);
 		const simplifiedInitialElemsRender = this.getInitialRenderAmount(props);
@@ -122,7 +124,7 @@ class DynamicVirtualizedScrollbar extends Component {
 
 	getInitialRenderAmount(props) {
 		// Return full list if list is small, else return first quarter
-		if (props.listLength <= this.optimisticCount * 2) {
+		if (props.listLength <= this.virtualizationThreshold) {
 			return props.listLength - 1;
 		}
 		return Math.round((props.listLength - 1) / 4) + this.optimisticCount;
@@ -248,7 +250,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		const scrollOffset = e.scrollTop;
 		const scrollHeight = this.scrollHeight;
 		// If list contains fewer elements than our optimism, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
-		if (this.props.listLength <= this.optimisticCount * 2 || Math.round(scrollHeight / this.props.containerHeight) < 2) {
+		if (this.props.listLength <= this.virtualizationThreshold || Math.round(scrollHeight / this.props.containerHeight) < 2) {
 			const stateUpdate = {};
 			if (this.state.firstRenderedItemIndex !== 0) {
 				stateUpdate.firstRenderedItemIndex = 0;
