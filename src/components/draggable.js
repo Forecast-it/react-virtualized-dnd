@@ -160,6 +160,10 @@ class Draggable extends Component {
 		this.releasePointerCapture();
 	}
 
+	getSectionAbove(x, y, elemHeight) {
+		return this.getDraggableElemUnderDrag(x, y - elemHeight);
+	}
+
 	moveElement(x, y) {
 		let hasDispatched = false;
 		let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
@@ -196,12 +200,14 @@ class Draggable extends Component {
 			const sectionId = draggableHoveringOver.getAttribute('sectionid');
 			const draggableId = draggableHoveringOver.getAttribute('draggableid');
 			if (sectionId != null && draggableId.includes('SECTION_HEADER')) {
+				// We need to find the sectionId above us
+				const aboveSectionId = this.getSectionAbove(x, y, draggableHoveringOver.clientHeight).getAttribute('sectionid');
 				if (draggableId.includes('DISABLE_MOVE')) {
 					hasDispatched = true;
 				}
 				if (!hasDispatched && (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== sectionId)) {
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
-					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, sectionId, x, y, sectionId);
+					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, sectionId, x, y, aboveSectionId);
 					hasDispatched = true;
 					this.droppableDraggedOver = droppableDraggedOver;
 					this.draggableHoveringOver = sectionId;

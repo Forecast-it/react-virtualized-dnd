@@ -15,6 +15,7 @@ class DynamicHeightExample extends Component {
 		};
 		this.dragAndDropGroupName = 'exampleboard';
 		this.droppables = [];
+		this.TEST_ENV = window.location.href.includes('localhost');
 	}
 
 	componentDidMount() {
@@ -228,11 +229,11 @@ class DynamicHeightExample extends Component {
 							<button className={'indicator-button' + (this.state.showIndicators ? ' active' : '')} onClick={this.toggleIndicators.bind(this)}>
 								Show Virtualization Indicators
 							</button>
-							{
+							{this.TEST_ENV ? (
 								<button className={'indicator-button' + (this.state.useSections ? ' active' : '')} onClick={this.toggleUseSections.bind(this)}>
 									Use Sections
 								</button>
-							}
+							) : null}
 						</div>
 					</div>
 					<div className={'input-section'}>
