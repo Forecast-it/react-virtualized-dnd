@@ -22,6 +22,8 @@ class Draggable extends Component {
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
+		// Optimization map - store draggables just above section cutoffs to save on DOM reads
+		this.beforeSectionMap = [];
 	}
 
 	componentDidMount() {
@@ -160,7 +162,7 @@ class Draggable extends Component {
 		this.releasePointerCapture();
 	}
 
-	getSectionAbove(x, y, elemHeight) {
+	getDraggableAboveSection(x, y, elemHeight) {
 		return this.getDraggableElemUnderDrag(x, y - elemHeight);
 	}
 
@@ -201,11 +203,11 @@ class Draggable extends Component {
 			const draggableId = draggableHoveringOver.getAttribute('draggableid');
 			if (sectionId != null && draggableId.includes('SECTION_HEADER')) {
 				// We need to find the sectionId above us
-				const aboveSectionId = this.getSectionAbove(x, y, draggableHoveringOver.clientHeight).getAttribute('sectionid');
 				if (draggableId.includes('DISABLE_MOVE')) {
 					hasDispatched = true;
 				}
 				if (!hasDispatched && (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== sectionId)) {
+					const aboveSectionId = this.getDraggableAboveSection(x, y, draggableHoveringOver.clientHeight).getAttribute('sectionid');
 					const sourceObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId, sectionId: this.props.sectionId};
 					dispatch(this.dragAndDropGroup.moveEvent, sourceObject, droppableDraggedOver, sectionId, x, y, aboveSectionId);
 					hasDispatched = true;
