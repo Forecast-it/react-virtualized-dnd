@@ -126,7 +126,7 @@ class Draggable extends Component {
 		if (this.usePointerEvents && this.state.pointerId) {
 			this.releasePointerCapture();
 		}
-		if (this.state.didMoveMinDistanceDuringDrag && this.state.minDragDistanceMoved) {
+		if (this.state.didMoveMinDistanceDuringDrag) {
 			dispatch(this.dragAndDropGroup.endEvent);
 		}
 		dispatch(this.dragAndDropGroup.resetEvent);
@@ -174,7 +174,7 @@ class Draggable extends Component {
 		const newLeft = x - this.state.xClickOffset;
 		const newTop = y - this.state.yClickOffset;
 		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
-		if (minDistanceMoved && !this.state.minDragDistanceMoved) {
+		if (minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
 			this.setState({didMoveMinDistanceDuringDrag: true});
 		}
 		if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
@@ -186,7 +186,7 @@ class Draggable extends Component {
 		if (!droppableDraggedOver) {
 			dispatch(this.dragAndDropGroup.resetEvent);
 		}
-		const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || this.state.minDragDistanceMoved || minDistanceMoved;
+		const shouldRegisterAsDrag = this.state.didMoveMinDistanceDuringDrag || minDistanceMoved;
 		if (shouldRegisterAsDrag && this.state.wasClicked && !this.state.isDragging) {
 			const sourceObject = {
 				draggableId: this.props.draggableId,
@@ -285,7 +285,7 @@ class Draggable extends Component {
 	}
 
 	getDraggableElemUnderDrag(x, y) {
-		if (!this.state.wasClicked || !this.state.minDragDistanceMoved) {
+		if (!this.state.wasClicked || !this.state.didMoveMinDistanceDuringDrag) {
 			return;
 		}
 		let cardUnder = null;
