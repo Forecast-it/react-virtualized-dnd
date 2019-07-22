@@ -263,6 +263,7 @@ class DragScrollBar extends Component {
 }
 DragScrollBar.propTypes = {
 	dragAndDropGroup: PropTypes.string.isRequired,
+	onScroll: PropTypes.func,
 	autoScrollThreshold: PropTypes.number,
 	tagName: PropTypes.string
 };

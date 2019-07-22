@@ -142,6 +142,7 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | minHeight           | Number   | no           | Minimum Height of the Scroll Container                                                             |
 | maxHeight           | Number   | no           | Maximum Height of the Scroll Container                                                             |
 | autoScrollThreshold | Number   | no           | Distance (in px) from the edges of the scroll container where auto scroll is triggered during drag |
+| onScroll            | Function | no           | Function fired when the Scrollbar scrolls. Returns {scrollX, scrollY}                              |
 
 #### Example Custom Scroll Bar
 
