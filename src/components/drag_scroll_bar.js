@@ -253,7 +253,7 @@ class DragScrollBar extends Component {
 					ref={scrollDiv => (this.outerScrollBar = scrollDiv)}
 					autoHeight={true}
 					autoHeightMin={this.props.minHeight != null ? this.props.minHeight : 1}
-					autoHeightMax={this.props.maxHeight != null ? this.props.maxHeight : 9999}
+					autoHeightMax={this.props.maxHeight != null ? this.props.maxHeight : window.innerHeight}
 				>
 					{children}
 				</UseScrollbars>
