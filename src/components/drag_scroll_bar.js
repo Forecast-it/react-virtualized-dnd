@@ -235,6 +235,30 @@ class DragScrollBar extends Component {
 		}
 	}
 
+	getScrollTop() {
+		if (this.outerScrollBar) {
+			return this.outerScrollBar.getScrollTop();
+		}
+	}
+
+	animateScrollTop(val) {
+		if (this.outerScrollBar) {
+			this.outerScrollBar.animateScrollTop(val);
+		}
+	}
+
+	scrollTop(val) {
+		if (this.outerScrollBar) {
+			this.outerScrollBar.scrollTop(val);
+		}
+	}
+
+	getScrollHeight() {
+		if (this.outerScrollBar) {
+			return this.outerScrollBar.getScrollHeight();
+		}
+	}
+
 	handleScroll(e) {
 		const scrollOffsetY = this.outerScrollBar ? this.outerScrollBar.getScrollTop() : 0;
 		const scrollOffsetX = this.outerScrollBar ? this.outerScrollBar.getScrollLeft() : 0;
