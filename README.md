@@ -31,6 +31,7 @@ React-Virtualized-DnD utilizes a three part abstraction for drag and drop:
     _Draggables_ and _Droppables_ can be organized in groups.
 
 _Droppables_ use an internal scrollbar to virtualize its children, and the _DragDropContext_ offers the option to include an outer scrollbar that can be scrolled while dragging.
+Addtionally, a DragScrollBar component is also available, which is a simple scroll container that reacts to drags and scroll near its edges.
 
 React-virtualized-dnd places a placeholder in droppables during drag, which is placed after the draggable element hovered over during drag. The placeholderId represents the id of the element it was placed after.
 On drag end, the _DragDropContext_ returns the placeholderId.
@@ -83,6 +84,7 @@ class Example extends Component {
 | outerScrollBar           | boolean  | no                          | Enables or disables global outer scrolling of the context (triggered by dragging)                                                         |
 | scrollYSpeed             | number   | no                          | Custom scroll speed for global page scrolling (y-axis)                                                                                    |
 | scrollXSpeed             | number   | no                          | Custom scroll speed for global page scrolling (x-axis)                                                                                    |
+| autoScrollThreshold      | number   | no                          | Distance (in px) from the edges of the context where auto scroll is triggered during drag                                                 |
 | scrollContainerHeight    | number   | no, yes with outerScrollBar | Height of the outer scrollable container                                                                                                  |
 | scrollContainerMinHeight | number   | no                          | Minimum height of the outer scrollable container                                                                                          |
 | onScroll                 | func     | no                          | Function fired when the DragDropContext's outer scrollbar scrolls. Returns {scrollX, scrollY}                                             |
@@ -129,7 +131,17 @@ Draggables will ignore drags started by clicking on any element with the "no-dra
 | customScrollbars          | component    | no                              | Component that uses forwardRef to generate scrollbars using react-custom-scrollbars                                                    |
 | initialElemsToRender      | Number       | no                              | Number of elements to initially render. Defaults to an optimistic guess about the number of elements that can fit in the viewport.     |
 
-\*Enabling dynamic element height fundamentally changes how the scrolling works, and requries some more complex logic that is completely separate from the normal virtualization.
+\*Enabling dynamic element height fundamentally changes how the scrolling works, and requries some more complex logic that is completely separate from the normal virtualization. If you experience issues with it, I recommend using the static element height approach, or trying to make the rendered children more similar in size.
+
+### Droppable
+
+#### Props
+
+| **Prop**            | **Type** | **Required** | **Description**                                                                                    |
+| ------------------- | -------- | ------------ | -------------------------------------------------------------------------------------------------- |
+| minHeight           | Number   | no           | Minimum Height of the Scroll Container                                                             |
+| maxHeight           | Number   | no           | Maximum Height of the Scroll Container                                                             |
+| autoScrollThreshold | Number   | no           | Distance (in px) from the edges of the scroll container where auto scroll is triggered during drag |
 
 #### Example Custom Scroll Bar
 

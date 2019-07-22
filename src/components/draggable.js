@@ -325,9 +325,7 @@ class Draggable extends Component {
 		const propsObject = {
 			'data-cy': 'draggable-' + this.props.draggableId,
 			className: 'draggable' + (active ? this.props.dragActiveClass : ''),
-			style: active
-				? {...draggingStyle}
-				: {transform: 'none', transition: 'all 1s ease-in', top: 0, left: 0, cursor: this.props.disabled || this.props.isSectionHeader ? 'arrow' : this.state.wasClicked ? 'move' : 'grab'},
+			style: active ? {...draggingStyle} : {transform: 'none', top: 0, left: 0, cursor: this.props.disabled || this.props.isSectionHeader ? 'arrow' : this.state.wasClicked ? 'move' : 'grab'},
 			key: this.props.draggableId,
 			draggableid: this.props.isSectionHeader ? 'SECTION_HEADER_' + this.props.draggableId + (this.props.disableMove ? '_DISABLE_MOVE' : '') : this.props.draggableId,
 			sectionid: this.props.sectionId,

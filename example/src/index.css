@@ -5,6 +5,33 @@ body {
 }
 .test-container {
 	margin-bottom: 10px;
+	display: flex;
+	flex-direction: row;
+	position: relative;
+}
+.page-margin {
+	margin: 0 66px;
+}
+.last {
+	margin-bottom: 66px;
+}
+.top-margin {
+	margin-top: 66px;
+}
+.droppable-section-header {
+	margin-left: 66px;
+}
+.with-space {
+	margin: 26px 26px 0 26px;
+}
+
+.with-border {
+	border: 1px solid #dbdbdb;
+}
+
+.col {
+	display: flex;
+	flex-direction: column;
 }
 
 .dropGlow {

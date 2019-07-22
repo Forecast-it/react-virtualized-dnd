@@ -2,8 +2,9 @@ import React, {Component} from 'react';
 import {dispatch, subscribe, unsubscribe} from '../util/event_manager';
 import {Scrollbars} from 'react-custom-scrollbars';
 import Util from './../util/util';
+import PropTypes from 'prop-types';
 
-class DragDropContext extends Component {
+class DragScrollBar extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -16,39 +17,17 @@ class DragDropContext extends Component {
 			dragAndDropGroup: Util.getDragEvents(this.props.dragAndDropGroup)
 		};
 		this.onDragMove = this.onDragMove.bind(this);
-		this.resetPlaceholderIndex = this.resetPlaceholderIndex.bind(this);
-		this.onDragEnd = this.onDragEnd.bind(this);
 		this.onDragStart = this.onDragStart.bind(this);
-		this.dispatchPlaceholder = this.dispatchPlaceholder.bind(this);
 	}
 
 	componentDidMount() {
-		subscribe(this.state.dragAndDropGroup.endEvent, this.onDragEnd);
 		subscribe(this.state.dragAndDropGroup.startEvent, this.onDragStart);
 		subscribe(this.state.dragAndDropGroup.moveEvent, this.onDragMove);
-		subscribe(this.state.dragAndDropGroup.resetEvent, this.resetPlaceholderIndex);
 	}
 
 	componentWillUnmount() {
-		unsubscribe(this.state.dragAndDropGroup.endEvent, this.onDragEnd);
 		unsubscribe(this.state.dragAndDropGroup.startEvent, this.onDragStart);
 		unsubscribe(this.state.dragAndDropGroup.moveEvent, this.onDragMove);
-		unsubscribe(this.state.dragAndDropGroup.resetEvent, this.resetPlaceholderIndex);
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		// If our placeholder has changed, notify droppables
-		if (this.state.placeholder !== prevState.placeholder || this.state.droppableActive !== prevState.droppableActive) {
-			this.dispatchPlaceholder();
-		}
-	}
-
-	dispatchPlaceholder() {
-		if (this.state.draggedElem && this.state.dragActive && this.state.droppableActive) {
-			dispatch(this.state.dragAndDropGroup.placeholderEvent, this.state.placeholder, this.state.droppableActive, this.state.draggedElem);
-		} else {
-			dispatch(this.state.dragAndDropGroup.placeholderEvent, null, null);
-		}
 	}
 
 	onDragStart(draggable, x, y) {
@@ -60,42 +39,18 @@ class DragDropContext extends Component {
 		}
 	}
 
-	onDragEnd() {
-		if (this.state.draggedElem && this.state.droppableActive) {
-			let placeholder = this.state.placeholder != null ? this.state.placeholder : 'END_OF_LIST';
-			if (this.props.onDragEnd) {
-				if (this.state.targetSection && this.state.targetSection === placeholder) {
-					// Send null and placeholderSection, not both
-					placeholder = null;
-				}
-				this.props.onDragEnd(this.state.draggedElem, this.state.droppableActive, placeholder, this.state.targetSection);
-			}
-		} else {
-			if (this.props.onDragCancel) {
-				this.props.onDragCancel(this.state.draggedElem);
-			}
-		}
-		this.setState({
-			draggedElem: null,
-			placeholder: null,
-			dragActive: false,
-			droppableActive: null,
-			dragStarted: false,
-			globalScroll: null,
-			globalScrollXDirection: null,
-			globalScrollYDirection: null
-		});
-	}
 	// Check if global scroll is at appropriate edge already
 	getCanScrollDirection(dir) {
 		if (!this.outerScrollBar) {
 			return false;
 		}
+		const containerHeight = this.container ? this.container.clientHeight : this.props.maxHeight ? this.props.maxHeight : window.innerHeight;
+		const scrollHeight = this.outerScrollBar.getScrollHeight();
 		switch (dir) {
 			case 'down':
-				return this.outerScrollBar.getScrollTop() < this.outerScrollBar.getScrollHeight() - this.props.scrollContainerHeight;
+				return scrollHeight > this.props.maxHeight && this.outerScrollBar.getScrollTop() < scrollHeight - containerHeight;
 			case 'up':
-				return this.outerScrollBar.getScrollTop() > 0;
+				return scrollHeight > this.props.maxHeight && this.outerScrollBar.getScrollTop() > 0;
 			case 'left':
 				return this.outerScrollBar.getScrollLeft() > 0;
 			case 'right':
@@ -106,10 +61,9 @@ class DragDropContext extends Component {
 	// When a card is moved, check for autoScroll
 	onMoveScroll(x, y, droppable) {
 		//var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
-		// Scroll when within 80px of edge
-		const scrollThreshold = this.props.autoScrollThreshold || 80;
+		// Scroll when within 60px of edge
+		const scrollThreshold = this.props.autoScrollThreshold || 60;
 		const scrollContainerPos = this.container.getBoundingClientRect();
-
 		const isNearPageBottom = y != null && scrollContainerPos.bottom - y <= scrollThreshold;
 		const isNearPageTop = y != null && y - scrollContainerPos.top <= scrollThreshold;
 		const isNearPageLeft = x != null && x - scrollContainerPos.left <= scrollThreshold;
@@ -220,12 +174,6 @@ class DragDropContext extends Component {
 		this.onMoveScroll(x, y, droppable);
 	}
 
-	resetPlaceholderIndex() {
-		if (this.state.placeholder != null || this.state.droppableActive != null) {
-			this.setState({placeholder: null, droppableActive: null});
-		}
-	}
-
 	sideScroll(val) {
 		if (this.outerScrollBar) {
 			this.outerScrollBar.scrollLeft(val);
@@ -296,23 +244,26 @@ class DragDropContext extends Component {
 	}
 
 	render() {
-		return this.props.outerScrollBar ? (
+		const {customScrollbars, children} = this.props;
+		const UseScrollbars = customScrollbars || Scrollbars;
+		return (
 			<div ref={div => (this.container = div)} className={'drag-drop-context'} style={{display: 'flex', flexDirection: 'column'}}>
-				<Scrollbars
+				<UseScrollbars
 					onScroll={this.handleScroll.bind(this)}
 					ref={scrollDiv => (this.outerScrollBar = scrollDiv)}
 					autoHeight={true}
-					autoHeightMin={this.props.scrollContainerMinHeight != null ? this.props.scrollContainerMinHeight : 1}
-					autoHeightMax={this.props.scrollContainerHeight}
+					autoHeightMin={this.props.minHeight != null ? this.props.minHeight : 1}
+					autoHeightMax={this.props.maxHeight != null ? this.props.maxHeight : 9999}
 				>
-					{this.props.children}
-				</Scrollbars>
-			</div>
-		) : (
-			<div ref={div => (this.container = div)} className={'drag-drop-context'}>
-				{this.props.children}
+					{children}
+				</UseScrollbars>
 			</div>
 		);
 	}
 }
-export default DragDropContext;
+DragScrollBar.propTypes = {
+	dragAndDropGroup: PropTypes.string.isRequired,
+	autoScrollThreshold: PropTypes.number,
+	tagName: PropTypes.string
+};
+export default DragScrollBar;

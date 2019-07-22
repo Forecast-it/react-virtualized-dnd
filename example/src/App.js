@@ -1,30 +1,46 @@
 import React, {Component} from 'react';
 
-import {ExampleBoard, DynamicHeightExample} from 'react-virtualized-dnd';
+import {ExampleBoard, DynamicHeightExample, ExampleMultipleDroppables} from 'react-virtualized-dnd';
 
 export default class App extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {showDynamicExample: false};
-		this.setShowDynamic = this.setShowDynamic.bind(this);
+		this.state = {page: 'static'};
+		this.setShowDynamic = this.setPage.bind(this);
 	}
 
-	setShowDynamic(bool) {
-		this.setState({showDynamicExample: bool});
+	setPage(pageName) {
+		this.setState({page: pageName});
 	}
 
 	render() {
+		let page;
+		switch (this.state.page) {
+			default:
+			case 'static':
+				page = <ExampleBoard text="React Virtualized Table" />;
+				break;
+			case 'dynamic':
+				page = <DynamicHeightExample />;
+				break;
+			case 'multiple':
+				page = <ExampleMultipleDroppables />;
+				break;
+		}
 		return (
 			<div className={'wrapper'}>
 				<div className={'tabs'}>
-					<div onClick={() => this.setShowDynamic(false)} className={'tab' + (!this.state.showDynamicExample ? ' active' : '')}>
+					<div onClick={() => this.setPage('static')} className={'tab' + (this.state.page === 'static' ? ' active' : '')}>
 						Static Height
 					</div>
-					<div onClick={() => this.setShowDynamic(true)} className={'tab' + (this.state.showDynamicExample ? ' active' : '')}>
+					<div onClick={() => this.setPage('dynamic')} className={'tab' + (this.state.page === 'dynamic' ? ' active' : '')}>
 						Dynamic Height
 					</div>
+					<div onClick={() => this.setPage('multiple')} className={'tab' + (this.state.page === 'multiple' ? ' active' : '')}>
+						Grouped Droppables
+					</div>
 				</div>
-				{!this.state.showDynamicExample ? <ExampleBoard text="React Virtualized Table" /> : <DynamicHeightExample />}
+				{page}
 			</div>
 		);
 	}
