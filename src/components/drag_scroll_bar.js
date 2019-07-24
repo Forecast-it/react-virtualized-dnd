@@ -241,12 +241,6 @@ class DragScrollBar extends Component {
 		}
 	}
 
-	animateScrollTop(val) {
-		if (this.outerScrollBar) {
-			this.outerScrollBar.animateScrollTop(val);
-		}
-	}
-
 	scrollTop(val) {
 		if (this.outerScrollBar) {
 			this.outerScrollBar.scrollTop(val);
