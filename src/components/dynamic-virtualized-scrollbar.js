@@ -261,13 +261,11 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (this.state.renderPart !== sectionScrolledTo) {
 			const firstIndex = isScrolledToLastSection ? this.props.listLength - 1 - sectionSize - this.optimisticCount : Math.max(0, sectionScrolledTo * sectionSize - this.optimisticCount);
 			const lastIndex = Math.min(this.props.listLength - 1, firstIndex + sectionSize + (isScrolledToLastSection ? remainder : 0) + this.optimisticCount);
-			console.log(sectionScrolledTo, firstIndex, lastIndex);
-
 			this.setState(
 				{
 					renderPart: sectionScrolledTo,
 					aboveSpacerHeight: sectionScrolledTo === 0 ? 0 : (firstIndex - 1) * avgElemSize, // If we're at section 1, we have scrolled past section 0, and the above height will be 1 sections height
-					belowSpacerHeight: isScrolledToLastSection ? 0 : (lastIndex - 1) * avgElemSize,
+					belowSpacerHeight: isScrolledToLastSection ? 0 : (remainder + lastIndex - 1) * avgElemSize,
 					firstRenderedItemIndex: firstIndex,
 					lastRenderedItemIndex: lastIndex
 				},
