@@ -18,16 +18,31 @@ class DragScrollBar extends Component {
 		};
 		this.onDragMove = this.onDragMove.bind(this);
 		this.onDragStart = this.onDragStart.bind(this);
+		this.onDragEnd = this.onDragEnd.bind(this);
 	}
 
 	componentDidMount() {
 		subscribe(this.state.dragAndDropGroup.startEvent, this.onDragStart);
+		subscribe(this.state.dragAndDropGroup.endEvent, this.onDragEnd);
 		subscribe(this.state.dragAndDropGroup.moveEvent, this.onDragMove);
 	}
 
 	componentWillUnmount() {
 		unsubscribe(this.state.dragAndDropGroup.startEvent, this.onDragStart);
+		unsubscribe(this.state.dragAndDropGroup.endEvent, this.onDragEnd);
 		unsubscribe(this.state.dragAndDropGroup.moveEvent, this.onDragMove);
+	}
+
+	onDragEnd() {
+		this.setState({
+			draggedElem: null,
+			dragActive: false,
+			droppableActive: null,
+			dragStarted: false,
+			globalScroll: null,
+			globalScrollXDirection: null,
+			globalScrollYDirection: null
+		});
 	}
 
 	onDragStart(draggable, x, y) {
@@ -62,7 +77,8 @@ class DragScrollBar extends Component {
 	onMoveScroll(x, y, droppable) {
 		//var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
 		// Scroll when within 60px of edge
-		if (this.state.dragActive && this.state.draggedElem) {
+		const shouldScroll = this.state.dragActive && this.state.draggedElem;
+		if (shouldScroll) {
 			const scrollThreshold = this.props.autoScrollThreshold || 60;
 			const scrollContainerPos = this.container.getBoundingClientRect();
 			const isNearPageBottom = y != null && scrollContainerPos.bottom - y <= scrollThreshold;
@@ -106,7 +122,7 @@ class DragScrollBar extends Component {
 					} else {
 						this.setState({globalScrollYDirection: null});
 					}
-					if (!this.frame) {
+					if (!this.frame && shouldScroll) {
 						this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
 					}
 				}
@@ -136,7 +152,7 @@ class DragScrollBar extends Component {
 				} else {
 					this.setState({shouldScrollY: false});
 				}
-				if (!this.frame) {
+				if (!this.frame && shouldScroll) {
 					this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
 				}
 			}
@@ -194,7 +210,8 @@ class DragScrollBar extends Component {
 	}
 
 	autoScroll(x, y) {
-		if (this.state.dragActive && this.state.draggedElem) {
+		const shouldScroll = this.state.dragActive && this.state.draggedElem;
+		if (shouldScroll) {
 			if (this.state.globalScroll && (this.state.globalScrollXDirection || this.state.globalScrollYDirection) && this.outerScrollBar) {
 				switch (this.state.globalScrollYDirection) {
 					case 'down':
@@ -224,14 +241,18 @@ class DragScrollBar extends Component {
 					default:
 						break;
 				}
-				requestAnimationFrame(() => this.autoScroll(x, y));
+				if (shouldScroll) {
+					requestAnimationFrame(() => this.autoScroll(x, y));
+				}
 			} else if (this.state.droppableActive && this.state.shouldScrollY) {
 				if (this.state.increaseYScroll) {
 					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, 15);
 				} else {
 					dispatch(this.state.dragAndDropGroup.scrollEvent, this.state.droppableActive, -15);
 				}
-				requestAnimationFrame(() => this.autoScroll(x, y));
+				if (shouldScroll) {
+					requestAnimationFrame(() => this.autoScroll(x, y));
+				}
 			} else {
 				this.frame = null;
 				return;
