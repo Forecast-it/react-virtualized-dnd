@@ -107,84 +107,96 @@ class DragDropContext extends Component {
 	onMoveScroll(x, y, droppable) {
 		//var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
 		// Scroll when within 80px of edge
-		const scrollThreshold = this.props.autoScrollThreshold || 80;
-		const scrollContainerPos = this.container.getBoundingClientRect();
+		if (this.state.dragActive && this.state.draggedElem) {
+			const scrollThreshold = this.props.autoScrollThreshold || 80;
+			const scrollContainerPos = this.container.getBoundingClientRect();
 
-		const isNearPageBottom = y != null && scrollContainerPos.bottom - y <= scrollThreshold;
-		const isNearPageTop = y != null && y - scrollContainerPos.top <= scrollThreshold;
-		const isNearPageLeft = x != null && x - scrollContainerPos.left <= scrollThreshold;
-		const isNearPageRight = x != null && scrollContainerPos.right - x <= scrollThreshold;
-		const shouldScrollGlobally = isNearPageBottom || isNearPageTop || isNearPageLeft || isNearPageRight;
-		const canScrollGlobally = this.getCanScrollDirection(isNearPageBottom ? 'down' : isNearPageTop ? 'up' : isNearPageLeft ? 'left' : isNearPageRight ? 'right' : '');
-		// BEGIN GLOBAL SCROLLING //
-		if (shouldScrollGlobally && canScrollGlobally) {
-			if (this.outerScrollBar) {
-				if (isNearPageRight) {
-					// Scroll right
-					this.setState({
-						globalScroll: true,
-						globalScrollXDirection: 'right'
-					});
-				} else if (isNearPageLeft) {
-					// Scroll left
-					this.setState({
-						globalScroll: true,
-						globalScrollXDirection: 'left'
-					});
-				} else {
-					this.setState({
-						globalScrollXDirection: null
-					});
+			const isNearPageBottom = y != null && scrollContainerPos.bottom - y <= scrollThreshold;
+			const isNearPageTop = y != null && y - scrollContainerPos.top <= scrollThreshold;
+			const isNearPageLeft = x != null && x - scrollContainerPos.left <= scrollThreshold;
+			const isNearPageRight = x != null && scrollContainerPos.right - x <= scrollThreshold;
+			const shouldScrollGlobally = isNearPageBottom || isNearPageTop || isNearPageLeft || isNearPageRight;
+			const canScrollGlobally = this.getCanScrollDirection(isNearPageBottom ? 'down' : isNearPageTop ? 'up' : isNearPageLeft ? 'left' : isNearPageRight ? 'right' : '');
+			// BEGIN GLOBAL SCROLLING //
+			if (shouldScrollGlobally && canScrollGlobally) {
+				if (this.outerScrollBar) {
+					if (isNearPageRight) {
+						// Scroll right
+						this.setState({
+							globalScroll: true,
+							globalScrollXDirection: 'right'
+						});
+					} else if (isNearPageLeft) {
+						// Scroll left
+						this.setState({
+							globalScroll: true,
+							globalScrollXDirection: 'left'
+						});
+					} else {
+						this.setState({
+							globalScrollXDirection: null
+						});
+					}
+					if (isNearPageBottom) {
+						this.setState({
+							globalScroll: true,
+							globalScrollYDirection: 'down'
+						});
+						// can only scroll down if the current scroll is less than height
+					} else if (isNearPageTop) {
+						this.setState({
+							globalScroll: true,
+							globalScrollYDirection: 'up'
+						});
+						// can only scroll up if current scroll is larger than 0
+					} else {
+						this.setState({globalScrollYDirection: null});
+					}
+					if (!this.frame) {
+						this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
+					}
 				}
-				if (isNearPageBottom) {
+				// END GLOBAL SCROLLING //
+			} else if (droppable) {
+				// Clear global scroll
+				this.setState({globalScroll: null});
+				const containerBoundaries = {
+					left: droppable.getBoundingClientRect().left,
+					right: droppable.getBoundingClientRect().right,
+					top: droppable.getBoundingClientRect().top,
+					bottom: droppable.getBoundingClientRect().bottom
+				};
+
+				const isNearYBottom = containerBoundaries.bottom - y <= scrollThreshold;
+				const isNearYTop = y - containerBoundaries.top <= scrollThreshold;
+
+				if (isNearYBottom) {
+					//Scroll down the page, increase y values
 					this.setState({
-						globalScroll: true,
-						globalScrollYDirection: 'down'
+						shouldScrollY: true,
+						increaseYScroll: true
 					});
-					// can only scroll down if the current scroll is less than height
-				} else if (isNearPageTop) {
-					this.setState({
-						globalScroll: true,
-						globalScrollYDirection: 'up'
-					});
-					// can only scroll up if current scroll is larger than 0
+				} else if (isNearYTop) {
+					//Scroll up
+					this.setState({shouldScrollY: true, increaseYScroll: false});
 				} else {
-					this.setState({globalScrollYDirection: null});
+					this.setState({shouldScrollY: false});
 				}
 				if (!this.frame) {
 					this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
 				}
 			}
-			// END GLOBAL SCROLLING //
-		} else if (droppable) {
-			// Clear global scroll
-			this.setState({globalScroll: null});
-			const containerBoundaries = {
-				left: droppable.getBoundingClientRect().left,
-				right: droppable.getBoundingClientRect().right,
-				top: droppable.getBoundingClientRect().top,
-				bottom: droppable.getBoundingClientRect().bottom
-			};
-
-			const isNearYBottom = containerBoundaries.bottom - y <= scrollThreshold;
-			const isNearYTop = y - containerBoundaries.top <= scrollThreshold;
-
-			if (isNearYBottom) {
-				//Scroll down the page, increase y values
-				this.setState({
-					shouldScrollY: true,
-					increaseYScroll: true
-				});
-			} else if (isNearYTop) {
-				//Scroll up
-				this.setState({shouldScrollY: true, increaseYScroll: false});
-			} else {
-				this.setState({shouldScrollY: false});
-			}
-			if (!this.frame) {
-				this.frame = requestAnimationFrame(() => this.autoScroll(x, y));
-			}
+		} else {
+			this.frame = null;
+			this.clearScrolling();
 		}
+	}
+	clearScrolling() {
+		const mutationObject = {};
+		if (this.state.globalScroll) {
+			mutationObject.globalScroll = false;
+		}
+		this.setState({mutationObject});
 	}
 
 	onDragMove(draggable, droppable, draggableHoveredOverId, x, y, sectionId) {

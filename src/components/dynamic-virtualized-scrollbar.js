@@ -246,6 +246,36 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastScrollBreakpoint = scrollOffset;
 	}
 
+	renderScrollSections(scrollOffset, scrollHeight) {
+		const avgElemSize = this.getElemSizeAvg();
+		const sectionSize = 50;
+		this.optimisticCount = Math.min(Math.round(sectionSize * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
+		let numSections = Math.floor(this.props.listLength / sectionSize);
+		// Remaining elements after last section
+		const remainder = this.props.listLength % sectionSize;
+
+		const sectionScrollPart = 1 / numSections; // How much of the scroll window will each section own
+		const sectionScrollHeight = sectionScrollPart * scrollHeight; // Height of the above in px
+		const sectionScrolledTo = Math.round(scrollOffset / sectionScrollHeight);
+		const isScrolledToLastSection = sectionScrolledTo >= numSections - 1;
+		if (this.state.renderPart !== sectionScrolledTo) {
+			const firstIndex = isScrolledToLastSection ? this.props.listLength - 1 - sectionSize - this.optimisticCount : Math.max(0, sectionScrolledTo * sectionSize - this.optimisticCount);
+			const lastIndex = Math.min(this.props.listLength - 1, firstIndex + sectionSize + (isScrolledToLastSection ? remainder : 0) + this.optimisticCount);
+			console.log(sectionScrolledTo, firstIndex, lastIndex);
+
+			this.setState(
+				{
+					renderPart: sectionScrolledTo,
+					aboveSpacerHeight: sectionScrolledTo === 0 ? 0 : (firstIndex - 1) * avgElemSize, // If we're at section 1, we have scrolled past section 0, and the above height will be 1 sections height
+					belowSpacerHeight: isScrolledToLastSection ? 0 : (lastIndex - 1) * avgElemSize,
+					firstRenderedItemIndex: firstIndex,
+					lastRenderedItemIndex: lastIndex
+				},
+				() => this.updateAverageSizing()
+			);
+		}
+	}
+
 	handleScrollSimplified(e) {
 		const scrollOffset = e.scrollTop;
 		const scrollHeight = this.scrollHeight;
@@ -265,67 +295,72 @@ class DynamicVirtualizedScrollbar extends Component {
 			}
 			return;
 		} else {
+			const useBinarySplit = false;
 			const elemsToRender = Math.round(this.props.listLength / 4);
 			this.optimisticCount = Math.min(Math.round(elemsToRender * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
-			if (scrollOffset < scrollHeight * 0.25) {
-				// RENDER FIRST QUARTER
-				// console.log('Q1');
-				if (this.state.renderPart !== 0) {
-					this.setState(
-						{
-							renderPart: 0,
-							aboveSpacerHeight: 0,
-							belowSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
-							firstRenderedItemIndex: 0,
-							lastRenderedItemIndex: elemsToRender + this.optimisticCount
-						},
-						() => this.updateAverageSizing()
-					);
-				}
-			} else if (scrollOffset >= scrollHeight * 0.25 && scrollOffset < scrollHeight * 0.5) {
-				// RENDER SECOND QUARTER
-				// console.log('Q2');
-				if (this.state.renderPart !== 1) {
-					this.setState(
-						{
-							renderPart: 1,
-							aboveSpacerHeight: (elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
-							belowSpacerHeight: (this.props.listLength - 2 * elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
-							firstRenderedItemIndex: elemsToRender - this.optimisticCount,
-							lastRenderedItemIndex: elemsToRender * 2 + this.optimisticCount
-						},
-						() => this.updateAverageSizing()
-					);
-				}
-			} else if (scrollOffset >= scrollHeight * 0.5 && scrollOffset < scrollHeight * 0.75) {
-				// RENDER THIRD QUARTER
-				// console.log('Q3');
-				if (this.state.renderPart !== 2) {
-					this.setState(
-						{
-							renderPart: 2,
-							aboveSpacerHeight: (2 * elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
-							belowSpacerHeight: (elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
-							firstRenderedItemIndex: 2 * elemsToRender - this.optimisticCount,
-							lastRenderedItemIndex: 3 * elemsToRender + this.optimisticCount
-						},
-						() => this.updateAverageSizing()
-					);
-				}
-			} else if (scrollOffset >= scrollHeight * 0.75) {
-				// RENDER FOURTH QUARTER
-				// console.log('Q4');
-				if (this.state.renderPart !== 3) {
-					this.setState(
-						{
-							renderPart: 3,
-							aboveSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
-							belowSpacerHeight: 0,
-							firstRenderedItemIndex: this.props.listLength - elemsToRender - this.optimisticCount,
-							lastRenderedItemIndex: this.props.listLength - 1
-						},
-						() => this.updateAverageSizing()
-					);
+			if (useBinarySplit) {
+				this.renderScrollSections(scrollOffset, scrollHeight);
+			} else {
+				if (scrollOffset < scrollHeight * 0.25) {
+					// RENDER FIRST QUARTER
+					// console.log('Q1');
+					if (this.state.renderPart !== 0) {
+						this.setState(
+							{
+								renderPart: 0,
+								aboveSpacerHeight: 0,
+								belowSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
+								firstRenderedItemIndex: 0,
+								lastRenderedItemIndex: elemsToRender + this.optimisticCount
+							},
+							() => this.updateAverageSizing()
+						);
+					}
+				} else if (scrollOffset >= scrollHeight * 0.25 && scrollOffset < scrollHeight * 0.5) {
+					// RENDER SECOND QUARTER
+					// console.log('Q2');
+					if (this.state.renderPart !== 1) {
+						this.setState(
+							{
+								renderPart: 1,
+								aboveSpacerHeight: (elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
+								belowSpacerHeight: (this.props.listLength - 2 * elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
+								firstRenderedItemIndex: elemsToRender - this.optimisticCount,
+								lastRenderedItemIndex: elemsToRender * 2 + this.optimisticCount
+							},
+							() => this.updateAverageSizing()
+						);
+					}
+				} else if (scrollOffset >= scrollHeight * 0.5 && scrollOffset < scrollHeight * 0.75) {
+					// RENDER THIRD QUARTER
+					// console.log('Q3');
+					if (this.state.renderPart !== 2) {
+						this.setState(
+							{
+								renderPart: 2,
+								aboveSpacerHeight: (2 * elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
+								belowSpacerHeight: (elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
+								firstRenderedItemIndex: 2 * elemsToRender - this.optimisticCount,
+								lastRenderedItemIndex: 3 * elemsToRender + this.optimisticCount
+							},
+							() => this.updateAverageSizing()
+						);
+					}
+				} else if (scrollOffset >= scrollHeight * 0.75) {
+					// RENDER FOURTH QUARTER
+					// console.log('Q4');
+					if (this.state.renderPart !== 3) {
+						this.setState(
+							{
+								renderPart: 3,
+								aboveSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
+								belowSpacerHeight: 0,
+								firstRenderedItemIndex: this.props.listLength - elemsToRender - this.optimisticCount,
+								lastRenderedItemIndex: this.props.listLength - 1
+							},
+							() => this.updateAverageSizing()
+						);
+					}
 				}
 			}
 		}
@@ -334,7 +369,8 @@ class DynamicVirtualizedScrollbar extends Component {
 		let numSized = this.state.numElemsSized;
 		let totalSize = this.state.totalElemsSizedSize;
 		if (this.itemsContainer && this.itemsContainer.children) {
-			for (let child of this.itemsContainer.children) {
+			for (let i = 0; i < this.itemsContainer.children.length; i++) {
+				const child = this.itemsContainer.children[i];
 				numSized++;
 				totalSize += child.clientHeight;
 			}
