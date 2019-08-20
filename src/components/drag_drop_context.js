@@ -300,9 +300,9 @@ class DragDropContext extends Component {
 	}
 
 	handleScroll(e) {
-		const scrollOffsetY = this.outerScrollBar ? this.outerScrollBar.getScrollTop() : 0;
-		const scrollOffsetX = this.outerScrollBar ? this.outerScrollBar.getScrollLeft() : 0;
 		if (this.props.onScroll) {
+			const scrollOffsetY = this.outerScrollBar ? this.outerScrollBar.getScrollTop() : 0;
+			const scrollOffsetX = this.outerScrollBar ? this.outerScrollBar.getScrollLeft() : 0;
 			this.props.onScroll({scrollX: scrollOffsetX, scrollY: scrollOffsetY});
 		}
 	}

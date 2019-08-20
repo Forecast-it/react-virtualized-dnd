@@ -82,7 +82,9 @@ class VirtualizedScrollBar extends Component {
 	// Save scroll position in state for virtualization
 	handleScroll(e) {
 		const scrollOffset = this.scrollBars ? this.scrollBars.getScrollTop() : 0;
-		if (this.state.scrollOffset !== scrollOffset) {
+		const scrollDiff = Math.abs(scrollOffset - this.state.scrollOffset);
+		const leniency = Math.max(5, this.state.elemHeight * 0.1); // As to not update exactly on breakpoint, but instead 5px or 10% within an element being scrolled past
+		if (!this.state.scrollOffset || scrollDiff >= this.state.elemHeight - leniency) {
 			this.setState({scrollOffset: scrollOffset});
 		}
 	}

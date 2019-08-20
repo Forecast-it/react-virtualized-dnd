@@ -34,6 +34,7 @@ class DragScrollBar extends Component {
 	}
 
 	onDragEnd() {
+		// Todo, performance
 		this.setState({
 			draggedElem: null,
 			dragActive: false,
