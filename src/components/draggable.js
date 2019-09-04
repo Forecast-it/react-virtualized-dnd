@@ -76,7 +76,7 @@ class Draggable extends Component {
 	}
 
 	onPointerDown(e) {
-		if ((e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disabled || this.props.isSectionHeader) {
+		if (e.buttons != 1 || (e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disabled || this.props.isSectionHeader) {
 			return;
 		}
 		if (e) {
