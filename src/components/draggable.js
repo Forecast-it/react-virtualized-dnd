@@ -24,7 +24,6 @@ class Draggable extends Component {
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
 		// Optimization map - store draggables just above section cutoffs to save on DOM reads
 		this.beforeSectionMap = [];
-		this.elFromPointCounter = 0;
 		this.latestSeenX = null;
 		this.latestSeenY = null;
 		// Minimum pixels moved before looking for new cards etc.
@@ -275,9 +274,7 @@ class Draggable extends Component {
 			// Disable pointer events to look through element
 			draggingElement.style.pointerEvents = 'none';
 			// Get element under dragged  (look through)
-			this.elFromPointCounter++;
 			let elementUnder = document.elementFromPoint(x, y);
-			console.log(this.elFromPointCounter);
 			// Reset dragged element's pointers
 			draggingElement.style.pointerEvents = 'all';
 			colUnder = Util.getDroppableParentElement(elementUnder, this.props.dragAndDropGroup);
@@ -296,9 +293,7 @@ class Draggable extends Component {
 			// Disable pointer events to look through element
 			draggingElement.style.pointerEvents = 'none';
 			// Get element under dragged tasks (look through)
-			this.elFromPointCounter++;
 			let elementUnder = document.elementFromPoint(x, y);
-			console.log(this.elFromPointCounter);
 			// Reset dragged element's pointers
 			cardUnder = Util.getDraggableParentElement(elementUnder);
 			draggingElement.style.pointerEvents = 'all';
