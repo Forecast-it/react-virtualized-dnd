@@ -24,6 +24,11 @@ class Draggable extends Component {
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
 		// Optimization map - store draggables just above section cutoffs to save on DOM reads
 		this.beforeSectionMap = [];
+		this.elFromPointCounter = 0;
+		this.latestSeenX = null;
+		this.latestSeenY = null;
+		// Minimum pixels moved before looking for new cards etc.
+		this.minDragDistanceThreshold = this.props.minDragDistanceThreshold ? this.props.minDragDistanceThreshold : 2;
 	}
 
 	componentDidMount() {
@@ -161,15 +166,23 @@ class Draggable extends Component {
 		this.removeDragEventListeners();
 		this.releasePointerCapture();
 	}
-
-	getDraggableAboveSection(x, y, elemHeight) {
-		return this.getDraggableElemUnderDrag(x, y - elemHeight);
+	// Don't update what we're dragging over on every single drag
+	shouldRefindDragElems(x, y) {
+		if (!this.latestSeenX || !this.latestSeenY) {
+			this.latestSeenX = x;
+			this.latestSeenY = y;
+			return true;
+		} else {
+			// Only update if we've moved some x + y distance that is larger than threshold
+			return Math.abs(this.latestSeenX - x) + Math.abs(this.latestSeenY - y) >= this.minDragDistanceThreshold;
+		}
 	}
 
 	moveElement(x, y) {
 		let hasDispatched = false;
-		let droppableDraggedOver = this.getDroppableElemUnderDrag(x, y);
-		let draggableHoveringOver = this.getDraggableElemUnderDrag(x, y);
+		const shouldRefindDragElems = this.shouldRefindDragElems(x, y);
+		let droppableDraggedOver = shouldRefindDragElems ? this.getDroppableElemUnderDrag(x, y) : this.droppableDraggedOver;
+		let draggableHoveringOver = shouldRefindDragElems ? this.getDraggableElemUnderDrag(x, y) : this.draggableHoveringOver;
 		const newLeft = x - this.state.xClickOffset;
 		const newTop = y - this.state.yClickOffset;
 		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
@@ -262,7 +275,9 @@ class Draggable extends Component {
 			// Disable pointer events to look through element
 			draggingElement.style.pointerEvents = 'none';
 			// Get element under dragged  (look through)
+			this.elFromPointCounter++;
 			let elementUnder = document.elementFromPoint(x, y);
+			console.log(this.elFromPointCounter);
 			// Reset dragged element's pointers
 			draggingElement.style.pointerEvents = 'all';
 			colUnder = Util.getDroppableParentElement(elementUnder, this.props.dragAndDropGroup);
@@ -281,7 +296,9 @@ class Draggable extends Component {
 			// Disable pointer events to look through element
 			draggingElement.style.pointerEvents = 'none';
 			// Get element under dragged tasks (look through)
+			this.elFromPointCounter++;
 			let elementUnder = document.elementFromPoint(x, y);
+			console.log(this.elFromPointCounter);
 			// Reset dragged element's pointers
 			cardUnder = Util.getDraggableParentElement(elementUnder);
 			draggingElement.style.pointerEvents = 'all';
