@@ -104,7 +104,7 @@ The placeholder ID can be used to determine where to place the dragged element o
 | draggableId              | string   | yes          | Unique identifier for the draggable                                                                                                                                           |
 | dragActiveClass          | string   | no           | CSS class applied to a draggable element during an active drag                                                                                                                |
 | disabled                 | bool     | no           | Flag to disabled dragging of element                                                                                                                                          |
-| minDragDistanceThreshold | number   | no           | Minimum pixels a drag should move, before registering new elements dragged over (for updating placeholder). Defaults to 2px, increase for better performance, but fewer scans |
+| minDragDistanceThreshold | number   | no           | Minimum pixels a drag should move, before registering new elements dragged over (for updating placeholder). Defaults to 5px, increase for better performance, but fewer scans |
 | usePointerEvents         | bool     | no           | Flag to enable pointer-event based implementation. Experimental for now.                                                                                                      |
 
 Draggables will ignore drags started by clicking on any element with the "no-drag" css class. This can be used to control drag interactions with interactive elements, such as inputs or buttons.

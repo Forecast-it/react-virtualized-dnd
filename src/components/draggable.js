@@ -24,10 +24,13 @@ class Draggable extends Component {
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
 		// Optimization map - store draggables just above section cutoffs to save on DOM reads
 		this.beforeSectionMap = [];
-		this.latestSeenX = null;
-		this.latestSeenY = null;
+		this.elFromPointCounter = 0;
+		this.latestUpdateX = null;
+		this.latestUpdateY = null;
 		// Minimum pixels moved before looking for new cards etc.
-		this.minDragDistanceThreshold = this.props.minDragDistanceThreshold ? this.props.minDragDistanceThreshold : 2;
+		this.minDragDistanceThreshold = this.props.minDragDistanceThreshold ? this.props.minDragDistanceThreshold : 5;
+		this.draggableHoveringOver = null;
+		this.droppableDraggedOver = null;
 	}
 
 	componentDidMount() {
@@ -167,21 +170,27 @@ class Draggable extends Component {
 	}
 	// Don't update what we're dragging over on every single drag
 	shouldRefindDragElems(x, y) {
-		if (!this.latestSeenX || !this.latestSeenY) {
-			this.latestSeenX = x;
-			this.latestSeenY = y;
+		if (!this.latestUpdateX || !this.latestUpdateY) {
+			this.latestUpdateX = x;
+			this.latestUpdateY = y;
 			return true;
 		} else {
 			// Only update if we've moved some x + y distance that is larger than threshold
-			return Math.abs(this.latestSeenX - x) + Math.abs(this.latestSeenY - y) >= this.minDragDistanceThreshold;
+			const shouldUpdate = Math.abs(this.latestUpdateX - x) + Math.abs(this.latestUpdateY - y) >= this.minDragDistanceThreshold;
+			if (shouldUpdate) {
+				this.latestUpdateX = x;
+				this.latestUpdateY = y;
+				return true;
+			}
+			return false;
 		}
 	}
 
 	moveElement(x, y) {
 		let hasDispatched = false;
 		const shouldRefindDragElems = this.shouldRefindDragElems(x, y);
-		let droppableDraggedOver = shouldRefindDragElems ? this.getDroppableElemUnderDrag(x, y) : this.droppableDraggedOver;
-		let draggableHoveringOver = shouldRefindDragElems ? this.getDraggableElemUnderDrag(x, y) : this.draggableHoveringOver;
+		let droppableDraggedOver = shouldRefindDragElems || this.droppableDraggedOver == null ? this.getDroppableElemUnderDrag(x, y) : this.droppableDraggedOver;
+		let draggableHoveringOver = shouldRefindDragElems || this.draggableHoveringOver == null ? this.getDraggableElemUnderDrag(x, y) : this.draggableHoveringOver;
 		const newLeft = x - this.state.xClickOffset;
 		const newTop = y - this.state.yClickOffset;
 		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
@@ -213,12 +222,12 @@ class Draggable extends Component {
 		if (droppableDraggedOver && draggableHoveringOver && shouldRegisterAsDrag) {
 			const draggableHoveredOverId = draggableHoveringOver.getAttribute('draggableid');
 			if (!draggableHoveredOverId.includes('placeholder')) {
-				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveredOverId) {
+				if (this.droppableDraggedOver !== droppableDraggedOver || this.draggableHoveringOver !== draggableHoveringOver) {
 					const dragObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
 					dispatch(this.dragAndDropGroup.moveEvent, dragObject, droppableDraggedOver, draggableHoveredOverId, x, y);
 					hasDispatched = true;
 					this.droppableDraggedOver = droppableDraggedOver;
-					this.draggableHoveringOver = draggableHoveredOverId;
+					this.draggableHoveringOver = draggableHoveringOver;
 				}
 			}
 		} else if (droppableDraggedOver && shouldRegisterAsDrag) {
