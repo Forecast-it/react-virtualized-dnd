@@ -49,7 +49,7 @@ class VirtualizedScrollBar extends Component {
 		}
 
 		let smallestIndexVisible = null;
-		if (this.state.scrollOffset === 0 && this.props.stickyElems.length === 0) {
+		if (this.state.scrollOffset === 0 && (this.props.stickyElems && this.props.stickyElems.length === 0)) {
 			smallestIndexVisible = 0;
 		} else {
 			for (let index = 0; index < list.length; index++) {
@@ -152,6 +152,7 @@ class VirtualizedScrollBar extends Component {
 				autoHeight={true}
 				autoHeightMax={this.props.containerHeight}
 				autoHeightMin={this.props.containerHeight}
+				{...this.props.scrollProps}
 			>
 				<div className={'virtualized-scrollbar-inner'} style={innerStyle} ref={div => (this._test = div)}>
 					<div style={belowSpacerStyle} className={'below-spacer'} />

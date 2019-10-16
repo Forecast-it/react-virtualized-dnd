@@ -22,8 +22,6 @@ class Draggable extends Component {
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
-		// Optimization map - store draggables just above section cutoffs to save on DOM reads
-		this.beforeSectionMap = [];
 		this.elFromPointCounter = 0;
 		this.latestUpdateX = null;
 		this.latestUpdateY = null;

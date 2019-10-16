@@ -306,6 +306,7 @@ class DragScrollBar extends Component {
 					autoHeight={true}
 					autoHeightMin={this.props.minHeight != null ? this.props.minHeight : 1}
 					autoHeightMax={this.props.maxHeight != null ? this.props.maxHeight : window.innerHeight}
+					{...this.props.scrollProps}
 				>
 					{children}
 				</UseScrollbars>
