@@ -250,6 +250,7 @@ class Droppable extends Component {
 							ref={scrollDiv => (this.scrollBars = scrollDiv)}
 							customScrollbars={customScrollbars}
 							containerHeight={this.props.containerHeight - listHeaderHeight}
+							onScroll={this.props.onScroll}
 						>
 							{isActive ? this.pushPlaceholder(listToRender) : listToRender}
 						</VirtualizedScrollBar>
