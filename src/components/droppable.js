@@ -244,6 +244,7 @@ class Droppable extends Component {
 						</DynamicVirtualizedScrollbar>
 					) : (
 						<VirtualizedScrollBar
+							scrollProps={this.props.scrollProps}
 							disableVirtualization={this.props.disableVirtualization}
 							stickyElems={draggedElemId ? [draggedElemId] : []}
 							staticElemHeight={elemHeight}
