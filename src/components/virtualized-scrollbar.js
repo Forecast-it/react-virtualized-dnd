@@ -87,6 +87,9 @@ class VirtualizedScrollBar extends Component {
 		if (!this.state.scrollOffset || scrollDiff >= this.state.elemHeight - leniency) {
 			this.setState({scrollOffset: scrollOffset});
 		}
+		if (this.props.onScroll) {
+			this.props.onScroll(e);
+		}
 	}
 
 	// Animated scroll to top
