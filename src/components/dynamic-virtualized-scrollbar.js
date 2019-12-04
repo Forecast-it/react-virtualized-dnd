@@ -208,34 +208,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		return items;
 	}
 
-	setElementBounds(scrollOffset, first, second) {
-		const overScanUsed = this.getOverScanUsed();
-		// Get the first visible element after overscan
-		const firstChild = this.itemsContainer.children[overScanUsed.above];
-		// Get the last visible element before overscan
-		const lastChild = this.itemsContainer.children[this.itemsContainer.children.length - 1 - overScanUsed.below];
-		if (first && firstChild != null) {
-			const firstElemBounds = firstChild.getBoundingClientRect();
-			this.firstElemBounds = {
-				top: firstElemBounds.top,
-				bottom: firstElemBounds.bottom,
-				left: firstElemBounds.left,
-				right: firstElemBounds.right
-			};
-		}
-		if (second && lastChild != null) {
-			const lastElemBounds = lastChild.getBoundingClientRect();
-			this.lastElemBounds = {
-				top: lastElemBounds.top,
-				bottom: lastElemBounds.bottom,
-				left: lastElemBounds.left,
-				right: lastElemBounds.right
-			};
-		}
-		// Update scroll breakpoint when finding new elements
-		this.lastScrollBreakpoint = scrollOffset;
-	}
-
 	renderScrollSections(scrollOffset, scrollHeight) {
 		const avgElemSize = this.getElemSizeAvg();
 		const sectionSize = 50;
