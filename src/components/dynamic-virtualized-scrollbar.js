@@ -9,23 +9,17 @@ class DynamicVirtualizedScrollbar extends Component {
 		super(props);
 		// Set initial elements to render - either specific amount, or the amount that can be in the viewPort + some optimistic amount to account for number of elements that deviate from min
 		this.optimisticCount = 10;
-		// Threshold at which to start virtualizing. Virtualizing small lists with the simplified approach can produce some problems
+		// Threshold at which to start virtualizing. Virtualizing small lists can produce jumping, and adds uneccesary overhead
 		this.virtualizationThreshold = props.virtualizationThreshold != null ? props.virtualizationThreshold : 40;
-		const initialElemsToRender =
-			this.props.initialElemsToRender != null ? this.props.initialElemsToRender : Math.min(Math.round(props.containerHeight / props.minElemHeight) + this.optimisticCount, props.listLength);
-		const simplifiedInitialElemsRender = this.getInitialRenderAmount(props);
+		const initialElemsToRender = this.getInitialRenderAmount(props);
 		this.state = {
 			// Update this when dynamic row height becomes a thing
 			scrollOffset: 0,
 			firstRenderedItemIndex: 0,
-			lastRenderedItemIndex: props.simplified ? simplifiedInitialElemsRender : initialElemsToRender,
+			lastRenderedItemIndex: initialElemsToRender,
 			aboveSpacerHeight: 0,
 			// Initially guess that all elems are min height
-			belowSpacerHeight: this.props.simplified
-				? simplifiedInitialElemsRender === this.props.listLength - 1
-					? 0
-					: (Math.floor(props.listLength * 0.75) - 1) * props.minElemHeight
-				: (props.listLength - initialElemsToRender) * props.minElemHeight,
+			belowSpacerHeight: initialElemsToRender === this.props.listLength - 1 ? 0 : (Math.floor(props.listLength * 0.75) - 1) * props.minElemHeight,
 			numElemsSized: 0,
 			totalElemsSizedSize: 0,
 			renderPart: null
@@ -38,8 +32,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.lastScrollBreakpoint = 0;
 		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
 		this.handleScroll = this.handleScroll.bind(this);
-		this.belowSpacerMap = new Map();
-		this.aboveSpacerMap = new Map();
+		this.setFullRender = this.setFullRender.bind(this);
 	}
 
 	componentDidMount() {
@@ -54,7 +47,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (this.itemsContainer && this.itemsContainer.children && !this.props.simplified) {
 			const lastElem = this.itemsContainer.lastElementChild;
 			const firstElem = this.itemsContainer.firstElementChild;
-			const lastElemBounds = lastElem ? lastElem.firstElementChildgetBoundingClientRect() : {};
+			const lastElemBounds = lastElem ? lastElem.firstElementChild.getBoundingClientRect() : {};
 			const firstElemBounds = firstElem ? firstElem.getBoundingClientRect() : {};
 			this.firstElemBounds = {
 				top: firstElemBounds.top,
@@ -83,7 +76,6 @@ class DynamicVirtualizedScrollbar extends Component {
 	componentDidUpdate(prevProps, prevState) {
 		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
 		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.numElemsSized !== this.state.numElemsSized) {
-			if (!this.props.simplified) this.updateRemainingSpace();
 		}
 		if (prevState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex) {
 			this.firstElemBounds = null;
@@ -97,8 +89,6 @@ class DynamicVirtualizedScrollbar extends Component {
 				this.scrollHeight = this.scrollBars.getScrollHeight();
 			}
 		}
-		this.aboveSpacerMap = new Map();
-		// this.logUpdateReason(this.props, this.state, prevProps, prevState);
 	}
 
 	componentWillUnmount() {
@@ -273,29 +263,33 @@ class DynamicVirtualizedScrollbar extends Component {
 			);
 		}
 	}
+	// Render entire list, if we aren't already viewing all of it
+	setFullRender() {
+		const stateUpdate = {};
+		if (this.state.firstRenderedItemIndex !== 0) {
+			stateUpdate.firstRenderedItemIndex = 0;
+			stateUpdate.aboveSpacerHeight = 0;
+		}
+		if (this.state.lastRenderedItemIndex !== this.props.listLength - 1) {
+			stateUpdate.lastRenderedItemIndex = this.props.listLength - 1;
+			stateUpdate.belowSpacerHeight = 0;
+		}
+		if (Object.entries(stateUpdate).length > 0) {
+			this.setState(stateUpdate);
+		}
+	}
 
-	handleScrollSimplified(e) {
+	handleScroll(e) {
 		const scrollOffset = e.scrollTop;
 		const scrollHeight = this.scrollHeight;
 		// If list contains fewer elements than our optimism, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
 		if (this.props.listLength <= this.virtualizationThreshold || Math.round(scrollHeight / this.props.containerHeight) < 2) {
-			const stateUpdate = {};
-			if (this.state.firstRenderedItemIndex !== 0) {
-				stateUpdate.firstRenderedItemIndex = 0;
-				stateUpdate.aboveSpacerHeight = 0;
-			}
-			if (this.state.lastRenderedItemIndex !== this.props.listLength - 1) {
-				stateUpdate.lastRenderedItemIndex = this.props.listLength - 1;
-				stateUpdate.belowSpacerHeight = 0;
-			}
-			if (Object.entries(stateUpdate).length > 0) {
-				this.setState(stateUpdate);
-			}
+			this.setFullRender(); // Just render entire list
 			return;
 		} else {
 			const useBinarySplit = false;
-			const elemsToRender = Math.round(this.props.listLength / 4);
-			this.optimisticCount = Math.min(Math.round(elemsToRender * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
+			const elemsPerSection = Math.round(this.props.listLength / 4);
+			this.optimisticCount = Math.min(Math.round(elemsPerSection * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
 			if (useBinarySplit) {
 				this.renderScrollSections(scrollOffset, scrollHeight);
 			} else {
@@ -307,9 +301,9 @@ class DynamicVirtualizedScrollbar extends Component {
 							{
 								renderPart: 0,
 								aboveSpacerHeight: 0,
-								belowSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
+								belowSpacerHeight: (this.props.listLength - elemsPerSection - this.optimisticCount) * this.getElemSizeAvg(),
 								firstRenderedItemIndex: 0,
-								lastRenderedItemIndex: elemsToRender + this.optimisticCount
+								lastRenderedItemIndex: elemsPerSection + this.optimisticCount
 							},
 							() => this.updateAverageSizing()
 						);
@@ -321,10 +315,10 @@ class DynamicVirtualizedScrollbar extends Component {
 						this.setState(
 							{
 								renderPart: 1,
-								aboveSpacerHeight: (elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
-								belowSpacerHeight: (this.props.listLength - 2 * elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
-								firstRenderedItemIndex: elemsToRender - this.optimisticCount,
-								lastRenderedItemIndex: elemsToRender * 2 + this.optimisticCount
+								aboveSpacerHeight: (elemsPerSection - this.optimisticCount - 1) * this.getElemSizeAvg(),
+								belowSpacerHeight: (this.props.listLength - 2 * elemsPerSection - this.optimisticCount) * this.getElemSizeAvg(),
+								firstRenderedItemIndex: elemsPerSection - this.optimisticCount,
+								lastRenderedItemIndex: elemsPerSection * 2 + this.optimisticCount
 							},
 							() => this.updateAverageSizing()
 						);
@@ -336,10 +330,10 @@ class DynamicVirtualizedScrollbar extends Component {
 						this.setState(
 							{
 								renderPart: 2,
-								aboveSpacerHeight: (2 * elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
-								belowSpacerHeight: (elemsToRender - this.optimisticCount) * this.getElemSizeAvg(),
-								firstRenderedItemIndex: 2 * elemsToRender - this.optimisticCount,
-								lastRenderedItemIndex: 3 * elemsToRender + this.optimisticCount
+								aboveSpacerHeight: (2 * elemsPerSection - this.optimisticCount - 1) * this.getElemSizeAvg(),
+								belowSpacerHeight: (elemsPerSection - this.optimisticCount) * this.getElemSizeAvg(),
+								firstRenderedItemIndex: 2 * elemsPerSection - this.optimisticCount,
+								lastRenderedItemIndex: 3 * elemsPerSection + this.optimisticCount
 							},
 							() => this.updateAverageSizing()
 						);
@@ -351,9 +345,9 @@ class DynamicVirtualizedScrollbar extends Component {
 						this.setState(
 							{
 								renderPart: 3,
-								aboveSpacerHeight: (this.props.listLength - elemsToRender - this.optimisticCount - 1) * this.getElemSizeAvg(),
+								aboveSpacerHeight: (this.props.listLength - elemsPerSection - this.optimisticCount - 1) * this.getElemSizeAvg(),
 								belowSpacerHeight: 0,
-								firstRenderedItemIndex: this.props.listLength - elemsToRender - this.optimisticCount,
+								firstRenderedItemIndex: this.props.listLength - elemsPerSection - this.optimisticCount,
 								lastRenderedItemIndex: this.props.listLength - 1
 							},
 							() => this.updateAverageSizing()
@@ -377,108 +371,6 @@ class DynamicVirtualizedScrollbar extends Component {
 			const scrollHeight = this.scrollBars ? this.scrollBars.getScrollHeight() : window.innerHeight;
 			this.scrollHeight = scrollHeight;
 			this.setState({numElemsSized: numSized, totalElemsSizedSize: totalSize});
-		}
-	}
-
-	// Save scroll position in state for virtualization
-	handleScroll(e) {
-		if (this.props.listLength <= this.elemOverScan * 2) {
-			// Do nothing unless we have more elems than our combined overScan
-			return;
-		}
-		const stateUpdate = {};
-		// If at end, do nothing to last elem
-		const scrollOffset = e.scrollTop;
-		let scrollingDown = true;
-		if (Math.abs(this.scrollOffset - scrollOffset) < this.props.minElemHeight / 2) {
-			// Minimal change, do nothing
-			return;
-		}
-		if (this.itemsContainer) {
-			// Check if we're increasing or decreasing scroll
-			if (this.scrollOffset) {
-				if (scrollOffset < this.scrollOffset) {
-					scrollingDown = false;
-				}
-			}
-			// Scrolled to bottom
-			if (scrollingDown && this.state.lastRenderedItemIndex + this.elemOverScan >= this.props.listLength - 1) {
-				if (this.state.belowSpacerHeight !== 0) {
-					this.setState({belowSpacerHeight: 0});
-				}
-				return;
-			}
-			// Scrolled to top
-			if (!scrollingDown && this.state.firstRenderedItemIndex - this.elemOverScan <= 0) {
-				if (this.state.aboveSpacerHeight !== 0) {
-					this.setState({aboveSpacerHeight: 0});
-				}
-				return;
-			}
-			this.scrollOffset = scrollOffset;
-			const viewPortTop = this.state.containerTop;
-			const viewPortBottom = this.state.containerTop + this.props.containerHeight;
-			const scrollChange = scrollOffset - this.lastScrollBreakpoint;
-			if (this.firstElemBounds == null) {
-				this.setElementBounds(scrollOffset, true, false);
-			} else {
-				this.firstElemBounds.top = this.firstElemBounds.top - scrollChange > 0 ? this.firstElemBounds.top - scrollChange : 0;
-				this.firstElemBounds.bottom = this.firstElemBounds.bottom - scrollChange > 0 ? this.firstElemBounds.bottom - scrollChange : 0;
-			}
-			if (this.lastElemBounds == null) {
-				this.setElementBounds(scrollOffset, false, true);
-			} else {
-				this.lastElemBounds.top -= scrollChange;
-				this.lastElemBounds.bottom -= scrollChange;
-			}
-			if (this.props.showIndicators) {
-				this.forceUpdate();
-			}
-
-			// SCROLLING DOWN BEGINS
-			if (scrollingDown) {
-				// If viewport bottom has crossed last (currently rendered) elem bottom, render one more elem below
-				if (this.lastElemBounds && this.lastElemBounds.bottom <= viewPortBottom) {
-					const elemSize = Math.abs(this.lastElemBounds.bottom - this.lastElemBounds.top);
-					stateUpdate.lastRenderedItemIndex = Math.min(this.state.lastRenderedItemIndex + 1, this.props.listLength - 1);
-					// If we're still not at the end of the list
-					if (this.state.lastRenderedItemIndex < this.props.listLength) {
-						// Only do it the first time we see the new elem
-						if (!this.belowSpacerMap.get(this.state.lastRenderedItemIndex)) {
-							// Update the numbers for calulating rolling average of item size, used for calculating remaining below space (under the list of rendered items)
-							stateUpdate.totalElemsSizedSize = this.state.totalElemsSizedSize + elemSize;
-							stateUpdate.numElemsSized = this.state.numElemsSized + 1;
-							this.belowSpacerMap.set(this.state.lastRenderedItemIndex, true);
-						}
-					}
-				}
-				// If viewPortTop has scrolled past first bottom, move first elem one down the list
-				if (this.firstElemBounds && this.firstElemBounds.bottom <= viewPortTop && !this.aboveSpacerMap.get(this.state.firstRenderedItemIndex)) {
-					const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
-					stateUpdate.firstRenderedItemIndex = Math.min(this.state.firstRenderedItemIndex + 1, this.props.listLength - 1);
-					stateUpdate.aboveSpacerHeight = this.state.aboveSpacerHeight + elemSize;
-					// add index to map, so we only update sizing once per item
-					this.aboveSpacerMap.set(this.state.firstRenderedItemIndex, true);
-				}
-
-				// SCROLLING DOWN ENDS
-			} else {
-				// SCROLLING UP BEGINS
-				// If viewport is scrolled up above first elements top
-				if (this.firstElemBounds && viewPortTop <= this.firstElemBounds.top) {
-					const elemSize = Math.abs(this.firstElemBounds.bottom - this.firstElemBounds.top);
-					stateUpdate.firstRenderedItemIndex = Math.max(this.state.firstRenderedItemIndex - 1, 0);
-					stateUpdate.aboveSpacerHeight = Math.max(this.state.aboveSpacerHeight - elemSize, 0);
-					// Update map to no longer account for index in above spacer
-					this.aboveSpacerMap.set(this.state.firstRenderedItemIndex, false);
-				}
-				// If viewport has scrolled up over last top
-				if (this.lastElemBounds && viewPortBottom <= this.lastElemBounds.top) {
-					stateUpdate.lastRenderedItemIndex = Math.max(this.state.lastRenderedItemIndex - 1, 0);
-				}
-				// SCROLLING UP ENDS
-			}
-			this.setState(stateUpdate);
 		}
 	}
 
@@ -590,7 +482,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		return (
 			<Scrollbars
 				// onScrollStop={this.onScrollStop.bind(this)}
-				onScrollFrame={this.props.simplified ? this.handleScrollSimplified.bind(this) : this.handleScroll.bind(this)}
+				onScrollFrame={this.handleScroll.bind(this)}
 				ref={div => (this.scrollBars = div)}
 				{...this.props.scrollProps}
 				autoHeight={true}

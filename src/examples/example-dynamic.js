@@ -45,7 +45,7 @@ class DynamicHeightExample extends Component {
 
 	generateTestList(num, numItems) {
 		let entry = {name: 'droppable' + num + 'Items', items: [], index: num};
-		const randomSize = () => 50 + Math.floor(Math.random() * Math.floor(50));
+		const randomSize = () => 50 + Math.floor(Math.random() * Math.floor(250));
 		let sectionId = 0;
 		for (let i = 0; i < numItems; i++) {
 			if (i % 3 === 0) {
@@ -259,7 +259,6 @@ class DynamicHeightExample extends Component {
 							!this.state.split || index < elemsToRender.length / 2 ? (
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
-										simplified={true}
 										scrollProps={scrollProps}
 										showIndicators={this.state.showIndicators}
 										dynamicElemHeight={true}
@@ -285,7 +284,6 @@ class DynamicHeightExample extends Component {
 								index >= elemsToRender.length / 2 ? (
 									<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 										<Droppable
-											simplified={true}
 											showIndicators={this.state.showIndicators}
 											dynamicElemHeight={true}
 											minElemHeight={50}
