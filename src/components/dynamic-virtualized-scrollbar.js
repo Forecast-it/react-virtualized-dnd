@@ -33,6 +33,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
 		this.handleScroll = this.handleScroll.bind(this);
 		this.setFullRender = this.setFullRender.bind(this);
+		this.clearTimer = this.clearTimer.bind(this);
 	}
 
 	componentDidMount() {
@@ -74,9 +75,6 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		// If we're rendering new things, update how much space we think is left in the rest of the list below, according to the new average
-		if (prevState.lastRenderedItemIndex !== this.state.lastRenderedItemIndex || prevState.numElemsSized !== this.state.numElemsSized) {
-		}
 		if (prevState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex) {
 			this.firstElemBounds = null;
 		}
@@ -89,6 +87,16 @@ class DynamicVirtualizedScrollbar extends Component {
 				this.scrollHeight = this.scrollBars.getScrollHeight();
 			}
 		}
+		if (this.state.renderPart !== prevState.renderPart) {
+			// We rendered a new section - start timer to not bounce back and forth if on the edge between two renderParts
+			this.renderPartTimeout = setTimeout(() => this.clearTimer(), 200);
+		}
+	}
+
+	// Clear timeout, allowing changes to renderpart
+	clearTimer() {
+		clearTimeout(this.renderPartTimeout);
+		this.renderPartTimeout = null;
 	}
 
 	componentWillUnmount() {
@@ -265,6 +273,9 @@ class DynamicVirtualizedScrollbar extends Component {
 			if (useBinarySplit) {
 				this.renderScrollSections(scrollOffset, scrollHeight);
 			} else {
+				if (this.renderPartTimeout != null) {
+					return;
+				}
 				if (scrollOffset < scrollHeight * 0.25) {
 					// RENDER FIRST QUARTER
 					// console.log('Q1');
