@@ -48,7 +48,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		if (this.itemsContainer && this.itemsContainer.children && !this.props.simplified) {
 			const lastElem = this.itemsContainer.lastElementChild;
 			const firstElem = this.itemsContainer.firstElementChild;
-			const lastElemBounds = lastElem ? lastElem.firstElementChild.getBoundingClientRect() : {};
+			const lastElemBounds = lastElem && lastElem.firstElementChild ? lastElem.firstElementChild.getBoundingClientRect() : {};
 			const firstElemBounds = firstElem ? firstElem.getBoundingClientRect() : {};
 			this.firstElemBounds = {
 				top: firstElemBounds.top,
