@@ -50,10 +50,10 @@ class Example extends Component {
 		return (
 		  <DragDropContext dragAndDropGroup={name} onDragEnd={this.onDragEnd.bind(this)} outerScrollBar={true}>
 			<div className={'your-drag-container'}>
-				{elemsToRender.map((elem, index) => (
+			  {elemsToRender.map((elem, index) => (
 				<div className={'your-droppable-container'}>
-					<Droppable dragAndDropGroup={name} droppableId={elem.droppableId} key={elem.droppableId}>
-					{elem.items.map(item => (
+				  <Droppable dragAndDropGroup={name} droppableId={elem.droppableId} key={elem.droppableId}>
+				    {elem.items.map(item => (
 					  <Draggable dragAndDropGroup={name} draggableId={item.id}>
 						<div className='your-draggable-element'>
 						  <p>
@@ -62,9 +62,9 @@ class Example extends Component {
 						</div>
 					  </Draggable>
 					))}
-					</Droppable>
+				  </Droppable>
 				</div>
-				))}
+			  ))}
 			</div>
 		  </DragDropContext>
 		);
