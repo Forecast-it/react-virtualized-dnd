@@ -70,11 +70,6 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.updateAverageSizing();
 	}
 
-	logUpdateReason(props, state, prevProps, prevState) {
-		Object.entries(props).forEach(([key, val]) => prevProps[key] !== val && console.log(`Prop '${key}' changed`));
-		Object.entries(state).forEach(([key, val]) => prevState[key] !== val && console.log(`State '${key}' changed`));
-	}
-
 	componentDidUpdate(prevProps, prevState) {
 		if (prevState.firstRenderedItemIndex !== this.state.firstRenderedItemIndex) {
 			this.firstElemBounds = null;
@@ -247,12 +242,10 @@ class DynamicVirtualizedScrollbar extends Component {
 					? Math.max(0, this.props.listLength - 1 - elemsPerSection - this.optimisticCount)
 					: sectionScrolledTo * elemsPerSection - this.optimisticCount;
 			const lastIndex = Math.min(this.props.listLength - 1, firstIndex + elemsPerSection + this.optimisticCount);
-
-			const bounce = isScrollingDown ? sectionScrolledTo < this.state.renderPart : sectionScrolledTo > this.state.renderPart;
-			if (bounce) {
-				console.log('Detected bounce while scrolling ' + (isScrollingDown ? ' down ' : ' up '), ' at section ', this.state.renderPart, '/', numSections);
-				console.log('Above height was ', this.state.aboveSpacerHeight);
-				console.log('Below height was', this.state.belowSpacerHeight);
+			// Sometimes, scroll bounces weirdly, causing a scroll down to actually render something pushes elements so far down, that the result is a lower scroll value.
+			// In this case, we don't want to update anything.
+			const didBounce = isScrollingDown ? sectionScrolledTo < this.state.renderPart : sectionScrolledTo > this.state.renderPart;
+			if (didBounce) {
 				return;
 			}
 			const aboveSpacerHeight = sectionScrolledTo === 0 ? 0 : sectionScrolledTo * this.props.containerHeight - optimismAboveHeight;
