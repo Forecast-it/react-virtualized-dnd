@@ -8,7 +8,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
 		super(props);
 		// Set initial elements to render - either specific amount, or the amount that can be in the viewPort + some optimistic amount to account for number of elements that deviate from min
-		this.optimisticCount = 10;
+		this.optimisticCount = 4;
 		// Threshold at which to start virtualizing. Virtualizing small lists can produce jumping, and adds uneccesary overhead
 		this.virtualizationThreshold = props.virtualizationThreshold != null ? props.virtualizationThreshold : 40;
 		const initialElemsToRender = this.getInitialRenderAmount(props);
