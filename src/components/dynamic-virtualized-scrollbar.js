@@ -3,6 +3,7 @@ import {Scrollbars} from 'react-custom-scrollbars';
 import PropTypes from 'prop-types';
 // import {SpringSystem} from 'rebound';
 import Rebound from 'rebound';
+import Util from './../util/util';
 
 class DynamicVirtualizedScrollbar extends Component {
 	constructor(props) {
@@ -216,30 +217,52 @@ class DynamicVirtualizedScrollbar extends Component {
 		return items;
 	}
 
-	setScrollSection(scrollOffset, scrollHeight) {
+	setScrollSection(scrollOffset, isScrollingDown) {
 		const avgElemSize = this.getElemSizeAvg();
-		const containerHeight = this.props.containerHeight;
-		// Ceil to optimistically render more than we have to (avoid unrendering 1 element at top/bottom)
-		const elemsPerSection = Math.ceil((this.props.listLength * avgElemSize) / containerHeight);
+		// The number of elements you can see in the container at a time (size of chunks we virtualize)
+		const elemsPerSection = Math.ceil(this.props.containerHeight / avgElemSize);
+		// Optimisticly render more than neccesary, to avoid removing elements at borders
 		// Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety of an upcoming section along with the prior section
-		this.optimisticCount = Math.min(Math.round(elemsPerSection * 0.8), 10);
+		this.optimisticCount = Math.min(Math.round(elemsPerSection * 0.8), 4);
 		let numSections = Math.floor(this.props.listLength / elemsPerSection);
-		// Remaining elements after last section
-		const remainder = this.props.listLength % elemsPerSection;
 
-		const sectionScrollPart = 1 / numSections; // How much of the scroll window will each section own
-		const sectionScrollHeight = sectionScrollPart * scrollHeight; // Height of the above in px
-		const sectionScrolledTo = Math.round(scrollOffset / sectionScrollHeight);
+		// The sector we've scrolled to. Height of each section (virtualizable chunk) should be roughly the container size
+		const sectionScrolledTo = Math.round(scrollOffset / this.props.containerHeight);
 		const isScrolledToLastSection = sectionScrolledTo >= numSections - 1;
+
+		// Only update if changed
 		if (this.state.renderPart !== sectionScrolledTo) {
-			const firstIndex = isScrolledToLastSection ? this.props.listLength - 1 - elemsPerSection - this.optimisticCount : Math.max(0, sectionScrolledTo * elemsPerSection - this.optimisticCount);
-			const lastIndex = Math.min(this.props.listLength - 1, firstIndex + elemsPerSection + (isScrolledToLastSection ? remainder : 0) + this.optimisticCount);
+			// Optimism used above at start.
+			const usedOptimismAbove = sectionScrolledTo === 0 ? 0 : this.optimisticCount;
+			const optimismAboveHeight = usedOptimismAbove * avgElemSize;
+
+			// Optimism used below to end of list
+			const usedOptimismBelow = isScrolledToLastSection ? 0 : this.optimisticCount;
+			const optimismBelowHeight = usedOptimismBelow * avgElemSize;
+
+			const firstIndex =
+				sectionScrolledTo == 0
+					? 0
+					: isScrolledToLastSection
+					? Math.max(0, this.props.listLength - 1 - elemsPerSection - this.optimisticCount)
+					: sectionScrolledTo * elemsPerSection - this.optimisticCount;
+			const lastIndex = Math.min(this.props.listLength - 1, firstIndex + elemsPerSection + this.optimisticCount);
+
+			const bounce = isScrollingDown ? sectionScrolledTo < this.state.renderPart : sectionScrolledTo > this.state.renderPart;
+			if (bounce) {
+				console.log('Detected bounce while scrolling ' + (isScrollingDown ? ' down ' : ' up '), ' at section ', this.state.renderPart, '/', numSections);
+				console.log('Above height was ', this.state.aboveSpacerHeight);
+				console.log('Below height was', this.state.belowSpacerHeight);
+				return;
+			}
+			const aboveSpacerHeight = sectionScrolledTo === 0 ? 0 : sectionScrolledTo * this.props.containerHeight - optimismAboveHeight;
+			const belowSpacerHeight = isScrolledToLastSection ? 0 : (numSections - sectionScrolledTo) * this.props.containerHeight - optimismBelowHeight;
 			this.setState(
 				{
 					renderPart: sectionScrolledTo,
 					// If we're at section 1, we have scrolled past section 0, and the above height will be 1 sections height
-					aboveSpacerHeight: sectionScrolledTo === 0 ? 0 : (firstIndex - 1) * avgElemSize,
-					belowSpacerHeight: isScrolledToLastSection ? 0 : (remainder + lastIndex - 1) * avgElemSize,
+					aboveSpacerHeight: aboveSpacerHeight,
+					belowSpacerHeight: belowSpacerHeight,
 					firstRenderedItemIndex: firstIndex,
 					lastRenderedItemIndex: lastIndex
 				},
@@ -264,100 +287,35 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	handleScroll(e) {
+		// Don't start rendering new things more than every 200ms.
+		if (this.renderPartTimeout != null) {
+			return;
+		}
 		const avgElemSize = this.getElemSizeAvg();
 		const scrollOffset = e.scrollTop;
 
 		const scrollHeight = this.scrollHeight;
 		// Scrolling difference in px since last time we rendered a new section
-		const scrollDiff = Math.abs(this.lastSectionChangeAt - scrollOffset);
+		const scrollDiff = scrollOffset - this.lastSectionChangeAt;
+
 		// Update only if difference isn't minimal
-		if (scrollDiff < Math.max(5, avgElemSize * 0.1)) {
+		if (Math.abs(scrollDiff) < Math.max(5, avgElemSize * 0.1)) {
 			return;
 		} else {
 			this.lastSectionChangeAt = scrollOffset;
 		}
-		// If list contains fewer elements than our optimism, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
-		if (this.props.listLength <= this.virtualizationThreshold || Math.round(scrollHeight / this.props.containerHeight) < 2) {
+		// If list contains fewer elements in total than some small number, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
+		if (this.props.listLength <= this.virtualizationThreshold || Math.round(scrollHeight / this.props.containerHeight) <= 2) {
 			this.setFullRender(); // Just render entire list
 			return;
 		} else {
-			// Dynamic split splits like below, but with a calculated amount of sections, rather than splitting into fixed quarters (4)
-			const useDynamicSplit = false;
-			if (useDynamicSplit) {
-				this.setScrollSection(scrollOffset, scrollHeight);
-			} else {
-				const elemsPerSection = Math.round(this.props.listLength / 4);
-				this.optimisticCount = Math.min(Math.round(elemsPerSection * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
-				if (this.renderPartTimeout != null) {
-					return;
-				}
-				if (scrollOffset < scrollHeight * 0.25) {
-					// RENDER FIRST QUARTER
-					// console.log('Q1');
-					if (this.state.renderPart !== 0) {
-						this.setState(
-							{
-								renderPart: 0,
-								aboveSpacerHeight: 0,
-								belowSpacerHeight: (this.props.listLength - elemsPerSection - this.optimisticCount) * this.getElemSizeAvg(),
-								firstRenderedItemIndex: 0,
-								lastRenderedItemIndex: elemsPerSection + this.optimisticCount
-							},
-							() => this.updateAverageSizing()
-						);
-					}
-				} else if (scrollOffset >= scrollHeight * 0.25 && scrollOffset < scrollHeight * 0.5) {
-					// RENDER SECOND QUARTER
-					// console.log('Q2');
-					if (this.state.renderPart !== 1) {
-						this.setState(
-							{
-								renderPart: 1,
-								aboveSpacerHeight: (elemsPerSection - this.optimisticCount - 1) * this.getElemSizeAvg(),
-								belowSpacerHeight: (this.props.listLength - 2 * elemsPerSection - this.optimisticCount) * this.getElemSizeAvg(),
-								firstRenderedItemIndex: elemsPerSection - this.optimisticCount,
-								lastRenderedItemIndex: elemsPerSection * 2 + this.optimisticCount
-							},
-							() => this.updateAverageSizing()
-						);
-					}
-				} else if (scrollOffset >= scrollHeight * 0.5 && scrollOffset < scrollHeight * 0.75) {
-					// RENDER THIRD QUARTER
-					// console.log('Q3');
-					if (this.state.renderPart !== 2) {
-						this.setState(
-							{
-								renderPart: 2,
-								aboveSpacerHeight: (2 * elemsPerSection - this.optimisticCount - 1) * this.getElemSizeAvg(),
-								belowSpacerHeight: (elemsPerSection - this.optimisticCount) * this.getElemSizeAvg(),
-								firstRenderedItemIndex: 2 * elemsPerSection - this.optimisticCount,
-								lastRenderedItemIndex: 3 * elemsPerSection + this.optimisticCount
-							},
-							() => this.updateAverageSizing()
-						);
-					}
-				} else if (scrollOffset >= scrollHeight * 0.75) {
-					// RENDER FOURTH QUARTER
-					// console.log('Q4');
-					if (this.state.renderPart !== 3) {
-						this.setState(
-							{
-								renderPart: 3,
-								aboveSpacerHeight: (this.props.listLength - elemsPerSection - this.optimisticCount - 1) * this.getElemSizeAvg(),
-								belowSpacerHeight: 0,
-								firstRenderedItemIndex: this.props.listLength - elemsPerSection - this.optimisticCount,
-								lastRenderedItemIndex: this.props.listLength - 1
-							},
-							() => this.updateAverageSizing()
-						);
-					}
-				}
-			}
+			// Set section to render based on the current scroll
+			this.setScrollSection(scrollOffset, scrollDiff > 0);
 		}
 	}
 	updateAverageSizing() {
-		let numSized = this.state.numElemsSized;
-		let totalSize = this.state.totalElemsSizedSize;
+		let numSized = 0;
+		let totalSize = 0;
 		if (this.itemsContainer && this.itemsContainer.children) {
 			for (let i = 0; i < this.itemsContainer.children.length; i++) {
 				const child = this.itemsContainer.children[i];
