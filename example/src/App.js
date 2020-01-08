@@ -31,10 +31,10 @@ export default class App extends Component {
 			<div className={'wrapper'}>
 				<div className={'tabs'}>
 					<div onClick={() => this.setPage('static')} className={'tab' + (this.state.page === 'static' ? ' active' : '')}>
-						Static Height
+						Fixed Height
 					</div>
 					<div onClick={() => this.setPage('dynamic')} className={'tab' + (this.state.page === 'dynamic' ? ' active' : '')}>
-						Dynamic Height
+						Variable Height
 					</div>
 					<div onClick={() => this.setPage('multiple')} className={'tab' + (this.state.page === 'multiple' ? ' active' : '')}>
 						Grouped Droppables
