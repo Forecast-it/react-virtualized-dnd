@@ -40,7 +40,6 @@ Example code can be seen below. A live example can be found at: https://forecast
 
 ```jsx
 import React, {Component} from 'react';
-
 import ExampleBoard from 'react-virtualized-dnd';
 
 class Example extends Component {
