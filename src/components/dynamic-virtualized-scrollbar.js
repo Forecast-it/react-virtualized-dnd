@@ -29,7 +29,7 @@ class DynamicVirtualizedScrollbar extends Component {
 		this.stickyElems = null;
 		this.lastElemBounds = null;
 		this.firstElemBounds = null;
-		this.lastScrollBreakpoint = 0;
+		this.lastSectionChangeAt = 0;
 		this.updateRemainingSpace = this.updateRemainingSpace.bind(this);
 		this.handleScroll = this.handleScroll.bind(this);
 		this.setFullRender = this.setFullRender.bind(this);
@@ -216,25 +216,29 @@ class DynamicVirtualizedScrollbar extends Component {
 		return items;
 	}
 
-	renderScrollSections(scrollOffset, scrollHeight) {
+	setScrollSection(scrollOffset, scrollHeight) {
 		const avgElemSize = this.getElemSizeAvg();
-		const sectionSize = 50;
-		this.optimisticCount = Math.min(Math.round(sectionSize * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
-		let numSections = Math.floor(this.props.listLength / sectionSize);
+		const containerHeight = this.props.containerHeight;
+		// Ceil to optimistically render more than we have to (avoid unrendering 1 element at top/bottom)
+		const elemsPerSection = Math.ceil((this.props.listLength * avgElemSize) / containerHeight);
+		// Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety of an upcoming section along with the prior section
+		this.optimisticCount = Math.min(Math.round(elemsPerSection * 0.8), 10);
+		let numSections = Math.floor(this.props.listLength / elemsPerSection);
 		// Remaining elements after last section
-		const remainder = this.props.listLength % sectionSize;
+		const remainder = this.props.listLength % elemsPerSection;
 
 		const sectionScrollPart = 1 / numSections; // How much of the scroll window will each section own
 		const sectionScrollHeight = sectionScrollPart * scrollHeight; // Height of the above in px
 		const sectionScrolledTo = Math.round(scrollOffset / sectionScrollHeight);
 		const isScrolledToLastSection = sectionScrolledTo >= numSections - 1;
 		if (this.state.renderPart !== sectionScrolledTo) {
-			const firstIndex = isScrolledToLastSection ? this.props.listLength - 1 - sectionSize - this.optimisticCount : Math.max(0, sectionScrolledTo * sectionSize - this.optimisticCount);
-			const lastIndex = Math.min(this.props.listLength - 1, firstIndex + sectionSize + (isScrolledToLastSection ? remainder : 0) + this.optimisticCount);
+			const firstIndex = isScrolledToLastSection ? this.props.listLength - 1 - elemsPerSection - this.optimisticCount : Math.max(0, sectionScrolledTo * elemsPerSection - this.optimisticCount);
+			const lastIndex = Math.min(this.props.listLength - 1, firstIndex + elemsPerSection + (isScrolledToLastSection ? remainder : 0) + this.optimisticCount);
 			this.setState(
 				{
 					renderPart: sectionScrolledTo,
-					aboveSpacerHeight: sectionScrolledTo === 0 ? 0 : (firstIndex - 1) * avgElemSize, // If we're at section 1, we have scrolled past section 0, and the above height will be 1 sections height
+					// If we're at section 1, we have scrolled past section 0, and the above height will be 1 sections height
+					aboveSpacerHeight: sectionScrolledTo === 0 ? 0 : (firstIndex - 1) * avgElemSize,
 					belowSpacerHeight: isScrolledToLastSection ? 0 : (remainder + lastIndex - 1) * avgElemSize,
 					firstRenderedItemIndex: firstIndex,
 					lastRenderedItemIndex: lastIndex
@@ -260,19 +264,30 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	handleScroll(e) {
+		const avgElemSize = this.getElemSizeAvg();
 		const scrollOffset = e.scrollTop;
+
 		const scrollHeight = this.scrollHeight;
+		// Scrolling difference in px since last time we rendered a new section
+		const scrollDiff = Math.abs(this.lastSectionChangeAt - scrollOffset);
+		// Update only if difference isn't minimal
+		if (scrollDiff < Math.max(5, avgElemSize * 0.1)) {
+			return;
+		} else {
+			this.lastSectionChangeAt = scrollOffset;
+		}
 		// If list contains fewer elements than our optimism, or the list's scroll area isn't at least 2x bigger than the container, don't virtualize
 		if (this.props.listLength <= this.virtualizationThreshold || Math.round(scrollHeight / this.props.containerHeight) < 2) {
 			this.setFullRender(); // Just render entire list
 			return;
 		} else {
-			const useBinarySplit = false;
-			const elemsPerSection = Math.round(this.props.listLength / 4);
-			this.optimisticCount = Math.min(Math.round(elemsPerSection * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
-			if (useBinarySplit) {
-				this.renderScrollSections(scrollOffset, scrollHeight);
+			// Dynamic split splits like below, but with a calculated amount of sections, rather than splitting into fixed quarters (4)
+			const useDynamicSplit = false;
+			if (useDynamicSplit) {
+				this.setScrollSection(scrollOffset, scrollHeight);
 			} else {
+				const elemsPerSection = Math.round(this.props.listLength / 4);
+				this.optimisticCount = Math.min(Math.round(elemsPerSection * 0.8), 10); // Scale optimism with amount of elements, up to a max of 10. Mostly for small lists to avoid rendering the entirety if Q4 with Q3 for example
 				if (this.renderPartTimeout != null) {
 					return;
 				}
@@ -378,7 +393,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	getElemSizeAvg() {
-		return this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight;
+		return Math.ceil(this.state.numElemsSized > 0 ? this.state.totalElemsSizedSize / this.state.numElemsSized : this.props.minElemHeight);
 	}
 
 	getOverScanUsed() {
@@ -417,8 +432,9 @@ class DynamicVirtualizedScrollbar extends Component {
 			height: this.state.belowSpacerHeight + (this.props.stickyElems && this.props.stickyElems.length > 0 ? this.props.stickyElems.length * this.getElemSizeAvg() : 0) - overScanHeightBelow
 		};
 		const aboveSpacerStyle = {border: this.props.showIndicators ? 'solid 3px purple' : 'none', width: '100%', height: Math.max(this.state.aboveSpacerHeight - overScanHeightAbove, 0)};
-
 		if (this.stickyElems && this.stickyElems.length > 0) {
+			// Insert element that is being dragged (stickyElems - currentl represented as arrays, in case we want more than 1, but multidrag only sticks 1 in the current design).
+			// This is done to avoid virtualizing the element we're dragging away, when its parent container is virtuaized away (drag + scroll)
 			listToRender.push(this.stickyElems[0]);
 		}
 
