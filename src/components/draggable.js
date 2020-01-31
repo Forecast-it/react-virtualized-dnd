@@ -337,13 +337,13 @@ class Draggable extends Component {
 			'aria-grabbed': true,
 			'aria-dropeffect': 'move'
 		};
-		if (this.state.isTouch) {
-			propsObject.onDrag = e => alert(e);
+		const useTouchEvents = false;
+		if (useTouchEvents && this.state.isTouch) {
 			propsObject.onTouchMove = e => this.onPointerMove(e);
 			propsObject.onTouchEnd = e => this.onPointerUp(e);
 			propsObject.onTouchCancel = e => this.onPointerCancel(e);
 		}
-		propsObject.onTouchStart = e => this.onPointerDown(e, true);
+		if (useTouchEvents) propsObject.onTouchStart = e => this.onPointerDown(e, true);
 		propsObject.onMouseDown = e => this.onPointerDown(e, false);
 
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
