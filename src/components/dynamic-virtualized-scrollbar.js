@@ -279,7 +279,7 @@ class DynamicVirtualizedScrollbar extends Component {
 	}
 
 	handleScroll(e) {
-		// Don't start rendering new things more than every 200ms.
+		// Don't start rendering new things more than once every 200ms.
 		if (this.renderPartTimeout != null) {
 			return;
 		}

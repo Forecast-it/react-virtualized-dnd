@@ -1,6 +1,6 @@
 {
 	"name": "react-virtualized-dnd",
-	"version": "2.5.0",
+	"version": "2.5.1",
 	"description": "A React-based, virtualized drag-and-drop framework.",
 	"author": "MagerlinC",
 	"license": "MIT",
@@ -23,7 +23,9 @@
 		"start": "rollup -c -w",
 		"prepare": "npm run build",
 		"predeploy": "cd example && npm install && npm run build",
-		"deploy": "gh-pages -d example/build"
+		"deploy": "gh-pages -d example/build",
+		"clean": "if exist dist ( rd /S /Q dist)",
+		"updateLink": "npm run clean && npm rm react-virtualized-dnd -g && npm link"
 	},
 	"peerDependencies": {
 		"prop-types": "^15.5.4",
