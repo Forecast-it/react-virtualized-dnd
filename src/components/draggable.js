@@ -11,6 +11,7 @@ class Draggable extends Component {
 			startY: null,
 			isDragging: false,
 			wasClicked: false,
+			isTouch: false,
 			xClickOffset: 0,
 			yClickOffset: 0,
 			didMoveMinDistanceDuringDrag: false,
@@ -18,7 +19,10 @@ class Draggable extends Component {
 			dragSensitivityY: 15
 		};
 		this.handleDragShortcuts = this.handleDragShortcuts.bind(this);
-		this.usePointerEvents = this.props.usePointerEvents && !!window.PointerEvent;
+		// This flags whether the mouse interaction on draggables is controlled by pointer events on the HTML elements clicked on,
+		// Or whether they're controlled by a global Window mouse listener. The default (and used) version does not use pointer events,
+		// due to some issues with catching pointer events and browser support of this, when the user flicks their mouse away from a draggable too quickly
+		// this.usePointerEvents = this.props.usePointerEvents && !!window.PointerEvent;
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
@@ -47,15 +51,15 @@ class Draggable extends Component {
 		}
 	}
 
-	setPointerCapture() {
-		if (!this.state.capturing) {
-			this.draggable.setPointerCapture(this.state.pointerId);
-			this.setState({capturing: true});
+	setPointerCapture(pointerId) {
+		if (!this.state.capturing && pointerId) {
+			this.draggable.setPointerCapture(pointerId);
+			this.setState({capturing: true, pointerId: pointerId});
 		}
 	}
 
 	releasePointerCapture() {
-		if (this.usePointerEvents && this.state.pointerId && this.draggable) {
+		if (this.state.isTouch && this.state.pointerId && this.draggable) {
 			this.draggable.releasePointerCapture(this.state.pointerId);
 		}
 	}
@@ -67,7 +71,7 @@ class Draggable extends Component {
 	}
 
 	removeDragEventListeners() {
-		if (!this.usePointerEvents) {
+		if (!this.state.isTouch) {
 			document.removeEventListener('mousemove', this.onPointerMove);
 			document.removeEventListener('mouseup', this.onPointerUp);
 			// Remove the click blocker after ended drag (on next available frame)
@@ -80,47 +84,43 @@ class Draggable extends Component {
 		e.preventDefault();
 	}
 
-	onPointerDown(e) {
-		if (e.buttons != 1 || (e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disabled || this.props.isSectionHeader) {
+	onPointerDown(e, isTouch) {
+		const isMouse = e.buttons === 1;
+		if ((!isTouch && !isMouse) || (e.target.className && typeof e.target.className === 'string' && e.target.className.includes('no-drag')) || this.props.disabled || this.props.isSectionHeader) {
 			return;
 		}
 		if (e) {
-			e.preventDefault();
+			if (!isTouch) e.preventDefault();
 			e.stopPropagation();
 		}
-		if (!this.usePointerEvents) {
+		if (!isTouch) {
 			document.addEventListener('mousemove', this.onPointerMove);
 			document.addEventListener('mouseup', this.onPointerUp);
 		}
-		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
-			//e.preventDefault();
-			//e.stopPropagation();
-			const dragObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
-			dispatch(this.dragAndDropGroup.moveEvent, dragObject, null, null, null, null);
-			if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
-				this.droppableDraggedOver = null;
-				this.draggableHoveringOver = null;
-			}
-			let x = e.clientX;
-			let y = e.clientY;
-			let cardWidth = this.draggable.offsetWidth;
-			const cardTop = this.draggable.getBoundingClientRect().top;
-			const cardLeft = this.draggable.getBoundingClientRect().left;
-
-			this.setState({
-				pointerId: e.pointerId,
-				width: cardWidth,
-				didMoveMinDistanceDuringDrag: false,
-				minDragDistanceMoved: false,
-				startX: x,
-				startY: y,
-				wasClicked: true,
-				isDragging: false,
-				// +8 for margin
-				xClickOffset: Math.abs(x - cardLeft) + 8,
-				yClickOffset: Math.abs(y - cardTop) + 8
-			});
+		const dragObject = {draggableId: this.props.draggableId, droppableId: this.props.droppableId};
+		dispatch(this.dragAndDropGroup.moveEvent, dragObject, null, null, null, null);
+		if (this.droppableDraggedOver !== null || this.draggableHoveringOver !== null) {
+			this.droppableDraggedOver = null;
+			this.draggableHoveringOver = null;
 		}
+		const x = isTouch ? e.changedTouches[e.changedTouches.length - 1].clientX : e.clientX;
+		const y = isTouch ? e.changedTouches[e.changedTouches.length - 1].clientY : e.clientY;
+		let cardWidth = this.draggable.offsetWidth;
+		const cardTop = this.draggable.getBoundingClientRect().top;
+		const cardLeft = this.draggable.getBoundingClientRect().left;
+		this.setState({
+			width: cardWidth,
+			didMoveMinDistanceDuringDrag: false,
+			minDragDistanceMoved: false,
+			startX: x,
+			startY: y,
+			wasClicked: true,
+			isTouch: isTouch,
+			isDragging: false,
+			// +8 for margin for error
+			xClickOffset: Math.abs(x - cardLeft) + 8,
+			yClickOffset: Math.abs(y - cardTop) + 8
+		});
 	}
 	onPointerUp(e) {
 		e.preventDefault();
@@ -128,7 +128,7 @@ class Draggable extends Component {
 		if (this.props.disabled || this.props.isSectionHeader) {
 			return;
 		}
-		if (this.usePointerEvents && this.state.pointerId) {
+		if (this.state.isTouch && this.state.pointerId) {
 			this.releasePointerCapture();
 		}
 		if (this.state.didMoveMinDistanceDuringDrag) {
@@ -254,20 +254,20 @@ class Draggable extends Component {
 		if (this.props.disabled || !this.state.wasClicked || this.props.isSectionHeader) {
 			return;
 		}
-		const x = e.clientX;
-		const y = e.clientY;
-		if (this.usePointerEvents) {
-			this.setPointerCapture();
+		const x = this.state.isTouch ? e.changedTouches[e.changedTouches.length - 1].clientX : e.clientX;
+		const y = this.state.isTouch ? e.changedTouches[e.changedTouches.length - 1].clientY : e.clientY;
+		if (this.state.isTouch) {
+			// This seems unneccesary for touch events
+			//this.setPointerCapture(e.pointerId);
 		}
 		const minDistanceMoved = Math.abs(this.state.startX - x) > this.state.dragSensitivityX || Math.abs(this.state.startY - y) > this.state.dragSensitivityY;
 		if (!minDistanceMoved && !this.state.didMoveMinDistanceDuringDrag) {
-			//this.releasePointerCapture();
 			return;
 		}
 		document.addEventListener('click', this.clickBlocker, true);
-		e.preventDefault();
+		if (!this.state.isTouch) e.preventDefault();
 		e.stopPropagation();
-		if (!this.usePointerEvents || e.buttons === 1 || e.pointerType === 'touch') {
+		if (e.buttons === 1 || this.state.isTouch) {
 			requestAnimationFrame(() => this.moveElement(x, y));
 		} else {
 			this.onPointerCancel();
@@ -339,19 +339,26 @@ class Draggable extends Component {
 			'aria-grabbed': true,
 			'aria-dropeffect': 'move'
 		};
-		if (this.usePointerEvents) {
-			propsObject.onPointerDown = e => this.onPointerDown(e);
-			propsObject.onPointerMove = e => this.onPointerMove(e);
-			propsObject.onPointerUp = e => this.onPointerUp(e);
-			propsObject.onPointerCancel = e => this.onPointerCancel(e);
-			propsObject.onLostPointerCapture = e => this.handlePointerCaptureLoss(e);
+		if (this.state.isTouch) {
+			propsObject.onTouchMove = e => this.onPointerMove(e);
+			propsObject.onTouchEnd = e => this.onPointerUp(e);
+			propsObject.onTouchCancel = e => this.onPointerCancel(e);
+			//propsObject.onLostPointerCapture = e => this.handlePointerCaptureLoss(e);
 		} else {
-			propsObject.onMouseDown = e => this.onPointerDown(e);
+			//propsObject.onTouchStart = e => this.onPointerDown(e);
 			//propsObject.onMouseUp = e => this.onPointerUp(e);
 		}
+		propsObject.onTouchStart = e => this.onPointerDown(e, true);
+		propsObject.onMouseDown = e => this.onPointerDown(e, false);
+		// There is a problem here - We need to accept all kinds of pointers to register both mouse down and touch down
+		/*const doTouchThings = false;
+		if (doTouchThings) {
+			propsObject.onPointerDown = e => this.onPointerDown(e);
+		} else {
+			propsObject.onMouseDown = e => this.onPointerDown(e);
+		}*/
 
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
-
 		return <CustomTag {...propsObject}>{this.props.children}</CustomTag>;
 	}
 }
@@ -360,7 +367,6 @@ Draggable.propTypes = {
 	dragAndDropGroup: PropTypes.string.isRequired,
 	draggableId: PropTypes.string.isRequired,
 	dragDisabled: PropTypes.bool,
-	usePointerEvents: PropTypes.bool,
 	section: PropTypes.string
 };
 
