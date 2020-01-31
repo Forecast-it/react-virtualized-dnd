@@ -106,9 +106,11 @@ class DragDropContext extends Component {
 	// When a card is moved, check for autoScroll
 	onMoveScroll(x, y, droppable) {
 		//var h = this.container.getBoundingClientRect().bottom - this.container.getBoundingClientRect().top;
-		// Scroll when within 80px of edge
 		if (this.state.dragActive && this.state.draggedElem) {
-			const scrollThreshold = this.props.autoScrollThreshold || 80;
+			const screenWidth = window.innerWidth;
+			// Scroll when within 5% or 50px of edge, depending on which one is larger.
+			// This gives nice big areas for computer screens, without scrolling everywhere on phones
+			const scrollThreshold = this.props.autoScrollThreshold || Math.max(50, Math.round(screenWidth * 0.05));
 			const scrollContainerPos = this.container.getBoundingClientRect();
 
 			const isNearPageLeft = Math.abs(x - scrollContainerPos.left) <= scrollThreshold;

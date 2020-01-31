@@ -19,10 +19,6 @@ class Draggable extends Component {
 			dragSensitivityY: 15
 		};
 		this.handleDragShortcuts = this.handleDragShortcuts.bind(this);
-		// This flags whether the mouse interaction on draggables is controlled by pointer events on the HTML elements clicked on,
-		// Or whether they're controlled by a global Window mouse listener. The default (and used) version does not use pointer events,
-		// due to some issues with catching pointer events and browser support of this, when the user flicks their mouse away from a draggable too quickly
-		// this.usePointerEvents = this.props.usePointerEvents && !!window.PointerEvent;
 		this.onPointerMove = this.onPointerMove.bind(this);
 		this.onPointerUp = this.onPointerUp.bind(this);
 		this.dragAndDropGroup = Util.getDragEvents(this.props.dragAndDropGroup);
@@ -266,6 +262,8 @@ class Draggable extends Component {
 		}
 		document.addEventListener('click', this.clickBlocker, true);
 		if (!this.state.isTouch) e.preventDefault();
+		else e.nativeEvent.preventDefault();
+
 		e.stopPropagation();
 		if (e.buttons === 1 || this.state.isTouch) {
 			requestAnimationFrame(() => this.moveElement(x, y));
@@ -340,23 +338,13 @@ class Draggable extends Component {
 			'aria-dropeffect': 'move'
 		};
 		if (this.state.isTouch) {
+			propsObject.onDrag = e => alert(e);
 			propsObject.onTouchMove = e => this.onPointerMove(e);
 			propsObject.onTouchEnd = e => this.onPointerUp(e);
 			propsObject.onTouchCancel = e => this.onPointerCancel(e);
-			//propsObject.onLostPointerCapture = e => this.handlePointerCaptureLoss(e);
-		} else {
-			//propsObject.onTouchStart = e => this.onPointerDown(e);
-			//propsObject.onMouseUp = e => this.onPointerUp(e);
 		}
 		propsObject.onTouchStart = e => this.onPointerDown(e, true);
 		propsObject.onMouseDown = e => this.onPointerDown(e, false);
-		// There is a problem here - We need to accept all kinds of pointers to register both mouse down and touch down
-		/*const doTouchThings = false;
-		if (doTouchThings) {
-			propsObject.onPointerDown = e => this.onPointerDown(e);
-		} else {
-			propsObject.onMouseDown = e => this.onPointerDown(e);
-		}*/
 
 		const CustomTag = this.props.tagName ? this.props.tagName : 'div';
 		return <CustomTag {...propsObject}>{this.props.children}</CustomTag>;
