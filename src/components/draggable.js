@@ -47,7 +47,7 @@ class Draggable extends Component {
 		}
 	}
 
-	setPointerCapture(pointerId) {
+	/*setPointerCapture(pointerId) {
 		if (!this.state.capturing && pointerId) {
 			this.draggable.setPointerCapture(pointerId);
 			this.setState({capturing: true, pointerId: pointerId});
@@ -58,7 +58,7 @@ class Draggable extends Component {
 		if (this.state.isTouch && this.state.pointerId && this.draggable) {
 			this.draggable.releasePointerCapture(this.state.pointerId);
 		}
-	}
+	}*/
 
 	getBoundingClientRect() {
 		if (this.draggable) {
@@ -125,7 +125,7 @@ class Draggable extends Component {
 			return;
 		}
 		if (this.state.isTouch && this.state.pointerId) {
-			this.releasePointerCapture();
+			//this.releasePointerCapture();
 		}
 		if (this.state.didMoveMinDistanceDuringDrag) {
 			dispatch(this.dragAndDropGroup.endEvent);
@@ -160,7 +160,7 @@ class Draggable extends Component {
 			wasClicked: false
 		});
 		this.removeDragEventListeners();
-		this.releasePointerCapture();
+		//this.releasePointerCapture();
 	}
 	// Don't update what we're dragging over on every single drag
 	shouldRefindDragElems(x, y) {
@@ -306,11 +306,11 @@ class Draggable extends Component {
 		return cardUnder;
 	}
 
-	handlePointerCaptureLoss(e) {
+	/*handlePointerCaptureLoss(e) {
 		if (this.state.wasClicked && e.pointerId != null) {
 			this.draggable.setPointerCapture(e.pointerId);
 		}
-	}
+	}*/
 
 	render() {
 		const active = this.state.isDragging && this.state.wasClicked;
