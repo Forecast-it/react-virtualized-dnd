@@ -304,6 +304,9 @@ class DynamicVirtualizedScrollbar extends Component {
 			// Set section to render based on the current scroll
 			this.setScrollSection(scrollOffset, scrollDiff > 0);
 		}
+		if (this.props.onScroll) {
+			this.props.onScroll(e);
+		}
 	}
 	updateAverageSizing() {
 		let numSized = 0;
