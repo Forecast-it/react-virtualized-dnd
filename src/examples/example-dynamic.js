@@ -8,10 +8,11 @@ class DynamicHeightExample extends Component {
 		super(props);
 		this.state = {
 			listData: [],
-			numItems: 150,
+			numItems: 50,
 			numColumns: 6,
 			showIndicators: false,
-			useSections: false
+			useSections: false,
+			lazyLoad: false
 		};
 		this.dragAndDropGroupName = 'exampleboard';
 		this.droppables = [];
@@ -20,6 +21,12 @@ class DynamicHeightExample extends Component {
 
 	componentDidMount() {
 		this.getListData();
+	}
+
+	addMoreElements(e) {
+		if (this.state.lazyLoad && e.scrollHeight - e.scrollTop < e.clientHeight + 1000) {
+			this.setState({numItems: 100});
+		}
 	}
 
 	toggleIndicators() {
@@ -46,12 +53,14 @@ class DynamicHeightExample extends Component {
 	generateTestList(num, numItems) {
 		let entry = {name: 'droppable' + num + 'Items', items: [], index: num};
 		const randomSize = () => 50 + Math.floor(Math.random() * Math.floor(250));
+		const pseudoRandomSize = i =>
+			50 + (((i + 1) * (num + 1)) % 5 === 0 ? 200 : ((i + 1) * (num + 1)) % 4 === 0 ? 150 : ((i + 1) * (num + 1)) % 3 === 0 ? 100 : ((i + 1) * (num + 1)) % 2 === 0 ? 50 : 0);
 		let sectionId = 0;
 		for (let i = 0; i < numItems; i++) {
 			if (i % 3 === 0) {
 				sectionId = i;
 			}
-			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i, height: randomSize(), sectionId: 'Person ' + sectionId / 3});
+			entry.items.push({id: num + '-' + i, name: 'Item ' + num + '-' + i, height: this.state.lazyLoad ? pseudoRandomSize(i) : randomSize(), sectionId: 'Person ' + sectionId / 3});
 		}
 		return entry;
 	}
@@ -103,7 +112,7 @@ class DynamicHeightExample extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (prevState.numItems !== this.state.numItems || prevState.numColumns !== this.state.numColumns) {
+		if (prevState.numItems !== this.state.numItems || prevState.numColumns !== this.state.numColumns || prevState.lazyLoad !== this.state.lazyLoad) {
 			this.getListData();
 		}
 	}
@@ -122,6 +131,10 @@ class DynamicHeightExample extends Component {
 			return;
 		}
 		this.setState({numColumns: Number(e.target.value)});
+	}
+
+	handleLazyLoadChange(e) {
+		this.setState({lazyLoad: !this.state.lazyLoad});
 	}
 
 	scroll(ref) {
@@ -254,6 +267,10 @@ class DynamicHeightExample extends Component {
 							onBlur={this.handleColumnInputChange.bind(this)}
 						/>
 					</div>
+					<div className={'input-section'}>
+						<div>Lazy loading example</div>
+						<input type={'checkbox'} value={this.state.lazyLoad} onClick={this.handleLazyLoadChange.bind(this)} />
+					</div>
 					<div className={'test-container'} style={{display: 'flex', flexDirection: 'row', position: 'relative'}}>
 						{elemsToRender.map((elem, index) =>
 							!this.state.split || index < elemsToRender.length / 2 ? (
@@ -267,10 +284,11 @@ class DynamicHeightExample extends Component {
 										listHeader={getListHeader(index)}
 										listHeaderHeight={60}
 										ref={div => this.droppables.push(div)}
-										containerHeight={620}
+										containerHeight={800}
 										dragAndDropGroup={this.dragAndDropGroupName}
 										droppableId={elem.droppableId}
 										key={elem.droppableId}
+										onScroll={this.addMoreElements.bind(this)}
 									>
 										{elem.items}
 									</Droppable>
