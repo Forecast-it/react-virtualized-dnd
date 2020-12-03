@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {Scrollbars} from 'react-custom-scrollbars';
 import {subscribe, unsubscribe} from '../util/event_manager';
 import VirtualizedScrollBar from './virtualized-scrollbar';
 import Util from './../util/util';
@@ -226,7 +227,19 @@ class Droppable extends Component {
 			<CustomTag {...propsObject} style={{height: outerContainerHeight, minHeight: outerContainerHeight, maxHeight: outerContainerHeight, overflow: 'hidden'}}>
 				<div className={'header-wrapper ' + (headerActive ? this.props.activeHeaderClass : '')}>{headerWithProps}</div>
 				{this.props.hideList ? null : shouldScroll && !this.props.disableScroll ? (
-					this.props.dynamicElemHeight ? (
+					this.props.externalVirtualization ? (
+						<Scrollbars
+							// onScrollStop={this.onScrollStop.bind(this)}
+							onScrollFrame={this.props.onScroll}
+							ref={div => (this.scrollBars = div)}
+							{...this.props.scrollProps}
+							autoHeight={true}
+							autoHeightMax={this.props.containerHeight - listHeaderHeight}
+							autoHeightMin={this.props.containerHeight - listHeaderHeight}
+						>
+							{isActive ? this.pushPlaceholder(listToRender) : listToRender}
+						</Scrollbars>
+					) : this.props.dynamicElemHeight ? (
 						<DynamicVirtualizedScrollbar
 							elemOverScan={this.props.elemOverScan}
 							initialElemsToRender={this.props.initialElemsToRender}
