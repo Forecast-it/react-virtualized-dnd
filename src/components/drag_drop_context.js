@@ -319,6 +319,10 @@ class DragDropContext extends Component {
 					autoHeight={true}
 					autoHeightMin={this.props.scrollContainerMinHeight != null ? this.props.scrollContainerMinHeight : 1}
 					autoHeightMax={this.props.scrollContainerHeight}
+					renderTrackHorizontal={props => <div {...props} className="track track-horizontal" />}
+					renderTrackVertical={props => <div {...props} className="track track-vertical" />}
+					renderThumbHorizontal={props => <div {...props} className="thumb thumb-horizontal" />}
+					renderThumbVertical={props => <div {...props} className="thumb thumb-vertical" />}
 				>
 					{this.props.children}
 				</Scrollbars>
