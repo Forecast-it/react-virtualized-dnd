@@ -43,7 +43,7 @@ class Draggable extends Component {
 
 	handleDragShortcuts(e) {
 		if (e.key === 'Escape') {
-			this.onPointerCancel(e);
+			this.cancelDrag();
 		}
 	}
 
@@ -130,22 +130,9 @@ class Draggable extends Component {
 		if (this.state.didMoveMinDistanceDuringDrag) {
 			dispatch(this.dragAndDropGroup.endEvent);
 		}
-		dispatch(this.dragAndDropGroup.resetEvent);
-		this.draggableHoveringOver = null;
-		this.setState({
-			isDragging: false,
-			capturing: false,
-			didMoveMinDistanceDuringDrag: false,
-			minDragDistanceMoved: false,
-			cardLeft: 0,
-			cardTop: 0,
-			top: null,
-			left: null,
-			wasClicked: false
-		});
-		this.removeDragEventListeners();
+		this.cancelDrag();
 	}
-	onPointerCancel() {
+	cancelDrag() {
 		dispatch(this.dragAndDropGroup.resetEvent);
 		this.draggableHoveringOver = null;
 		this.setState({
@@ -268,7 +255,12 @@ class Draggable extends Component {
 		if (e.buttons === 1 || this.state.isTouch) {
 			requestAnimationFrame(() => this.moveElement(x, y));
 		} else {
-			this.onPointerCancel();
+			if (!this.props.noCancelOnMove) {
+				// This call can cause mouseUp calls to be cancelled instead when using mice with low polling rates.
+				// The noCancelOnMove prop is a workaround for this, disabling the cancelDrag invocation.
+				// It is currently unknown if noCancelOnMove has side effects, use at your own risk.
+				this.cancelDrag();
+			}
 		}
 	}
 
@@ -341,7 +333,7 @@ class Draggable extends Component {
 		if (useTouchEvents && this.state.isTouch) {
 			propsObject.onTouchMove = e => this.onPointerMove(e);
 			propsObject.onTouchEnd = e => this.onPointerUp(e);
-			propsObject.onTouchCancel = e => this.onPointerCancel(e);
+			propsObject.onTouchCancel = () => this.cancelDrag();
 		}
 		if (useTouchEvents) propsObject.onTouchStart = e => this.onPointerDown(e, true);
 		propsObject.onMouseDown = e => this.onPointerDown(e, false);
@@ -355,7 +347,8 @@ Draggable.propTypes = {
 	dragAndDropGroup: PropTypes.string.isRequired,
 	draggableId: PropTypes.string.isRequired,
 	dragDisabled: PropTypes.bool,
-	section: PropTypes.string
+	section: PropTypes.string,
+	noCancelOnMove: PropTypes.bool
 };
 
 export default Draggable;

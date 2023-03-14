@@ -43,7 +43,7 @@ class ExampleBoard extends Component {
 			const list = [];
 			entry.items.forEach(item => {
 				list.push(
-					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
+					<Draggable dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id} noCancelOnMove={true}>
 						<div onClick={() => alert('A click is not a drag')} className={'draggable-test'} style={{border: 'solid 1px black', height: '48px', backgroundColor: 'white', flexGrow: 1}}>
 							<p style={{marginLeft: '5px'}} className={'item-name'}>
 								{item.name}
@@ -187,7 +187,7 @@ class ExampleBoard extends Component {
 							!this.state.split || index < elemsToRender.length / 2 ? (
 								<div className={'sizer'} style={{flexGrow: 1, minWidth: 350}} key={index + elem.droppableId}>
 									<Droppable
-										//enforceContainerMinHeight={true}
+										// enforceContainerMinHeight={true}
 										activeHeaderClass={'header-active'}
 										listHeader={getListHeader(index)}
 										listHeaderHeight={60}
