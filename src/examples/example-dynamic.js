@@ -81,6 +81,7 @@ class DynamicHeightExample extends Component {
 							isSectionHeader={true}
 							disableMove={idx === 0}
 							key={item.sectionId + '#' + item.id}
+							noCancelOnMove={true}
 						>
 							<div className={'draggable-test section'} style={{height: 50, outline: 'none', backgroundColor: '#dbdbdb', flexGrow: 1}}>
 								<div style={{marginLeft: '5px', paddingTop: '8px'}} className={'item-name row'}>
@@ -93,7 +94,7 @@ class DynamicHeightExample extends Component {
 					seenSections.push(entry.index + '-' + item.sectionId);
 				}
 				list.push(
-					<Draggable sectionId={item.sectionId} dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id}>
+					<Draggable sectionId={item.sectionId} dragAndDropGroup={this.dragAndDropGroupName} draggableId={item.id} dragDisabled={false} key={item.id} noCancelOnMove={true}>
 						<div
 							onClick={() => alert('A click is not a drag')}
 							className={'draggable-test' + (this.state.recentlyMovedItem === item.id ? ' dropGlow' : '')}
