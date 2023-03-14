@@ -256,7 +256,7 @@ class Draggable extends Component {
 			requestAnimationFrame(() => this.moveElement(x, y));
 		} else {
 			if (!this.props.noCancelOnMove) {
-				// This call can cause drop mouseUp calls when using mice with low polling rates.
+				// This call can cause mouseUp calls to be cancelled instead when using mice with low polling rates.
 				// The noCancelOnMove prop is a workaround for this, disabling the cancelDrag invocation.
 				// It is currently unknown if noCancelOnMove has side effects, use at your own risk.
 				this.cancelDrag();
